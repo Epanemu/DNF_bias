@@ -1,5 +1,11 @@
 # Bias detection using DNF
 
+Install requirements:
+
+```shell
+pip install -r requirements.txt
+```
+
 To use the provided code, one needs the Pyomo and Gurobi libraries (or modify the implementation to use a different solver)
 
 To use the BRCG or Ripper through AIX360, install it separately:
