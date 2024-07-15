@@ -24,13 +24,20 @@ def load_scenario(name):
     if name == "stress":
         target_label = "SDSTRESS"
         target_vals = ["NOT AT ALL"]
-    # elif name == "stress":
-    # elif name == "stress":
-    # elif name == "stress":
+    elif name == "insurance_uninsured":
+        target_label = "INSCOV21"
+        target_vals = ["UNINSURED"]
+    elif name == "insurance_private":
+        target_label = "INSCOV21"
+        target_vals = ["ANY PRIVATE"]
+    elif name == "home_problems":
+        target_label = "SDPROBNONE"
+        target_vals = ["YES"]
+    elif name == "home_problems":
+        target_label = "SDGETTGT"
+        target_vals = ["1 TIME", "NEVER", "2 TIMES"]
     else:
         raise ValueError(f'Scenario "{name}" does not exist.')
-    # for col in data_cols:
-    #     print(f"{col}:\n  " + "\n  ".join([str(v) for v in data[col].unique()]))
 
     input_data = data[data_cols]
     target_data = data[target_label]
