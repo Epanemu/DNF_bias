@@ -3,6 +3,14 @@ import pandas as pd
 from binarizer import Binarizer
 from data_handler import DataHandler
 
+SCENARIOS = [
+    "stress",
+    "insurance_uninsured",
+    "insurance_private",
+    "home_problems",
+    "socializing",
+]
+
 
 def load_scenario(name):
     data_cols = [
