@@ -33,7 +33,7 @@ def load_scenario(name):
     elif name == "home_problems":
         target_label = "SDPROBNONE"
         target_vals = ["YES"]
-    elif name == "home_problems":
+    elif name == "socializing":
         target_label = "SDGETTGT"
         target_vals = ["1 TIME", "NEVER", "2 TIMES"]
     else:
