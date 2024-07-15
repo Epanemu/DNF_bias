@@ -164,11 +164,14 @@ class Binarizer:
             feats = self.__binarized_features
         for binariaztions in feats:
             for bin in binariaztions:
-                names.append((bin.feature.name, bin.operation.value, bin.value))
+                names.append((bin.feature.name, bin.operation.value, str(bin.value)))
         return names
 
     def feature_names(self, include_negations=False) -> list[str]:
-        return [f"{feat} {op} {val}" for (feat, op, val) in self.__feature_name_tuples(include_negations)]
+        return [
+            f"{feat} {op} {val}"
+            for (feat, op, val) in self.__feature_name_tuples(include_negations)
+        ]
 
     def target_name(self) -> tuple[str, str]:
         bin = self.binarized_target
@@ -178,5 +181,7 @@ class Binarizer:
         return positive, negative
 
     def multi_index_feats(self, include_negations=False) -> pd.MultiIndex:
-        return pd.MultiIndex.from_tuples(self.__feature_name_tuples(include_negations), names=["feature", "operation", "value"])
-
+        return pd.MultiIndex.from_tuples(
+            self.__feature_name_tuples(include_negations),
+            names=["feature", "operation", "value"],
+        )
