@@ -17,6 +17,7 @@ class OneRule:
         self,
         X: np.ndarray[bool],
         y: np.ndarray[bool],
+        weights: np.ndarray[float],
         # trunk-ignore(ruff/B006)
         feat_init: dict[int, int] = {},
     ) -> pyo.ConcreteModel:
@@ -48,6 +49,11 @@ class OneRule:
         #     expr=sum(model.use_feat[j] for j in model.feat_i) >= 1
         # )
 
+        # positive - error = 1 if at least one where u_j = 1 has X_j=0
+        #     else error = 0
+        # negative - error = 1 if all where u_j = 1 have X_j=1 as well
+        #     else error = 0
+
         model.pos = pyo.Constraint(
             model.pos_i,
             model.feat_i,
@@ -65,21 +71,27 @@ class OneRule:
         )
 
         model.obj = pyo.Objective(
-            expr=sum(model.error[i] for i in model.all_i), sense=pyo.minimize
+            expr=sum(model.error[i] * weights[i] for i in model.all_i),
+            sense=pyo.minimize,
         )
 
         return model
 
     def find_rule(
-        self, X: np.ndarray[bool], y: np.ndarray[bool], warmstart: bool = False
+        self,
+        X: np.ndarray[bool],
+        y: np.ndarray[bool],
+        warmstart: bool = False,
+        verbose: bool = False,
     ) -> list[int]:
         """Find a single conjunction with lowest 0-1 error
 
         Args:
             X (np.ndarray[bool]): Input data (boolean values), shape (n, d)
             y (np.ndarray[bool]): Target (boolean values), shape (n,)
-            warmstart (bool, optional): If true an approximate solution will be created first to warmstart the MIO.
+            warmstart (bool, optional): If true, an approximate solution will be created first to warmstart the MIO.
                 Defaults to False.
+            verbose (bool, optional): If true, solver output is printed to stdout. Defaults to False.
 
         Returns:
             list[int]: List of indices of the literals in the final conjunction
@@ -90,9 +102,16 @@ class OneRule:
         if warmstart:
             print("No warmstart available, previous attempts were useless")
 
-        int_model = self._make_int_model(X, y)
-        opt = pyo.SolverFactory("gurobi")
-        opt.solve(int_model, tee=True)
+        w = np.ones_like(y, dtype=float)
+        size1 = np.sum(y)
+        w[y] = 1 / size1
+        w[~y] = 1 / (y.shape[0] - size1)
+        # print(1 / size1, 1 / (y.shape[0] - size1))
+        int_model = self._make_int_model(X, y, weights=w)
+        opt = pyo.SolverFactory("gurobi", solver_io="python")
+        opt.solve(int_model, tee=verbose)
+
+        self.model = int_model
 
         # print([int_model.error[i].value for i in int_model.all_i])
 
