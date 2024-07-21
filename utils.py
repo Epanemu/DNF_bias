@@ -47,7 +47,7 @@ def balance_datasets(
     elif neg > pos:
         to_drop = np.random.choice(np.where(~y)[0], size=(neg - pos,), replace=False)
     else:
-        to_drop = np.array([])
+        to_drop = []
     keep_mask = np.ones_like(y, dtype=bool)
     keep_mask[to_drop] = False
 
