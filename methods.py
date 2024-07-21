@@ -93,8 +93,8 @@ def test_one_rule(
     positive, negative = binarizer.target_name()
     if verbose:
         print(
-            "IF \n    ",
-            "\n AND ".join(resnames),
+            "IF \n ",
+            " AND ".join(resnames),
             f"\nTHEN\n {positive} ELSE {negative}",
         )
 
