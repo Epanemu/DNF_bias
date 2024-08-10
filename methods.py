@@ -18,8 +18,9 @@ def test_RIPPER(
     if X_train.shape[1] != len(binarizer.feature_names(include_negations=False)):
         raise ValueError("Ripper method assumes that negations are NOT included")
 
-    X_pd = pd.DataFrame(X_train, columns=binarizer.multi_index_feats()).astype(int)
-    X_test_pd = pd.DataFrame(X_test, columns=binarizer.multi_index_feats()).astype(int)
+    colnames = [" ".join(b) for b in binarizer.multi_index_feats()]
+    X_pd = pd.DataFrame(X_train, columns=colnames).astype(int)
+    X_test_pd = pd.DataFrame(X_test, columns=colnames).astype(int)
     y_pd = pd.Series(y_train, name="target").astype(int)
 
     if verbose:
