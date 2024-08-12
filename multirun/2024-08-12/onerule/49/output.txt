@@ -1,0 +1,66 @@
+Command:
+python test_script.py -s smallest_subclass -d 7 -n 50 --seed 42 --onerule
+Output:
+The true sup(\mu - \nu) = 0.009375000000000001
+The correct rule has \hat{\mu} - \hat{\nu} = 0.0
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 50 remain. 
+Dimension is 7.
+
+One Rule (using MIO)
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (win64 - Windows 11.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i9-14900HX, instruction set [SSE2|AVX|AVX2]
+Thread count: 24 physical cores, 32 logical processors, using up to 32 threads
+
+Optimize a model with 375 rows, 64 columns and 725 nonzeros
+Model fingerprint: 0xeffbf87a
+Variable types: 50 continuous, 14 integer (14 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e-02, 4e-02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.0000000
+Presolve removed 204 rows and 5 columns
+Presolve time: 0.00s
+Presolved: 171 rows, 59 columns, 486 nonzeros
+Variable types: 0 continuous, 59 integer (59 binary)
+Found heuristic solution: objective 0.8400000
+
+Root relaxation: objective 1.428571e-01, 50 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.14286    0   35    0.84000    0.14286  83.0%     -    0s
+H    0     0                       0.8000000    0.14286  82.1%     -    0s
+     0     0    0.42618    0   39    0.80000    0.42618  46.7%     -    0s
+H    0     0                       0.7200000    0.42618  40.8%     -    0s
+     0     0    0.60000    0   38    0.72000    0.60000  16.7%     -    0s
+     0     0    0.61600    0   40    0.72000    0.61600  14.4%     -    0s
+
+Cutting planes:
+  Gomory: 3
+  Cover: 2
+  Clique: 7
+  MIR: 8
+  Zero half: 15
+  RLT: 20
+
+Explored 1 nodes (174 simplex iterations) in 0.02 seconds (0.01 work units)
+Thread count was 32 (of 32 available processors)
+
+Solution count 4: 0.72 0.8 0.84 1 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 7.200000000000e-01, best bound 7.200000000000e-01, gap 0.0000%
+IF 
+  x5 = True AND x0 = False 
+THEN
+ target = 1.0 ELSE target = 0.0
+Accruacy: 0.64
+Our objective: 0.27999999999999997
+
+Errors:
+

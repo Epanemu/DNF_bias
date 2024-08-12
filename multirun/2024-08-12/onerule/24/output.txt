@@ -1,0 +1,22 @@
+Command:
+python test_script.py -s smallest_subclass -d 4 -n 10 --seed 42 --onerule
+Output:
+The true sup(\mu - \nu) = 0.07500000000000001
+The correct rule has \hat{\mu} - \hat{\nu} = 0.0
+
+Errors:
+Traceback (most recent call last):
+  File "C:\personal\work\DNF_bias\test_script.py", line 52, in <module>
+    binarizer, input_data, target_data = sample_scenario(
+  File "C:\personal\work\DNF_bias\scenarios\synthetic_scenarios.py", line 62, in sample_scenario
+    return smallest_subclass(rho, dimension, n_samples, seed)
+  File "C:\personal\work\DNF_bias\scenarios\synthetic_scenarios.py", line 46, in smallest_subclass
+    dhandler = DataHandler.from_data(
+  File "C:\personal\work\DNF_bias\data_handler\DataHandler.py", line 122, in from_data
+    make_feature(
+  File "C:\personal\work\DNF_bias\data_handler\features\utils.py", line 66, in make_feature
+    return Binary(
+  File "C:\personal\work\DNF_bias\data_handler\features\Binary.py", line 32, in __init__
+    self.__negative_val, self.__positive_val = value_names
+ValueError: not enough values to unpack (expected 2, got 1)
+

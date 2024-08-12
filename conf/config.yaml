@@ -1,0 +1,24 @@
+# python experiment.py -m
+
+# defaults:
+#   - override hydra/job_logging: disabled
+#   - override hydra/hydra_logging: disabled
+
+task: smallest_subclass
+dimension: ${hydra:runtime.choice}
+n_samples: ${hydra:runtime.choice}
+seed: 42
+rho: null
+
+brcg: false
+ripper: false
+onerule: true
+
+hydra:
+  sweeper:
+    params:
+      dimension: 1, 2, 3, 4, 5, 6, 7, 8
+      n_samples: 10, 50, 100, 500, 1000, 5000, 10000, 50000
+
+      
+  

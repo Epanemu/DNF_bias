@@ -1,0 +1,31 @@
+Command:
+python test_script.py -s smallest_subclass -d 3 -n 500 --seed 42 --ripper
+Output:
+The true sup(\mu - \nu) = 0.15000000000000002
+The correct rule has \hat{\mu} - \hat{\nu} = 0.164
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 500 remain. 
+Dimension is 3.
+
+Importing dev version v0.982 of RIPPER
+
+RIPPER:
+
+Errors:
+Traceback (most recent call last):
+  File "C:\personal\work\DNF_bias\test_script.py", line 75, in <module>
+    y_est, rules = test_RIPPER(
+  File "C:\personal\work\DNF_bias\methods.py", line 29, in test_RIPPER
+    ripper.fit(X_pd, y_pd, target_label=1)
+  File "C:\personal\work\DNF_bias\src\aix360\aix360\algorithms\rule_induction\ripper\ripper.py", line 156, in fit
+    irep_res = self._irep_plus_outer_loop(
+  File "C:\personal\work\DNF_bias\src\aix360\aix360\algorithms\rule_induction\ripper\ripper.py", line 299, in _irep_plus_outer_loop
+    pos_grow, pos_prune, neg_grow, neg_prune = _split_instances(pos, neg, ratio, self.random_state)
+  File "C:\personal\work\DNF_bias\src\aix360\aix360\algorithms\rule_induction\ripper\base.py", line 75, in _split_instances
+    neg_train, neg_prune = train_test_split(neg, random_state=random_state, train_size=ratio)
+  File "C:\Users\illia\AppData\Local\Programs\Python\Python310\lib\site-packages\sklearn\model_selection\_split.py", line 2448, in train_test_split
+    n_train, n_test = _validate_shuffle_split(
+  File "C:\Users\illia\AppData\Local\Programs\Python\Python310\lib\site-packages\sklearn\model_selection\_split.py", line 2126, in _validate_shuffle_split
+    raise ValueError(
+ValueError: With n_samples=0, test_size=None and train_size=0.6666666666666666, the resulting train set will be empty. Adjust any of the aforementioned parameters.
+
