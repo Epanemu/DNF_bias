@@ -46,7 +46,7 @@ def smallest_subclass(rho: float, dimension: int, n_samples: int, seed: int):
     dhandler = DataHandler.from_data(
         input_data,
         target_data,
-        categ_map={c: [] for c in colnames},
+        categ_map={c: [0, 1] for c in colnames},
         feature_names=colnames,
     )
 
