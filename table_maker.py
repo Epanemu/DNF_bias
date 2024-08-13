@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from collections import defaultdict
 
-method = "brcg"
+method = "onerule"
 
-base_dir = "multirun/2024-08-12/" + method
+base_dir = "multirun/2024-08-13/" + method
 
 extracted_data = []
 

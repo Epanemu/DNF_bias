@@ -1,0 +1,63 @@
+Command:
+python test_script.py -s smallest_subclass -d 5 -n 50000 --seed 43 --onerule
+Output:
+The true sup(\mu - \nu) = 0.037500000000000006
+The correct rule has \hat{\mu} - \hat{\nu} = 0.03576
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 50000 remain. 
+Dimension is 5.
+
+One Rule (using MIO)
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (win64 - Windows 11.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i9-14900HX, instruction set [SSE2|AVX|AVX2]
+Thread count: 24 physical cores, 32 logical processors, using up to 32 threads
+
+Optimize a model with 275000 rows, 50010 columns and 525000 nonzeros
+Model fingerprint: 0x107c6467
+Variable types: 50000 continuous, 10 integer (10 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e-05, 4e-05]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.0000000
+Presolve removed 274808 rows and 49936 columns
+Presolve time: 0.26s
+Presolved: 192 rows, 74 columns, 512 nonzeros
+Variable types: 0 continuous, 74 integer (74 binary)
+
+Root relaxation: objective 2.000000e-01, 63 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.20000    0   42    1.00000    0.20000  80.0%     -    0s
+H    0     0                       0.9729200    0.20000  79.4%     -    0s
+H    0     0                       0.9702800    0.20000  79.4%     -    0s
+H    0     0                       0.9652000    0.38328  60.3%     -    0s
+     0     0    0.96306    0   22    0.96520    0.96306  0.22%     -    0s
+*    0     0               0       0.9632000    0.96320  0.00%     -    0s
+
+Cutting planes:
+  Gomory: 1
+  Clique: 32
+  Zero half: 11
+  RLT: 14
+
+Explored 1 nodes (141 simplex iterations) in 0.32 seconds (0.46 work units)
+Thread count was 32 (of 32 available processors)
+
+Solution count 5: 0.9632 0.9652 0.97028 ... 1
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 9.632000000000e-01, best bound 9.632000000000e-01, gap 0.0000%
+IF 
+  x1 = 0 AND x2 = 0 AND x3 = 0 AND x4 = 0 
+THEN
+ target = 1.0 ELSE target = 0.0
+Accruacy: 0.5184
+Our objective: 0.03680000000000005
+
+Errors:
+
