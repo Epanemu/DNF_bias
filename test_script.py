@@ -114,5 +114,14 @@ if args.onerule:
         verbose=args.verbose,
     )
 
+if args.verbose:
+    positive, negative = binarizer.target_name()
+    print(
+        "IF \n ("
+        + ") OR\n (".join([" AND ".join(map(str, term)) for term in rules])
+        + f")\nTHEN\n {positive} ELSE {negative}",
+    )
+    print()
+
 print("Accruacy:", accuracy(y_bin, y_est))
 print("Our objective:", our_metric(y_bin, y_est))

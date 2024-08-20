@@ -77,6 +77,18 @@ class Bin:
         self.operation = operation
         self.value = value
 
+    def negate_self(self):
+        if isinstance(self.feature, Binary):
+            return Bin(self.feature, self.operation, 1 - self.value)
+        else:
+            return Bin(self.feature, Operation.negated(self.operation), self.value)
+
+    def __repr__(self):
+        return f"Bin({repr(self.feature)}, {repr(self.operation)}, {repr(self.value)})"
+
+    def __str__(self):
+        return f"{str(self.feature)} {self.operation.value} {str(self.value)}"
+
 
 class Binarizer:
     """Handles binarizing the dataset"""
@@ -185,3 +197,14 @@ class Binarizer:
             self.__feature_name_tuples(include_negations),
             names=["feature", "operation", "value"],
         )
+
+    def get_bin_encodings(self, include_negations=False):
+        if include_negations:
+            feats = self.__binarized_features + self.__binarized_negations
+        else:
+            feats = self.__binarized_features
+        flat = []
+        for binariaztions in feats:
+            for bin in binariaztions:
+                flat.append(bin)
+        return flat
