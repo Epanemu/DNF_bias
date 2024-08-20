@@ -92,7 +92,7 @@ if args.ripper:
         binarizer,
         verbose=args.verbose,
     )
-if args.brcg:
+elif args.brcg:
     y_est, rules = test_BRCG(
         X_bin_neg,
         y_bin,
@@ -105,7 +105,7 @@ if args.brcg:
             "solver": "CLARABEL",
         },
     )
-if args.onerule:
+elif args.onerule:
     y_est, rules = test_one_rule(
         X_bin_neg,
         y_bin,
@@ -113,6 +113,8 @@ if args.onerule:
         binarizer,
         verbose=args.verbose,
     )
+else:
+    raise ValueError("You must select a method")
 
 if args.verbose:
     positive, negative = binarizer.target_name()
