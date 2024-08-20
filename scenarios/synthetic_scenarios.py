@@ -6,6 +6,8 @@ from data_handler import DataHandler
 
 SCENARIOS = [
     "smallest_subclass",
+    "linear_dependence",
+    "constant_subclass",
 ]
 
 
@@ -17,23 +19,30 @@ def nums_to_bin(vals: np.ndarray[int], dim: int) -> np.ndarray[bool]:
     return binvecs
 
 
-def smallest_subclass(rho: float, dimension: int, n_samples: int, seed: int):
+def sample_with_fixed_zeros(
+    rho: float, dimension: int, fixed_zeros: int, n_samples: int, seed: int
+):
     np.random.seed(seed)
     d = dimension
+    k = fixed_zeros
+    assert d >= k, "Cannot fix more features than dimensions."
     n_mu = n_samples // 2
-    mu_probs = np.full((2**d,), (1 - rho / (2 ** (d - 1))) / (2**d - 1))
-    mu_probs[0] = rho / (2 ** (d - 1))
+    n_shifted = 2 ** (d - k)
+
+    mu_probs = np.full((2**d,), (1 - rho / (2 ** (k - 1))) / (2**d - n_shifted))
+    mu_probs[:n_shifted] = rho / (2 ** (d - 1))
     mu_samples = np.random.choice(np.arange(2**d), n_mu, replace=True, p=mu_probs)
 
-    nu_probs = np.full((2**d,), (1 - (1 - rho) / (2 ** (d - 1))) / (2**d - 1))
-    nu_probs[0] = (1 - rho) / (2 ** (d - 1))
+    nu_probs = np.full((2**d,), (1 - (1 - rho) / (2 ** (k - 1))) / (2**d - n_shifted))
+    nu_probs[:n_shifted] = (1 - rho) / (2 ** (d - 1))
     nu_samples = np.random.choice(
         np.arange(2**d), n_samples - n_mu, replace=True, p=nu_probs
     )
 
-    print(f"The true sup(\\mu - \\nu) = {mu_probs[0]-nu_probs[0]}")
+    print(f"The true theoretical sup(\\mu - \\nu) = {(2*rho - 1) / (2 ** (k-1))}")
+    objective = np.mean(mu_samples < n_shifted) - np.mean(nu_samples < n_shifted)
     print(
-        f"The correct rule has \\hat{{\\mu}} - \\hat{{\\nu}} = {np.mean(mu_samples==0) - np.mean(nu_samples==0)}"
+        f"The correct rule on sampled data has \\hat{{\\mu}} - \\hat{{\\nu}} = {objective}"
     )
 
     mu_data = nums_to_bin(mu_samples, dimension)
@@ -55,8 +64,17 @@ def smallest_subclass(rho: float, dimension: int, n_samples: int, seed: int):
 
 
 def sample_scenario(name, dimension, n_samples, seed, **kwargs):
+    rho = 0.8
+    if "rho" in kwargs:
+        rho = kwargs["rho"]
     if name == "smallest_subclass":
-        rho = 0.8
+        k = dimension
+    elif name == "linear_dependence":
+        k = np.round(np.log2(dimension)).astype(int)
+    elif name == "constant_subclass":
+        k = min(3, dimension)
         if "rho" in kwargs:
-            rho = kwargs["rho"]
-        return smallest_subclass(rho, dimension, n_samples, seed)
+            k = kwargs["k"]
+    else:
+        raise AttributeError(f"name must be one of {SCENARIOS}")
+    return sample_with_fixed_zeros(rho, dimension, k, n_samples, seed)

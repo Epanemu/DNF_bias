@@ -27,6 +27,12 @@ parser.add_argument(
     "-d", "--dimension", help="Dimension of sampled data", type=int, default=6
 )
 parser.add_argument(
+    "-k",
+    help="Number of features fixed to 0 that will represent the subclass. Only valid for `constant_subclass` scenario.",
+    type=int,
+    default=3,
+)
+parser.add_argument(
     "-n", "--n_samples", help="Number of samples to sample", type=int, default=1000
 )
 parser.add_argument(
@@ -50,7 +56,7 @@ if args.scenario in MEPS_SCENARIOS:
     binarizer, input_data, target_data = load_MEPS_scenario(args.scenario)
 elif args.scenario in SYNTH_SCENARIOS:
     binarizer, input_data, target_data = sample_scenario(
-        args.scenario, args.dimension, args.n_samples, args.seed, rho=args.rho
+        args.scenario, args.dimension, args.n_samples, args.seed, rho=args.rho, k=args.k
     )
 
 X_bin = binarizer.encode(input_data)
