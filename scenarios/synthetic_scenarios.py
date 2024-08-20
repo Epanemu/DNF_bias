@@ -25,7 +25,7 @@ def sample_with_fixed_zeros(
     np.random.seed(seed)
     d = dimension
     k = fixed_zeros
-    assert d >= k, "Cannot fix more features than dimensions."
+    assert d >= k, "Cannot fix more features than there are dimensions."
     n_mu = n_samples // 2
     n_shifted = 2 ** (d - k)
 
