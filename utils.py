@@ -1,5 +1,7 @@
 import numpy as np
 
+from binarizer import Bin, Binarizer
+
 
 def our_metric(truth: np.ndarray[bool], estimate: np.ndarray[bool]) -> float:
     # trunk-ignore(bandit/B101)
@@ -53,3 +55,17 @@ def balance_datasets(
 
     pruned_datasets = [d[keep_mask] for d in datasets]
     return pruned_datasets
+
+
+def _eval_term(term: list[Bin], binarizer: Binarizer, X_test: np.ndarray[bool]):
+    mask = np.ones((X_test.shape[0],), dtype=bool)
+    bin_feats = [str(f) for f in binarizer.get_bin_encodings(include_negations=True)]
+    for feat in term:
+        feat_i = bin_feats.index(str(feat))
+        mask &= X_test[:, feat_i]
+    return mask
+
+
+def eval_terms(dnf: list[list[Bin]], binarizer: Binarizer, X_test: np.ndarray[bool]):
+    masks = [_eval_term(term, binarizer, X_test) for term in dnf]
+    return masks

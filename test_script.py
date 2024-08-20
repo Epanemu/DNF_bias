@@ -7,7 +7,7 @@ from scenarios.MEPS_scenarios import SCENARIOS as MEPS_SCENARIOS
 from scenarios.MEPS_scenarios import load_scenario as load_MEPS_scenario
 from scenarios.synthetic_scenarios import SCENARIOS as SYNTH_SCENARIOS
 from scenarios.synthetic_scenarios import sample_scenario
-from utils import accuracy, balance_datasets, our_metric
+from utils import accuracy, balance_datasets, eval_terms, our_metric
 
 SCENARIOS = MEPS_SCENARIOS + SYNTH_SCENARIOS
 
@@ -116,6 +116,8 @@ elif args.onerule:
 else:
     raise ValueError("You must select a method")
 
+y_terms = eval_terms(rules, binarizer, X_bin_neg)
+our_evals = [our_metric(y_bin, yhat) for yhat in y_terms]
 if args.verbose:
     positive, negative = binarizer.target_name()
     print(
@@ -125,5 +127,7 @@ if args.verbose:
     )
     print()
 
-print("Accruacy:", accuracy(y_bin, y_est))
-print("Our objective:", our_metric(y_bin, y_est))
+
+print("Max over terms:")
+print("  Accruacy:", np.max([accuracy(y_bin, yhat) for yhat in y_terms]))
+print("  Our objective:", np.max(our_evals))
