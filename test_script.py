@@ -7,7 +7,7 @@ from scenarios.MEPS_scenarios import SCENARIOS as MEPS_SCENARIOS
 from scenarios.MEPS_scenarios import load_scenario as load_MEPS_scenario
 from scenarios.synthetic_scenarios import SCENARIOS as SYNTH_SCENARIOS
 from scenarios.synthetic_scenarios import sample_scenario
-from utils import accuracy, balance_datasets, eval_terms, our_metric
+from utils import accuracy, balance_datasets, eval_terms, our_metric, print_dnf
 
 SCENARIOS = MEPS_SCENARIOS + SYNTH_SCENARIOS
 
@@ -119,12 +119,12 @@ else:
 y_terms = eval_terms(rules, binarizer, X_bin_neg)
 our_evals = [our_metric(y_bin, yhat) for yhat in y_terms]
 if args.verbose:
-    positive, negative = binarizer.target_name()
-    print(
-        "IF \n ("
-        + ") OR\n (".join([" AND ".join(map(str, term)) for term in rules])
-        + f")\nTHEN\n {positive} ELSE {negative}",
-    )
+    print("FULL MODEL:")
+    print("  Accruacy:", accuracy(y_bin, y_est))
+    print("  Our objective:", our_metric(y_bin, y_est))
+    print()
+
+    print_dnf(rules, binarizer, our_evals)
     print()
 
 
