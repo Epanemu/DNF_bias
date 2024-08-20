@@ -50,6 +50,13 @@ parser.add_argument(
 parser.add_argument(
     "--onerule", action="store_true", help="Find a single rule (conjunction) using MIO"
 )
+parser.add_argument(
+    "-v",
+    "--verbose",
+    action="store_true",
+    default=False,
+    help="Verbose mode, print more information",
+)
 args = parser.parse_args()
 
 if args.scenario in MEPS_SCENARIOS:
@@ -83,7 +90,7 @@ if args.ripper:
         y_bin,
         X_bin,
         binarizer,
-        verbose=True,
+        verbose=args.verbose,
     )
 if args.brcg:
     y_est, rules = test_BRCG(
@@ -91,7 +98,7 @@ if args.brcg:
         y_bin,
         X_bin_neg,
         binarizer,
-        verbose=True,
+        verbose=args.verbose,
         brcg_params={
             "lambda0": 0.0001,
             "lambda1": 0,
@@ -104,7 +111,7 @@ if args.onerule:
         y_bin,
         X_bin_neg,
         binarizer,
-        verbose=True,
+        verbose=args.verbose,
     )
 
 print("Accruacy:", accuracy(y_bin, y_est))
