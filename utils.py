@@ -90,3 +90,29 @@ def print_dnf(
     print(
         "IF \n    " + "\n OR ".join(term_strs) + f"\nTHEN\n {positive} ELSE {negative}",
     )
+
+
+def _tv_recurse(
+    set1: np.ndarray[int],
+    set2: np.ndarray[int],
+    curr_i: int,
+    valid_values: list[list[int]],
+    vector: np.ndarray[int],
+) -> float:
+    # computes 2*total variation between set1 and set2
+    if curr_i == len(valid_values):
+        p1 = np.mean((set1 == vector).all(axis=1))
+        p2 = np.mean((set2 == vector).all(axis=1))
+        return abs(p1 - p2)
+    else:
+        tv_sum = 0
+        for val in valid_values[curr_i]:
+            vector[curr_i] = val
+            tv_sum += _tv_recurse(set1, set2, curr_i + 1, valid_values, vector)
+        return tv_sum
+
+
+def total_variation(set1: np.ndarray[int], set2: np.ndarray[int]) -> float:
+    all_data = np.concatenate([set1, set2], axis=0)
+    valid_values = [np.unique(all_data[:, i]) for i in range(all_data.shape[1])]
+    return _tv_recurse(set1, set2, 0, valid_values, np.empty((set1.shape[1],))) / 2

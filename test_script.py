@@ -7,7 +7,14 @@ from scenarios.MEPS_scenarios import SCENARIOS as MEPS_SCENARIOS
 from scenarios.MEPS_scenarios import load_scenario as load_MEPS_scenario
 from scenarios.synthetic_scenarios import SCENARIOS as SYNTH_SCENARIOS
 from scenarios.synthetic_scenarios import sample_scenario
-from utils import accuracy, balance_datasets, eval_terms, our_metric, print_dnf
+from utils import (
+    accuracy,
+    balance_datasets,
+    eval_terms,
+    our_metric,
+    print_dnf,
+    total_variation,
+)
 
 SCENARIOS = MEPS_SCENARIOS + SYNTH_SCENARIOS
 
@@ -83,6 +90,9 @@ y_bin, X_bin, X_bin_neg = balance_datasets(
 )
 n, d = X_bin.shape
 print(f"Balancing dropped {n_orig-n} samples, {n} remain. \nDimension is {d}.\n")
+
+if args.verbose:
+    print(f"Computed total variation: {total_variation(X_bin[y_bin], X_bin[~y_bin])}")
 
 if args.ripper:
     y_est, rules = test_RIPPER(
