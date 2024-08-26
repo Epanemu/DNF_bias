@@ -71,15 +71,10 @@ def eval_terms(dnf: list[list[Bin]], binarizer: Binarizer, X_test: np.ndarray[bo
     return masks
 
 
-def _format_term(term, eval):
-    return "(" + " AND ".join(map(str, term)) + f")    --- (our objective: {eval})"
-
-
 def print_dnf(
     dnf: list[list[Bin]], binarizer: Binarizer, term_evals: np.ndarray[float]
 ):
     positive, negative = binarizer.target_name()
-    # term_strs = [_format_term(term, eval) for term, eval in zip(dnf, term_evals)]
     term_strs = ["(" + " AND ".join(map(str, term)) + ")" for term in dnf]
     maxlen = max(map(len, term_strs))
     term_strs = [
