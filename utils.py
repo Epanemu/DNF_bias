@@ -111,3 +111,12 @@ def total_variation(set1: np.ndarray[int], set2: np.ndarray[int]) -> float:
     all_data = np.concatenate([set1, set2], axis=0)
     valid_values = [np.unique(all_data[:, i]) for i in range(all_data.shape[1])]
     return _tv_recurse(set1, set2, 0, valid_values, np.empty((set1.shape[1],))) / 2
+
+
+def term_hamming_distance(term1: list[Bin], term2: list[Bin]) -> int:
+    hd = 0
+    for b in term1:
+        if b not in term2:
+            hd += 1
+    hd_rest = len(term2) - (len(term1) - hd)
+    return hd + hd_rest

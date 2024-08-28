@@ -77,4 +77,8 @@ def sample_scenario(name, dimension, n_samples, seed, **kwargs):
             k = kwargs["k"]
     else:
         raise AttributeError(f"name must be one of {SCENARIOS}")
-    return sample_with_fixed_zeros(rho, dimension, k, n_samples, seed)
+    binarizer, input_data, target_data = sample_with_fixed_zeros(
+        rho, dimension, k, n_samples, seed
+    )
+    true_term = [b.negate_self() for b in binarizer.get_bin_encodings()[:k]]
+    return (binarizer, input_data, target_data, true_term)

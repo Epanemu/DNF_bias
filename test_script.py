@@ -13,6 +13,7 @@ from utils import (
     eval_terms,
     our_metric,
     print_dnf,
+    term_hamming_distance,
     total_variation,
 )
 
@@ -66,8 +67,9 @@ args = parser.parse_args()
 
 if args.scenario in MEPS_SCENARIOS:
     binarizer, input_data, target_data = load_MEPS_scenario(args.scenario)
+    true_term = []
 elif args.scenario in SYNTH_SCENARIOS:
-    binarizer, input_data, target_data = sample_scenario(
+    binarizer, input_data, target_data, true_term = sample_scenario(
         args.scenario, args.dimension, args.n_samples, args.seed, rho=args.rho, k=args.k
     )
 
@@ -133,6 +135,7 @@ elif args.method == "mdss":
 
 y_terms = eval_terms(rules, binarizer, X_bin_neg)
 our_evals = [our_metric(y_bin, yhat) for yhat in y_terms]
+hamming_dists = [term_hamming_distance(true_term, term) for term in rules]
 if args.verbose:
     print("FULL MODEL:")
     print("  Accruacy:", accuracy(y_bin, y_est))
@@ -143,6 +146,12 @@ if args.verbose:
     print()
 
 
-print("Max over terms:")
-print("  Accruacy:", np.max([accuracy(y_bin, yhat) for yhat in y_terms]))
-print("  Our objective:", np.max(our_evals))
+print("Best over terms:")
+max_i = np.argmax(our_evals)
+print("  Our objective:", our_evals[max_i])
+print("    Its accruacy:", accuracy(y_bin, y_terms[max_i]))
+print("    Its hamming distance:", hamming_dists[max_i])
+min_dist_i = np.argmin(hamming_dists)
+print("  Shortest hamming distance:", hamming_dists[min_dist_i])
+print("    Its our objective:", our_evals[min_dist_i])
+print("  Highest accruacy:", np.max([accuracy(y_bin, yhat) for yhat in y_terms]))
