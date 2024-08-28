@@ -146,12 +146,13 @@ if args.verbose:
     print()
 
 
-print("Best over terms:")
-max_i = np.argmax(our_evals)
-print("  Our objective:", our_evals[max_i])
-print("    Its accruacy:", accuracy(y_bin, y_terms[max_i]))
-print("    Its hamming distance:", hamming_dists[max_i])
-min_dist_i = np.argmin(hamming_dists)
-print("  Shortest hamming distance:", hamming_dists[min_dist_i])
-print("    Its our objective:", our_evals[min_dist_i])
-print("  Highest accruacy:", np.max([accuracy(y_bin, yhat) for yhat in y_terms]))
+if len(y_terms) > 0:
+    print("Best over terms:")
+    max_i = np.argmax(our_evals)
+    print("  Our objective:", our_evals[max_i])
+    print("    Its accruacy:", accuracy(y_bin, y_terms[max_i]))
+    print("    Its hamming distance:", hamming_dists[max_i])
+    min_dist_i = np.argmin(hamming_dists)
+    print("  Shortest hamming distance:", hamming_dists[min_dist_i])
+    print("    Its our objective:", our_evals[min_dist_i])
+    print("  Highest accruacy:", np.max([accuracy(y_bin, yhat) for yhat in y_terms]))
