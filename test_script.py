@@ -49,13 +49,11 @@ parser.add_argument(
     "--rho", help="Rho parameter for sampling synthetic data", type=float, default=0.8
 )
 parser.add_argument(
-    "--brcg", action="store_true", help="Use the BRCG method to find a DNF"
-)
-parser.add_argument(
-    "--ripper", action="store_true", help="Use the RIPPER method to find a DNF"
-)
-parser.add_argument(
-    "--onerule", action="store_true", help="Find a single rule (conjunction) using MIO"
+    "-m",
+    "--method",
+    required=True,
+    choices=["brcg", "ripper", "onerule"],
+    help="A method to use for the search of a DNF.",
 )
 parser.add_argument(
     "-v",
@@ -94,7 +92,7 @@ print(f"Balancing dropped {n_orig-n} samples, {n} remain. \nDimension is {d}.\n"
 if args.verbose:
     print(f"Computed total variation: {total_variation(X_bin[y_bin], X_bin[~y_bin])}")
 
-if args.ripper:
+if args.method == "ripper":
     y_est, rules = test_RIPPER(
         X_bin,
         y_bin,
@@ -102,7 +100,7 @@ if args.ripper:
         binarizer,
         verbose=args.verbose,
     )
-elif args.brcg:
+elif args.method == "brcg":
     y_est, rules = test_BRCG(
         X_bin_neg,
         y_bin,
@@ -115,7 +113,7 @@ elif args.brcg:
             "solver": "CLARABEL",
         },
     )
-elif args.onerule:
+elif args.method == "onerule":
     y_est, rules = test_one_rule(
         X_bin_neg,
         y_bin,
@@ -123,8 +121,6 @@ elif args.onerule:
         binarizer,
         verbose=args.verbose,
     )
-else:
-    raise ValueError("You must select a method")
 
 y_terms = eval_terms(rules, binarizer, X_bin_neg)
 our_evals = [our_metric(y_bin, yhat) for yhat in y_terms]
