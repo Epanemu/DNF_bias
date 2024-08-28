@@ -2,7 +2,7 @@ import argparse
 
 import numpy as np
 
-from methods import test_BRCG, test_one_rule, test_RIPPER
+from methods import test_BRCG, test_MDSS, test_one_rule, test_RIPPER
 from scenarios.MEPS_scenarios import SCENARIOS as MEPS_SCENARIOS
 from scenarios.MEPS_scenarios import load_scenario as load_MEPS_scenario
 from scenarios.synthetic_scenarios import SCENARIOS as SYNTH_SCENARIOS
@@ -52,7 +52,7 @@ parser.add_argument(
     "-m",
     "--method",
     required=True,
-    choices=["brcg", "ripper", "onerule"],
+    choices=["brcg", "ripper", "mdss", "onerule"],
     help="A method to use for the search of a DNF.",
 )
 parser.add_argument(
@@ -121,6 +121,15 @@ elif args.method == "onerule":
         binarizer,
         verbose=args.verbose,
     )
+elif args.method == "mdss":
+    y_est, rules = test_MDSS(
+        X_bin,
+        y_bin,
+        X_bin,
+        binarizer,
+        verbose=args.verbose,
+    )
+
 
 y_terms = eval_terms(rules, binarizer, X_bin_neg)
 our_evals = [our_metric(y_bin, yhat) for yhat in y_terms]

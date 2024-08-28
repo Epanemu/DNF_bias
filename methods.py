@@ -110,3 +110,48 @@ def test_one_rule(
     for feat_i in res:
         mask &= X_test[:, feat_i]
     return mask, [term]
+
+
+def test_MDSS(
+    X_train: np.ndarray[bool],
+    y_train: np.ndarray[bool],
+    X_test: np.ndarray[bool],
+    binarizer: Binarizer,
+    verbose: bool = False,
+    # trunk-ignore(ruff/B006)
+    mdss_params: dict = {},
+) -> tuple[np.ndarray[bool], list[list[Bin]]]:
+    # made for binary inputs only, one could improve the performance of this for categorical values, possibly
+    from aif360.detectors.mdss_detector import bias_scan
+
+    bin_feats = binarizer.get_bin_encodings(include_negations=False)
+    if X_train.shape[1] != len(bin_feats):
+        raise ValueError("BRCG method assumes that negations are also included")
+
+    fnames = binarizer.feature_names(include_negations=False)
+    X_train_pd = pd.DataFrame(X_train, columns=fnames)
+
+    if "alpha" not in mdss_params:
+        mdss_params["alpha"] = 0.5
+
+    privileged_subset, _ = bias_scan(
+        data=X_train_pd,
+        observations=pd.Series(y_train, name="target"),
+        expectations=None,
+        scoring="BerkJones",
+        favorable_value=0,
+        overpredicted=True,
+        **mdss_params,
+    )
+    res = [
+        (fnames.index(name), vals[0])
+        for name, vals in privileged_subset.items()
+        if len(vals) == 1
+    ]  # more than 1 val means that there are both true and false
+    term = [bin_feats[r] if v else bin_feats[r].negate_self() for r, v in res]
+
+    mask = np.ones((X_test.shape[0],), dtype=bool)
+    for feat_i, val in res:
+        mask &= X_test[:, feat_i] == val
+
+    return mask, [term]

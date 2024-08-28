@@ -15,3 +15,9 @@ conda create -n AIX360 python=3.10
 conda activate AIX360
 pip install -e git+https://github.com/Trusted-AI/AIX360.git#egg=aix360[rbm,rule_induction]
 ```
+
+To use MDSS, install AIF360 library
+
+```shell
+pip install aif360
+```
