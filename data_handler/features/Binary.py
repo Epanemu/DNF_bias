@@ -99,3 +99,14 @@ class Binary(Feature):
     @property
     def value_mapping(self) -> dict[CategValue, int]:
         return {self.__positive_val: 1, self.__negative_val: 0}
+
+    def __eq__(self, other):
+        if isinstance(other, Binary):
+            return (
+                self.name == other.name
+                and self.monotone == other.monotone
+                and self.modifiable == other.modifiable
+                and self.value_mapping == other.value_mapping
+                and self._MAD == other._MAD
+            )
+        return False

@@ -93,3 +93,15 @@ class Contiguous(Feature):
                 return pre_val >= post_val
             return True
         return pre_val == post_val
+
+    def __eq__(self, other):
+        if isinstance(other, Contiguous):
+            return (
+                self.name == other.name
+                and self.monotone == other.monotone
+                and self.modifiable == other.modifiable
+                and self.bounds == other.bounds
+                and self.discrete == other.discrete
+                and self._MAD == other._MAD
+            )
+        return False

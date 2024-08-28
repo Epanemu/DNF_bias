@@ -89,6 +89,13 @@ class Bin:
     def __str__(self):
         return f"{str(self.feature)} {self.operation.value} {str(self.value)}"
 
+    def __eq__(self, other):
+        return (
+            self.feature == other.feature
+            and self.operation == other.operation
+            and self.value == other.value
+        )
+
 
 class Binarizer:
     """Handles binarizing the dataset"""

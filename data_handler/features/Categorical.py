@@ -144,3 +144,14 @@ class Categorical(Feature):
         return pre_val == post_val
 
     # TODO fix the numeric/non-numeric value handling
+
+    def __eq__(self, other):
+        if isinstance(other, Categorical):
+            return (
+                self.name == other.name
+                and self.monotone == other.monotone
+                and self.modifiable == other.modifiable
+                and self.value_mapping == other.value_mapping
+                and self._MAD == other._MAD
+            )
+        return False
