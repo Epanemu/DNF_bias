@@ -84,6 +84,37 @@ def test_BRCG(
     return model.predict(X_test_pd) == 1, dnf
 
 
+def test_dnf_mio(
+    X_train: np.ndarray[bool],
+    y_train: np.ndarray[bool],
+    X_test: np.ndarray[bool],
+    binarizer: Binarizer,
+    verbose: bool = False,
+    # trunk-ignore(ruff/B006)
+    dnfmio_params: dict = {"n_terms": 5, "time_limit": 120},
+) -> tuple[np.ndarray[bool], list[list[Bin]]]:
+    from dnf_mio import DNF_MIO
+
+    bin_feats = binarizer.get_bin_encodings(include_negations=True)
+    if X_train.shape[1] != len(bin_feats):
+        raise ValueError("DNF via MIO assumes that negations are also included")
+
+    if verbose:
+        print("DNF using MIO")
+        dnfmio_params["verbose"] = True
+    dnf_mio = DNF_MIO()
+    res = dnf_mio.find_dnf(X_train, y_train, **dnfmio_params)
+
+    dnf = [[bin_feats[t] for t in term] for term in res]
+    tot_mask = np.zeros((X_test.shape[0],), dtype=bool)
+    for term in res:
+        mask = np.ones((X_test.shape[0],), dtype=bool)
+        for feat_i in term:
+            mask &= X_test[:, feat_i]
+        tot_mask |= mask
+    return mask, dnf
+
+
 def test_one_rule(
     X_train: np.ndarray[bool],
     y_train: np.ndarray[bool],
