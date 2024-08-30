@@ -78,14 +78,18 @@ def print_dnf(
     if len(dnf) == 0:
         term_strs = ["False"]
     else:
-        term_strs = ["(" + " AND ".join(map(str, term)) + ")" for term in dnf]
+        term_strs = ["(" + " AND ".join(sorted(map(str, term))) + ")" for term in dnf]
         if "()" in term_strs:
             term_evals = [term_evals[term_strs.index("()")]]
             term_strs = ["True"]
         maxlen = max(map(len, term_strs))
+        ordering = np.argsort(term_strs)
+        # ordering = np.argsort(-term_evals)
         term_strs = [
-            term + " " * (maxlen - len(term)) + f" <-- (term's our objective: {eval})"
-            for term, eval in zip(term_strs, term_evals)
+            term_strs[i]
+            + " " * (maxlen - len(term_strs[i]))
+            + f" <-- (term's our objective: {np.round(term_evals[i], 6)})"
+            for i in ordering
         ]
 
     print(
