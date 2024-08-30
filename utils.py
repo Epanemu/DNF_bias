@@ -79,6 +79,9 @@ def print_dnf(
         term_strs = ["False"]
     else:
         term_strs = ["(" + " AND ".join(map(str, term)) + ")" for term in dnf]
+        if "()" in term_strs:
+            term_evals = [term_evals[term_strs.index("()")]]
+            term_strs = ["True"]
         maxlen = max(map(len, term_strs))
         term_strs = [
             term + " " * (maxlen - len(term)) + f" <-- (term's our objective: {eval})"
