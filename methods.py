@@ -95,6 +95,9 @@ def test_one_rule(
 ) -> tuple[np.ndarray[bool], list[list[Bin]]]:
     from one_rule import OneRule
 
+    # alternative implementation using LP - but it does not use the 0-1 loss
+    # from one_rule_lp import OneRule
+
     bin_feats = binarizer.get_bin_encodings(include_negations=True)
     if X_train.shape[1] != len(bin_feats):
         raise ValueError("One rule method assumes that negations are also included")
