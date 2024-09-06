@@ -1,3 +1,5 @@
+# python experiment.py -m
+
 import hydra
 from omegaconf import DictConfig
 import subprocess
@@ -17,18 +19,19 @@ def run_experiment(cfg: DictConfig):
         command.extend(["--seed", str(cfg.seed)])
     if cfg.rho is not None:
         command.extend([str(cfg.rho)])
-    if cfg.brcg:
-        command.append("--brcg")
-    if cfg.ripper:
-        command.append("--ripper")
-    if cfg.onerule:
-        command.append("--onerule")
+    if cfg.method is not None:
+        command.extend(["-m", str(cfg.method)])
+    
+    command.extend(["--verbose"])
 
     print("Running command:", " ".join(command))
     
     # Run the command and capture the output
-    result = subprocess.run(command, capture_output=True, text=True)
-    
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, timeout=200)
+    except subprocess.TimeoutExpired as exc:
+        print("Worked too long. Process finished without result.")
+
     # Get the current working directory, which Hydra sets for each run
     run_dir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir
 

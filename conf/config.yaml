@@ -7,18 +7,16 @@
 task: smallest_subclass
 dimension: ${hydra:runtime.choice}
 n_samples: ${hydra:runtime.choice}
-seed: 44
+seed: ${hydra:runtime.choice}
 rho: null
-
-brcg: false
-ripper: true
-onerule: false
+method: dnf_mio
 
 hydra:
   sweeper:
     params:
-      dimension: 7
+      dimension: 1, 2, 3, 4, 5, 6, 7, 8
       n_samples: 10, 50, 100, 500, 1000, 5000, 10000, 50000
+      seed: 43, 56, 73, 34, 21
 
       
   

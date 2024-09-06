@@ -1,0 +1,124 @@
+Command:
+python test_script.py -s smallest_subclass -d 6 -n 10000 --seed 56 -m dnf_mio --verbose
+Output:
+The true theoretical sup(\mu - \nu) = 0.018750000000000003
+The correct rule on sampled data has \hat{\mu} - \hat{\nu} = 0.018799999999999997
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 10000 remain. 
+Dimension is 6.
+
+Computed total variation: 0.07819999999999999
+DNF using MIO
+Set parameter TimeLimit to value 120
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (win64 - Windows 11.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i9-14900HX, instruction set [SSE2|AVX|AVX2]
+Thread count: 24 physical cores, 32 logical processors, using up to 32 threads
+
+Optimize a model with 330000 rows, 35060 columns and 655000 nonzeros
+Model fingerprint: 0xba009e22
+Variable types: 35000 continuous, 60 integer (60 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-04, 2e-04]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 4e+00]
+Found heuristic solution: objective 1.0000000
+Presolve removed 327696 rows and 34552 columns
+Presolve time: 0.51s
+Presolved: 2304 rows, 508 columns, 6464 nonzeros
+Variable types: 448 continuous, 60 integer (60 binary)
+
+Root relaxation: objective 0.000000e+00, 483 iterations, 0.01 seconds (0.01 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.00000    0    8    1.00000    0.00000   100%     -    0s
+H    0     0                       0.9988000    0.00000   100%     -    0s
+H    0     0                       0.9908000    0.00000   100%     -    0s
+     0     0    0.00000    0   15    0.99080    0.00000   100%     -    0s
+H    0     0                       0.9892000    0.00000   100%     -    0s
+H    0     0                       0.9778000    0.00000   100%     -    0s
+     0     0    0.00000    0    8    0.97780    0.00000   100%     -    0s
+H    0     0                       0.9750000    0.00000   100%     -    0s
+     0     0    0.00000    0    8    0.97500    0.00000   100%     -    0s
+H    0     0                       0.9676000    0.00000   100%     -    0s
+     0     0    0.00000    0   10    0.96760    0.00000   100%     -    0s
+     0     0    0.00000    0   14    0.96760    0.00000   100%     -    0s
+     0     0    0.00000    0   10    0.96760    0.00000   100%     -    0s
+     0     0    0.00000    0   10    0.96760    0.00000   100%     -    0s
+     0     2    0.00000    0    8    0.96760    0.00000   100%     -    0s
+H   41    56                       0.9608000    0.00000   100%   121    0s
+H  103   128                       0.9498000    0.00000   100%   117    1s
+H  114   128                       0.9484000    0.00000   100%   117    1s
+H 1210  1077                       0.9428000    0.00000   100%  64.2    2s
+H 1211  1077                       0.9424000    0.00000   100%  64.2    2s
+H 1253  1095                       0.9386000    0.00000   100%  63.5    2s
+H 3163  2380                       0.9378000    0.00904  99.0%  46.8    4s
+  3184  2394    0.24088   14   48    0.93780    0.09396  90.0%  46.5    5s
+H 3461  2482                       0.9350000    0.21623  76.9%  55.8    9s
+H 3472  2359                       0.9328000    0.21623  76.8%  55.8    9s
+  4213  2902    0.49238   74   12    0.93280    0.21642  76.8%  55.4   10s
+  9787  4722    0.90770   77    5    0.93280    0.25754  72.4%  44.7   15s
+ 19344 10490    0.39994   65   32    0.93280    0.31144  66.6%  37.9   20s
+ 31219 17373    0.46978   68   12    0.93280    0.33620  64.0%  34.4   25s
+ 44125 25512    0.52095   71   14    0.93280    0.35372  62.1%  33.2   30s
+ 58994 33389    0.84795   85   30    0.93280    0.37175  60.1%  31.8   39s
+ 59009 33399    0.40698   68   59    0.93280    0.37175  60.1%  31.8   40s
+ 62935 34981    0.90016   88   14    0.93280    0.37175  60.1%  32.1   45s
+ 72374 37324    0.38297   84   17    0.93280    0.37175  60.1%  31.9   50s
+ 81138 39425    0.46988   87   19    0.93280    0.37175  60.1%  31.3   55s
+ 89319 41673    0.72393   91   12    0.93280    0.38989  58.2%  31.1   60s
+ 98031 43479    0.92762   95    4    0.93280    0.40378  56.7%  30.7   65s
+ 105452 45036    0.82668   89   11    0.93280    0.41535  55.5%  30.3   70s
+ 114234 47177    0.69913   93   15    0.93280    0.42503  54.4%  29.9   75s
+ 122208 48875    0.79137   86   13    0.93280    0.43228  53.7%  29.6   80s
+ 133300 49591     cutoff  104         0.93280    0.44186  52.6%  29.1   88s
+ 133343 50857    0.93200  103    4    0.93280    0.44238  52.6%  29.1   90s
+ 138653 51940     cutoff  103         0.93280    0.44761  52.0%  28.9   95s
+ 144892 53499    0.90685   94    8    0.93280    0.45324  51.4%  28.8  100s
+ 148254 54994    0.52113   85   26    0.93280    0.45608  51.1%  28.7  105s
+ 157143 56055    0.55440   84   22    0.93280    0.46200  50.5%  28.4  110s
+ 168212 61392    0.74439   85    8    0.93280    0.46685  50.0%  28.2  117s
+
+Cutting planes:
+  Gomory: 93
+  MIR: 109
+  Flow cover: 1382
+  RLT: 58
+  Relax-and-lift: 149
+
+Explored 174190 nodes (4881658 simplex iterations) in 120.31 seconds (35.55 work units)
+Thread count was 32 (of 32 available processors)
+
+Solution count 10: 0.9328 0.935 0.9378 ... 0.9676
+
+Time limit reached
+Best objective 9.328000000000e-01, best bound 4.704735119048e-01, gap 49.5633%
+WARNING: Loading a SolverResults object with an 'aborted' status, but
+containing a solution
+FULL MODEL:
+  Accruacy: 0.5102
+  Our objective: 0.020399999999999946
+
+IF 
+    (x0 = 1 AND x2 = 1 AND x5 = 1)                       <-- (term's our objective: 0.013600000000000029)
+ OR (x1 = 1 AND x5 = 1 AND x2 = 0 AND x4 = 0)            <-- (term's our objective: 0.010199999999999994)
+ OR (x2 = 1 AND x3 = 1 AND x5 = 0)                       <-- (term's our objective: 0.017)
+ OR (x4 = 1 AND x1 = 0 AND x2 = 0 AND x3 = 0)            <-- (term's our objective: 0.006000000000000019)
+ OR (x0 = 0 AND x1 = 0 AND x3 = 0 AND x4 = 0 AND x5 = 0) <-- (term's our objective: 0.020399999999999946)
+THEN
+ target = 1.0 ELSE target = 0.0
+
+Seconds needed: 132.40789246559143
+Best over terms:
+  Our final objective: 0.020399999999999946
+    Its accruacy: 0.5102
+    Its hamming distance: 1
+  Shortest hamming distance: 1
+    Its our objective: 0.020399999999999946
+  Highest accruacy: 0.5102
+
+Errors:
+

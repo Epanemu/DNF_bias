@@ -1,0 +1,71 @@
+Command:
+python test_script.py -s smallest_subclass -d 4 -n 50000 --seed 56 -m onerule --verbose
+Output:
+The true theoretical sup(\mu - \nu) = 0.07500000000000001
+The correct rule on sampled data has \hat{\mu} - \hat{\nu} = 0.07904
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 50000 remain. 
+Dimension is 4.
+
+Computed total variation: 0.07904
+One Rule (using MIO)
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (win64 - Windows 11.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i9-14900HX, instruction set [SSE2|AVX|AVX2]
+Thread count: 24 physical cores, 32 logical processors, using up to 32 threads
+
+Optimize a model with 225000 rows, 50008 columns and 425000 nonzeros
+Model fingerprint: 0x3a0fa467
+Variable types: 50000 continuous, 8 integer (8 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e-05, 4e-05]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.0000000
+Presolve removed 224920 rows and 49968 columns
+Presolve time: 0.32s
+Presolved: 80 rows, 40 columns, 208 nonzeros
+Variable types: 0 continuous, 40 integer (40 binary)
+
+Root relaxation: objective 2.500000e-01, 41 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.25000    0   24    1.00000    0.25000  75.0%     -    0s
+H    0     0                       0.9209600    0.92096  0.00%     -    0s
+     0     0          -    0         0.92096    0.92096  0.00%     -    0s
+
+Cutting planes:
+  Gomory: 2
+  Clique: 16
+  Zero half: 14
+  RLT: 9
+
+Explored 1 nodes (82 simplex iterations) in 0.37 seconds (0.34 work units)
+Thread count was 32 (of 32 available processors)
+
+Solution count 2: 0.92096 1 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 9.209600000000e-01, best bound 9.209600000000e-01, gap 0.0000%
+FULL MODEL:
+  Accruacy: 0.53952
+  Our objective: 0.07903999999999997
+
+IF 
+    (x0 = 0 AND x1 = 0 AND x2 = 0 AND x3 = 0) <-- (term's our objective: 0.07903999999999997)
+THEN
+ target = 1.0 ELSE target = 0.0
+
+Best over terms:
+  Our final objective: 0.07903999999999997
+    Its accruacy: 0.53952
+    Its hamming distance: 0
+  Shortest hamming distance: 0
+    Its our objective: 0.07903999999999997
+  Highest accruacy: 0.53952
+
+Errors:
+

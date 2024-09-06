@@ -94,6 +94,9 @@ print(f"Balancing dropped {n_orig-n} samples, {n} remain. \nDimension is {d}.\n"
 if args.verbose:
     print(f"Computed total variation: {total_variation(X_bin[y_bin], X_bin[~y_bin])}")
 
+import time
+start_time = time.time()
+
 if args.method == "ripper":
     y_est, rules = test_RIPPER(
         X_bin,
@@ -155,9 +158,10 @@ if args.verbose:
 
 
 if len(y_terms) > 0:
+    print("Seconds needed:", (time.time() - start_time))
     print("Best over terms:")
     max_i = np.argmax(our_evals)
-    print("  Our objective:", our_evals[max_i])
+    print("  Our final objective:", our_evals[max_i])
     print("    Its accruacy:", accuracy(y_bin, y_terms[max_i]))
     print("    Its hamming distance:", hamming_dists[max_i])
     min_dist_i = np.argmin(hamming_dists)

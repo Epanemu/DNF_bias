@@ -1,0 +1,56 @@
+Command:
+python test_script.py -s smallest_subclass -d 1 -n 500 --seed 73 -m onerule --verbose
+Output:
+The true theoretical sup(\mu - \nu) = 0.6000000000000001
+The correct rule on sampled data has \hat{\mu} - \hat{\nu} = 0.588
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 500 remain. 
+Dimension is 1.
+
+Computed total variation: 0.588
+One Rule (using MIO)
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (win64 - Windows 11.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i9-14900HX, instruction set [SSE2|AVX|AVX2]
+Thread count: 24 physical cores, 32 logical processors, using up to 32 threads
+
+Optimize a model with 750 rows, 502 columns and 1250 nonzeros
+Model fingerprint: 0xe2b72b44
+Variable types: 500 continuous, 2 integer (2 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e-03, 4e-03]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.0000000
+Presolve removed 750 rows and 502 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds (0.00 work units)
+Thread count was 1 (of 32 available processors)
+
+Solution count 2: 0.412 1 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.120000000000e-01, best bound 4.120000000000e-01, gap 0.0000%
+FULL MODEL:
+  Accruacy: 0.794
+  Our objective: 0.588
+
+IF 
+    (x0 = 0) <-- (term's our objective: 0.588)
+THEN
+ target = 1.0 ELSE target = 0.0
+
+Seconds needed: 0.3260834217071533
+Best over terms:
+  Our final objective: 0.588
+    Its accruacy: 0.794
+    Its hamming distance: 0
+  Shortest hamming distance: 0
+    Its our objective: 0.588
+  Highest accruacy: 0.794
+
+Errors:
+
