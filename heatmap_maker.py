@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from collections import defaultdict
 
+method = "brcg"
+method = "onerule"
+method = "ripper"
+method = "mdss"
 method = "dnf_mio"
 
 base_dir = "multirun/2024-08-31/" + method
@@ -97,7 +101,7 @@ from matplotlib.colors import LogNorm
 sns.heatmap(heatmap_data, annot=True, fmt=".2f", xticklabels=dimensions, yticklabels=n_samples, cmap="viridis", norm=LogNorm(vmin=10**(-2.5), vmax=10**1.5)) # vmin=0, vmax=1)
 plt.xlabel("Dimension")
 plt.ylabel("N Samples")
-plt.title("Logarithmic Difference Heatmap with method '" + method + "'")
+plt.title("Logarithmic Difference Heatmap with method '" + method + "' and group type 'smallest_subclass'")
 plt.gca().invert_yaxis()
 
 from datetime import date
