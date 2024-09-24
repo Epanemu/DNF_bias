@@ -1,0 +1,72 @@
+Command:
+python test_script.py -s linear_dependence -d 4 -n 10 --seed 34 -m dnf_mio -k 4 --verbose
+Output:
+The true theoretical sup(\mu - \nu) = 0.30000000000000004
+The correct rule on sampled data has \hat{\mu} - \hat{\nu} = 0.6
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 10 remain. 
+Dimension is 4.
+
+Computed total variation: 0.8
+DNF using MIO
+Set parameter TimeLimit to value 120
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (win64 - Windows 11.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i9-14900HX, instruction set [SSE2|AVX|AVX2]
+Thread count: 24 physical cores, 32 logical processors, using up to 32 threads
+
+Optimize a model with 230 rows, 75 columns and 455 nonzeros
+Model fingerprint: 0x733d8751
+Variable types: 35 continuous, 40 integer (40 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-01, 2e-01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 4e+00]
+Found heuristic solution: objective 0.4000000
+Presolve removed 177 rows and 37 columns
+Presolve time: 0.00s
+Presolved: 53 rows, 38 columns, 132 nonzeros
+Variable types: 0 continuous, 38 integer (38 binary)
+
+Root relaxation: objective 0.000000e+00, 33 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.00000    0   10    0.40000    0.00000   100%     -    0s
+     0     0    0.00000    0    6    0.40000    0.00000   100%     -    0s
+     0     0    0.05000    0    6    0.40000    0.05000  87.5%     -    0s
+*    0     0               0       0.2000000    0.20000  0.00%     -    0s
+
+Explored 1 nodes (72 simplex iterations) in 0.00 seconds (0.00 work units)
+Thread count was 32 (of 32 available processors)
+
+Solution count 2: 0.2 0.4 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.000000000000e-01, best bound 2.000000000000e-01, gap 0.0000%
+FULL MODEL:
+  Accruacy: 0.8
+  Our objective: 0.6
+
+IF 
+    (x0 = 0 AND x1 = 0 AND x1 = 1 AND x2 = 1 AND x3 = 1) <-- (term's our objective: 0.0)
+ OR (x0 = 0 AND x1 = 0)                                  <-- (term's our objective: 0.6)
+ OR (x0 = 0 AND x1 = 0)                                  <-- (term's our objective: 0.6)
+ OR (x1 = 0 AND x2 = 1)                                  <-- (term's our objective: 0.2)
+ OR (x1 = 0 AND x2 = 1)                                  <-- (term's our objective: 0.2)
+THEN
+ target = 1.0 ELSE target = 0.0
+
+Seconds needed: 0.33342647552490234
+Best over terms:
+  Our final objective: 0.6
+    Its accruacy: 0.8
+    Its hamming distance: 0
+  Shortest hamming distance: 0
+    Its our objective: 0.6
+  Highest accruacy: 0.8
+
+Errors:
+

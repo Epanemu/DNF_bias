@@ -1,0 +1,241 @@
+Command:
+python test_script.py -s linear_dependence -d 4 -n 50000 --seed 43 -m brcg -k 4 --verbose
+Output:
+The true theoretical sup(\mu - \nu) = 0.30000000000000004
+The correct rule on sampled data has \hat{\mu} - \hat{\nu} = 0.29972
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 50000 remain. 
+Dimension is 4.
+
+Computed total variation: 0.29972
+BRCG
+Learning DNF rule with complexity parameters lambda0=0.0001, lambda1=0
+===============================================================================
+                                     CVXPY                                     
+                                     v1.5.2                                    
+===============================================================================
+(CVXPY) Sep 20 03:06:40 PM: Your problem has 25009 variables, 25000 constraints, and 0 parameters.
+(CVXPY) Sep 20 03:06:40 PM: It is compliant with the following grammars: DCP, DQCP
+(CVXPY) Sep 20 03:06:40 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
+(CVXPY) Sep 20 03:06:40 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
+(CVXPY) Sep 20 03:06:40 PM: Your problem is compiled with the CPP canonicalization backend.
+-------------------------------------------------------------------------------
+                                  Compilation                                  
+-------------------------------------------------------------------------------
+(CVXPY) Sep 20 03:06:40 PM: Compiling problem (target solver=CLARABEL).
+(CVXPY) Sep 20 03:06:40 PM: Reduction chain: Dcp2Cone -> CvxAttr2Constr -> ConeMatrixStuffing -> CLARABEL
+(CVXPY) Sep 20 03:06:40 PM: Applying reduction Dcp2Cone
+(CVXPY) Sep 20 03:06:40 PM: Applying reduction CvxAttr2Constr
+(CVXPY) Sep 20 03:06:40 PM: Applying reduction ConeMatrixStuffing
+(CVXPY) Sep 20 03:06:40 PM: Applying reduction CLARABEL
+(CVXPY) Sep 20 03:06:40 PM: Finished problem compilation (took 7.190e-02 seconds).
+-------------------------------------------------------------------------------
+                                Numerical solver                               
+-------------------------------------------------------------------------------
+(CVXPY) Sep 20 03:06:40 PM: Invoking solver CLARABEL  to obtain a solution.
+-------------------------------------------------------------
+           Clarabel.rs v0.9.0  -  Clever Acronym                
+
+                   (c) Paul Goulart                          
+                University of Oxford, 2022                   
+-------------------------------------------------------------
+
+problem:
+  variables     = 25009
+  constraints   = 50009
+  nnz(P)        = 0
+  nnz(A)        = 175009
+  cones (total) = 1
+    : Nonnegative = 1,  numel = 50009
+
+settings:
+  linear algebra: direct / qdldl, precision: 64 bit
+  max iter = 200, time limit = Inf,  max step = 0.990
+  tol_feas = 1.0e-8, tol_gap_abs = 1.0e-8, tol_gap_rel = 1.0e-8,
+
+
+  iter refine: on, reltol = 1.0e-13, abstol = 1.0e-12,
+               max iter = 10, stop ratio = 5.0
+  equilibrate: on, min_scale = 1.0e-4, max_scale = 1.0e4
+               max iter = 10
+
+
+---------------------------------------------------------------------------------------------
+  0  +5.0012e-01  +2.5004e+04  2.50e+04  9.93e-01  1.94e+02  1.00e+00  1.00e+00   ------   
+  1  +6.0822e-01  +4.8427e+03  4.84e+03  3.41e-01  1.08e+02  4.10e-03  4.73e-01  6.67e-01  
+  2  +5.5116e-01  +7.5385e+02  7.53e+02  1.44e-01  5.61e+01  8.21e-03  2.28e-01  7.23e-01  
+  3  +5.1142e-01  +1.6769e+02  1.67e+02  1.31e-01  5.09e+01  1.84e-05  2.26e-01  5.84e-02  
+  4  +5.0015e-01  +2.6055e+00  2.11e+00  6.30e-03  2.42e+00  1.78e-06  1.54e-01  9.90e-01  
+  5  +4.9999e-01  +8.2333e-01  3.23e-01  9.65e-04  3.75e-01  3.90e-06  3.70e-02  9.90e-01  
+  6  +4.9791e-01  +1.3339e+00  8.36e-01  4.81e-04  1.90e-01  2.53e-04  1.38e-03  9.76e-01  
+  7  +4.8256e-01  +1.1675e+00  6.85e-01  5.51e-05  2.18e-02  1.80e-03  1.50e-04  8.92e-01  
+  8  +4.5267e-01  +7.4851e-01  2.96e-01  1.42e-05  5.58e-03  1.13e-03  4.10e-05  7.90e-01  
+  9  +4.1487e-01  +4.8043e-01  6.56e-02  3.36e-06  1.31e-03  8.55e-06  1.21e-05  8.86e-01  
+ 10  +3.9979e-01  +4.0684e-01  7.04e-03  3.28e-07  1.28e-04  6.24e-07  1.39e-06  9.04e-01  
+ 11  +3.9751e-01  +3.9760e-01  9.42e-05  4.19e-09  1.63e-06  7.43e-09  1.88e-08  9.88e-01  
+ 12  +3.9748e-01  +3.9748e-01  9.42e-07  4.18e-11  1.63e-08  7.43e-11  1.88e-10  9.90e-01  
+ 13  +3.9748e-01  +3.9748e-01  9.44e-09  4.20e-13  1.63e-10  8.42e-13  2.12e-12  9.90e-01  
+---------------------------------------------------------------------------------------------
+Terminated with status = Solved
+solve time = 196.0126ms
+-------------------------------------------------------------------------------
+                                    Summary                                    
+-------------------------------------------------------------------------------
+(CVXPY) Sep 20 03:06:40 PM: Problem status: optimal
+(CVXPY) Sep 20 03:06:40 PM: Optimal value: 3.975e-01
+(CVXPY) Sep 20 03:06:40 PM: Compilation took 7.190e-02 seconds
+(CVXPY) Sep 20 03:06:40 PM: Solver (including time spent in interface) took 2.166e-01 seconds
+Initial LP solved
+Iteration: 1, Objective: 0.3975
+===============================================================================
+                                     CVXPY                                     
+                                     v1.5.2                                    
+===============================================================================
+(CVXPY) Sep 20 03:06:40 PM: Your problem has 25019 variables, 25000 constraints, and 0 parameters.
+(CVXPY) Sep 20 03:06:40 PM: It is compliant with the following grammars: DCP, DQCP
+(CVXPY) Sep 20 03:06:40 PM: (If you need to solve this problem multiple times, but with different data, consider using parameters.)
+(CVXPY) Sep 20 03:06:40 PM: CVXPY will first compile your problem; then, it will invoke a numerical solver to obtain a solution.
+(CVXPY) Sep 20 03:06:40 PM: Your problem is compiled with the CPP canonicalization backend.
+-------------------------------------------------------------------------------
+                                  Compilation                                  
+-------------------------------------------------------------------------------
+(CVXPY) Sep 20 03:06:40 PM: Compiling problem (target solver=CLARABEL).
+(CVXPY) Sep 20 03:06:40 PM: Reduction chain: Dcp2Cone -> CvxAttr2Constr -> ConeMatrixStuffing -> CLARABEL
+(CVXPY) Sep 20 03:06:40 PM: Applying reduction Dcp2Cone
+(CVXPY) Sep 20 03:06:40 PM: Applying reduction CvxAttr2Constr
+(CVXPY) Sep 20 03:06:40 PM: Applying reduction ConeMatrixStuffing
+(CVXPY) Sep 20 03:06:40 PM: Applying reduction CLARABEL
+(CVXPY) Sep 20 03:06:40 PM: Finished problem compilation (took 9.919e-02 seconds).
+-------------------------------------------------------------------------------
+                                Numerical solver                               
+-------------------------------------------------------------------------------
+(CVXPY) Sep 20 03:06:40 PM: Invoking solver CLARABEL  to obtain a solution.
+-------------------------------------------------------------
+           Clarabel.rs v0.9.0  -  Clever Acronym                
+
+                   (c) Paul Goulart                          
+                University of Oxford, 2022                   
+-------------------------------------------------------------
+
+problem:
+  variables     = 25019
+  constraints   = 50019
+  nnz(P)        = 0
+  nnz(A)        = 222284
+  cones (total) = 1
+    : Nonnegative = 1,  numel = 50019
+
+settings:
+  linear algebra: direct / qdldl, precision: 64 bit
+  max iter = 200, time limit = Inf,  max step = 0.990
+  tol_feas = 1.0e-8, tol_gap_abs = 1.0e-8, tol_gap_rel = 1.0e-8,
+
+
+  iter refine: on, reltol = 1.0e-13, abstol = 1.0e-12,
+               max iter = 10, stop ratio = 5.0
+  equilibrate: on, min_scale = 1.0e-4, max_scale = 1.0e4
+               max iter = 10
+
+
+---------------------------------------------------------------------------------------------
+  0  +5.0012e-01  +2.5004e+04  2.50e+04  9.93e-01  2.08e+02  1.00e+00  1.00e+00   ------   
+  1  +6.0818e-01  +4.8431e+03  4.84e+03  3.42e-01  1.16e+02  4.10e-03  4.73e-01  6.67e-01  
+  2  +5.5110e-01  +7.5308e+02  7.53e+02  1.44e-01  6.00e+01  8.22e-03  2.28e-01  7.24e-01  
+  3  +5.1138e-01  +1.6728e+02  1.67e+02  1.31e-01  5.44e+01  1.84e-05  2.26e-01  5.90e-02  
+  4  +5.0015e-01  +2.6408e+00  2.14e+00  6.40e-03  2.64e+00  1.88e-06  1.54e-01  9.90e-01  
+  5  +5.0000e-01  +9.2013e-01  4.20e-01  1.25e-03  5.21e-01  2.53e-06  4.60e-02  8.63e-01  
+  6  +4.9947e-01  +1.3493e+00  8.50e-01  1.28e-03  5.40e-01  4.96e-05  4.06e-03  9.52e-01  
+  7  +4.8034e-01  +1.1700e+00  6.90e-01  3.98e-05  1.70e-02  1.57e-03  9.95e-05  9.75e-01  
+  8  +4.6458e-01  +9.9634e-01  5.32e-01  2.31e-05  9.83e-03  1.30e-03  5.89e-05  4.96e-01  
+  9  +4.2515e-01  +6.6123e-01  2.36e-01  8.86e-06  3.74e-03  1.39e-05  2.46e-05  8.43e-01  
+ 10  +3.7128e-01  +4.2463e-01  5.34e-02  1.96e-06  8.19e-04  1.19e-07  6.47e-06  8.16e-01  
+ 11  +3.5086e-01  +3.5219e-01  1.33e-03  4.81e-08  2.00e-05  9.55e-09  1.75e-07  9.90e-01  
+ 12  +3.5025e-01  +3.5026e-01  1.33e-05  4.81e-10  2.00e-07  9.55e-11  1.76e-09  9.90e-01  
+ 13  +3.5024e-01  +3.5024e-01  1.33e-07  4.81e-12  2.00e-09  9.55e-13  1.76e-11  9.90e-01  
+ 14  +3.5024e-01  +3.5024e-01  1.33e-09  4.81e-14  2.00e-11  9.63e-15  1.78e-13  9.90e-01  
+---------------------------------------------------------------------------------------------
+Terminated with status = Solved
+solve time = 260.1755ms
+-------------------------------------------------------------------------------
+                                    Summary                                    
+-------------------------------------------------------------------------------
+(CVXPY) Sep 20 03:06:41 PM: Problem status: optimal
+(CVXPY) Sep 20 03:06:41 PM: Optimal value: 3.502e-01
+(CVXPY) Sep 20 03:06:41 PM: Compilation took 9.919e-02 seconds
+(CVXPY) Sep 20 03:06:41 PM: Solver (including time spent in interface) took 2.855e-01 seconds
+FULL MODEL:
+  Accruacy: 0.64986
+  Our objective: 0.29972
+
+IF 
+    (x0 = 0 AND x1 = 0) <-- (term's our objective: 0.29972)
+THEN
+ target = 1.0 ELSE target = 0.0
+
+Seconds needed: 2.329399585723877
+Best over terms:
+  Our final objective: 0.29972
+    Its accruacy: 0.64986
+    Its hamming distance: 0
+  Shortest hamming distance: 0
+    Its our objective: 0.29972
+  Highest accruacy: 0.64986
+  static reg : on, ϵ1 = 1.0e-8, ϵ2 = 4.9e-32  dynamic reg: on, ϵ = 1.0e-13, δ = 2.0e-7iter    pcost        dcost       gap       pres      dres      k/t        μ       step        static reg : on, ϵ1 = 1.0e-8, ϵ2 = 4.9e-32  dynamic reg: on, ϵ = 1.0e-13, δ = 2.0e-7iter    pcost        dcost       gap       pres      dres      k/t        μ       step      
+Errors:
+C:\Users\illia\AppData\Local\Programs\Python\Python310\lib\site-packages\cvxpy\expressions\expression.py:650: UserWarning: 
+This use of ``*`` has resulted in matrix multiplication.
+Using ``*`` for matrix multiplication has been deprecated since CVXPY 1.1.
+    Use ``*`` for matrix-scalar and vector-scalar multiplication.
+    Use ``@`` for matrix-matrix and matrix-vector multiplication.
+    Use ``multiply`` for elementwise multiplication.
+This code path has been hit 1 times so far.
+
+  warnings.warn(msg, UserWarning)
+C:\Users\illia\AppData\Local\Programs\Python\Python310\lib\site-packages\cvxpy\expressions\expression.py:650: UserWarning: 
+This use of ``*`` has resulted in matrix multiplication.
+Using ``*`` for matrix multiplication has been deprecated since CVXPY 1.1.
+    Use ``*`` for matrix-scalar and vector-scalar multiplication.
+    Use ``@`` for matrix-matrix and matrix-vector multiplication.
+    Use ``multiply`` for elementwise multiplication.
+This code path has been hit 2 times so far.
+
+  warnings.warn(msg, UserWarning)
+C:\Users\illia\AppData\Local\Programs\Python\Python310\lib\site-packages\cvxpy\expressions\expression.py:650: UserWarning: 
+This use of ``*`` has resulted in matrix multiplication.
+Using ``*`` for matrix multiplication has been deprecated since CVXPY 1.1.
+    Use ``*`` for matrix-scalar and vector-scalar multiplication.
+    Use ``@`` for matrix-matrix and matrix-vector multiplication.
+    Use ``multiply`` for elementwise multiplication.
+This code path has been hit 3 times so far.
+
+  warnings.warn(msg, UserWarning)
+C:\Users\illia\AppData\Local\Programs\Python\Python310\lib\site-packages\cvxpy\expressions\expression.py:650: UserWarning: 
+This use of ``*`` has resulted in matrix multiplication.
+Using ``*`` for matrix multiplication has been deprecated since CVXPY 1.1.
+    Use ``*`` for matrix-scalar and vector-scalar multiplication.
+    Use ``@`` for matrix-matrix and matrix-vector multiplication.
+    Use ``multiply`` for elementwise multiplication.
+This code path has been hit 4 times so far.
+
+  warnings.warn(msg, UserWarning)
+C:\Users\illia\AppData\Local\Programs\Python\Python310\lib\site-packages\cvxpy\expressions\expression.py:650: UserWarning: 
+This use of ``*`` has resulted in matrix multiplication.
+Using ``*`` for matrix multiplication has been deprecated since CVXPY 1.1.
+    Use ``*`` for matrix-scalar and vector-scalar multiplication.
+    Use ``@`` for matrix-matrix and matrix-vector multiplication.
+    Use ``multiply`` for elementwise multiplication.
+This code path has been hit 5 times so far.
+
+  warnings.warn(msg, UserWarning)
+C:\Users\illia\AppData\Local\Programs\Python\Python310\lib\site-packages\cvxpy\expressions\expression.py:650: UserWarning: 
+This use of ``*`` has resulted in matrix multiplication.
+Using ``*`` for matrix multiplication has been deprecated since CVXPY 1.1.
+    Use ``*`` for matrix-scalar and vector-scalar multiplication.
+    Use ``@`` for matrix-matrix and matrix-vector multiplication.
+    Use ``multiply`` for elementwise multiplication.
+This code path has been hit 6 times so far.
+
+  warnings.warn(msg, UserWarning)
+C:\personal\work\DNF_bias\src\aix360\aix360\algorithms\rbm\beam_search.py:58: FutureWarning: The default dtype for empty Series will be 'object' instead of 'float64' in a future version. Specify a dtype explicitly to silence this warning.
+  zOut = pd.Series(index=X.columns)
+

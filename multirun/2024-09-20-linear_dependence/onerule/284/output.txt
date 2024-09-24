@@ -1,0 +1,57 @@
+Command:
+python test_script.py -s linear_dependence -d 8 -n 10 --seed 21 -m onerule -k 8 --verbose
+Output:
+The true theoretical sup(\mu - \nu) = 0.15000000000000002
+The correct rule on sampled data has \hat{\mu} - \hat{\nu} = 0.4
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 10 remain. 
+Dimension is 8.
+
+Computed total variation: 1.0
+One Rule (using MIO)
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (win64 - Windows 11.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i9-14900HX, instruction set [SSE2|AVX|AVX2]
+Thread count: 24 physical cores, 32 logical processors, using up to 32 threads
+
+Optimize a model with 85 rows, 26 columns and 165 nonzeros
+Model fingerprint: 0x5f0b241f
+Variable types: 10 continuous, 16 integer (16 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-01, 2e-01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.0000000
+Found heuristic solution: objective 0.6000000
+Presolve removed 85 rows and 26 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.00 seconds (0.00 work units)
+Thread count was 1 (of 32 available processors)
+
+Solution count 3: 0.2 0.6 1 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.000000000000e-01, best bound 2.000000000000e-01, gap 0.0000%
+FULL MODEL:
+  Accruacy: 0.9
+  Our objective: 0.8
+
+IF 
+    (x1 = 0 AND x4 = 0 AND x7 = 1) <-- (term's our objective: 0.8)
+THEN
+ target = 1.0 ELSE target = 0.0
+
+Seconds needed: 0.29102540016174316
+Best over terms:
+  Our final objective: 0.8
+    Its accruacy: 0.9
+    Its hamming distance: 4
+  Shortest hamming distance: 4
+    Its our objective: 0.8
+  Highest accruacy: 0.9
+
+Errors:
+

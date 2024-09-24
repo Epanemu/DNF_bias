@@ -1,0 +1,65 @@
+Command:
+python test_script.py -s constant_subclass -d 8 -n 10 --seed 43 -m onerule -k 8 --verbose
+Output:
+The true theoretical sup(\mu - \nu) = 0.004687500000000001
+The correct rule on sampled data has \hat{\mu} - \hat{\nu} = 0.0
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 10 remain. 
+Dimension is 8.
+
+Computed total variation: 1.0
+One Rule (using MIO)
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (win64 - Windows 11.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i9-14900HX, instruction set [SSE2|AVX|AVX2]
+Thread count: 24 physical cores, 32 logical processors, using up to 32 threads
+
+Optimize a model with 85 rows, 26 columns and 165 nonzeros
+Model fingerprint: 0xa49c5a49
+Variable types: 10 continuous, 16 integer (16 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [2e-01, 2e-01]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.0000000
+Presolve removed 42 rows and 1 columns
+Presolve time: 0.00s
+Presolved: 43 rows, 25 columns, 121 nonzeros
+Variable types: 0 continuous, 25 integer (25 binary)
+Found heuristic solution: objective 0.6000000
+
+Root relaxation: objective 4.000000e-01, 12 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0       0.4000000    0.40000  0.00%     -    0s
+
+Explored 1 nodes (12 simplex iterations) in 0.00 seconds (0.00 work units)
+Thread count was 32 (of 32 available processors)
+
+Solution count 3: 0.4 0.6 1 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 4.000000000000e-01, best bound 4.000000000000e-01, gap 0.0000%
+FULL MODEL:
+  Accruacy: 0.8
+  Our objective: 0.6000000000000001
+
+IF 
+    (x0 = 0) <-- (term's our objective: 0.6)
+THEN
+ target = 1.0 ELSE target = 0.0
+
+Seconds needed: 0.32756662368774414
+Best over terms:
+  Our final objective: 0.6000000000000001
+    Its accruacy: 0.8
+    Its hamming distance: 7
+  Shortest hamming distance: 7
+    Its our objective: 0.6000000000000001
+  Highest accruacy: 0.8
+
+Errors:
+

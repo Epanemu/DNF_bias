@@ -21,7 +21,11 @@ def run_experiment(cfg: DictConfig):
         command.extend([str(cfg.rho)])
     if cfg.method is not None:
         command.extend(["-m", str(cfg.method)])
-    
+    if cfg.k is not None:
+        command.extend(["-k", str(cfg.k)])
+    else:
+        command.extend(["-k", str(cfg.dimension)])
+
     command.extend(["--verbose"])
 
     print("Running command:", " ".join(command))

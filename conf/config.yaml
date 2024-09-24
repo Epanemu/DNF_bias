@@ -4,17 +4,22 @@
 #   - override hydra/job_logging: disabled
 #   - override hydra/hydra_logging: disabled
 
-task: smallest_subclass
+
+#smallest_subclass
+#linear_dependence
+#constant_subclass
+task: constant_subclass
 dimension: ${hydra:runtime.choice}
 n_samples: ${hydra:runtime.choice}
 seed: ${hydra:runtime.choice}
 rho: null
-method: dnf_mio
+method: onerule
+k: 
 
 hydra:
   sweeper:
     params:
-      dimension: 1, 2, 3, 4, 5, 6, 7, 8
+      dimension: 1, 2, 3, 4, 5, 6, 7, 8, 9
       n_samples: 10, 50, 100, 500, 1000, 5000, 10000, 50000
       seed: 43, 56, 73, 34, 21
 

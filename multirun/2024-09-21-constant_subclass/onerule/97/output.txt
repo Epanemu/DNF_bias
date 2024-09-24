@@ -1,0 +1,72 @@
+Command:
+python test_script.py -s constant_subclass -d 3 -n 500 --seed 73 -m onerule -k 3 --verbose
+Output:
+The true theoretical sup(\mu - \nu) = 0.15000000000000002
+The correct rule on sampled data has \hat{\mu} - \hat{\nu} = 0.176
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 500 remain. 
+Dimension is 3.
+
+Computed total variation: 0.192
+One Rule (using MIO)
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (win64 - Windows 11.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i9-14900HX, instruction set [SSE2|AVX|AVX2]
+Thread count: 24 physical cores, 32 logical processors, using up to 32 threads
+
+Optimize a model with 1750 rows, 506 columns and 3250 nonzeros
+Model fingerprint: 0xc19b2472
+Variable types: 500 continuous, 6 integer (6 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e-03, 4e-03]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.0000000
+Presolve removed 1718 rows and 484 columns
+Presolve time: 0.00s
+Presolved: 32 rows, 22 columns, 80 nonzeros
+Variable types: 0 continuous, 22 integer (22 binary)
+
+Root relaxation: objective 3.333333e-01, 20 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.33333    0   14    1.00000    0.33333  66.7%     -    0s
+H    0     0                       0.8240000    0.33333  59.5%     -    0s
+H    0     0                       0.8080000    0.80800  0.00%     -    0s
+     0     0          -    0         0.80800    0.80800  0.00%     -    0s
+
+Cutting planes:
+  Clique: 8
+  Zero half: 3
+  RLT: 4
+
+Explored 1 nodes (35 simplex iterations) in 0.01 seconds (0.00 work units)
+Thread count was 32 (of 32 available processors)
+
+Solution count 3: 0.808 0.824 1 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 8.080000000000e-01, best bound 8.080000000000e-01, gap 0.0000%
+FULL MODEL:
+  Accruacy: 0.596
+  Our objective: 0.192
+
+IF 
+    (x0 = 0 AND x2 = 0) <-- (term's our objective: 0.192)
+THEN
+ target = 1.0 ELSE target = 0.0
+
+Seconds needed: 0.3779630661010742
+Best over terms:
+  Our final objective: 0.192
+    Its accruacy: 0.596
+    Its hamming distance: 1
+  Shortest hamming distance: 1
+    Its our objective: 0.192
+  Highest accruacy: 0.596
+
+Errors:
+
