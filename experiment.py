@@ -32,7 +32,7 @@ def run_experiment(cfg: DictConfig):
     
     # Run the command and capture the output
     try:
-        result = subprocess.run(command, capture_output=True, text=True, timeout=200)
+        result = subprocess.run(command, capture_output=True, text=True, timeout=310)
     except subprocess.TimeoutExpired as exc:
         print("Worked too long. Process finished without result.")
 

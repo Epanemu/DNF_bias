@@ -4,13 +4,35 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import numpy as np
 
+# methods for plotting
 methods = ["brcg", "mdss", "onerule"]
+
+# one of ["smallest_subclass", "linear_dependence", "constant_subclass"]
+scenario = "linear_dependence"
+
+# specified dimension for data plotting
+interested_dimension = 5
+
+# main text on plot
+plot_title = "Plot for methods ['brcg', 'mdss', 'onerule'], scenario='" + scenario + "',  with dimension=" + str(interested_dimension)
+
+#------------------------------
+
+if scenario == "smallest_subclass":
+    base_dir_prefix = "multirun/2024-08-31-smallest_subclass/"
+elif scenario == "linear_dependence":
+    base_dir_prefix = "multirun/2024-09-20-linear_dependence/"
+elif scenario == "constant_subclass":
+    base_dir_prefix = "multirun/2024-10-06-constant_sublass(k=3)/"
+else:
+    raise BaseException("Unknown scenario!")
 
 # scenario = "smallest_subclass"
 # scenario = "linear_dependence"
-scenario = "constant_subclass"
+# scenario = "constant_subclass"
 
-base_dir_prefix = "multirun/2024-09-21-" + scenario + "/"
+
+# base_dir_prefix = "multirun/2024-09-20-" + scenario + "/"
 
 method_colors = {
     "brcg": "red",
@@ -22,7 +44,7 @@ def extract_data_for_method(method):
     base_dir = base_dir_prefix + method
     extracted_data = []
 
-    for i in range(400):
+    for i in range(500):
         folder_path = os.path.join(base_dir, str(i))
         output_file = os.path.join(folder_path, "output.txt")
 
@@ -43,7 +65,7 @@ def extract_data_for_method(method):
                 dimension = int(dimension_match.group(1))
                 n_samples = int(n_samples_match.group(1))
 
-                if dimension != 3:
+                if dimension != interested_dimension:
                     continue
 
                 total_variation = None
@@ -111,11 +133,12 @@ for method in methods:
 plt.xscale('log')
 plt.xlabel('Number of Samples (n_samples) [Log Scale]')
 plt.ylabel('Value')
+plt.title(plot_title)
 plt.grid(True, which="both", ls=":")
 plt.legend()
 
 from datetime import date
-output_path = "multirun_images/" + str(date.today()) + "_" + scenario + ".png"
+output_path = "multirun_images/" + str(date.today()) + "_plot_" + scenario + ".png"
 plt.savefig(output_path)
 
 plt.show()

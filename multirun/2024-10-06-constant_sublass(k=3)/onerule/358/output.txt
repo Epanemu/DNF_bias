@@ -1,0 +1,79 @@
+Command:
+python test_script.py -s constant_subclass -d 9 -n 50000 --seed 34 -m onerule -k 3 --verbose
+Output:
+The true theoretical sup(\mu - \nu) = 0.15000000000000002
+The correct rule on sampled data has \hat{\mu} - \hat{\nu} = 0.15380000000000002
+TRIVIAL ACCURACY - always TRUE: 0.5
+Balancing dropped 0 samples, 50000 remain. 
+Dimension is 9.
+
+Computed total variation: 0.17175999999999997
+One Rule (using MIO)
+Gurobi Optimizer version 11.0.3 build v11.0.3rc0 (win64 - Windows 11.0 (22631.2))
+
+CPU model: Intel(R) Core(TM) i9-14900HX, instruction set [SSE2|AVX|AVX2]
+Thread count: 24 physical cores, 32 logical processors, using up to 32 threads
+
+Optimize a model with 475000 rows, 50018 columns and 925000 nonzeros
+Model fingerprint: 0x0b4d1704
+Variable types: 50000 continuous, 18 integer (18 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e-05, 4e-05]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 1.0000000
+Presolve removed 469880 rows and 48976 columns
+Presolve time: 1.49s
+Presolved: 5120 rows, 1042 columns, 14336 nonzeros
+Variable types: 1024 continuous, 18 integer (18 binary)
+
+Root relaxation: objective 1.111111e-01, 1547 iterations, 0.13 seconds (0.19 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0    0.11111    0   18    1.00000    0.11111  88.9%     -    1s
+H    0     0                       0.9992000    0.11111  88.9%     -    1s
+H    0     0                       0.9130800    0.11111  87.8%     -    1s
+H    0     0                       0.8686000    0.11111  87.2%     -    1s
+     0     0    0.15959    0   18    0.86860    0.15959  81.6%     -    2s
+     0     0    0.20464    0   18    0.86860    0.20464  76.4%     -    2s
+     0     0    0.45568    0   18    0.86860    0.45568  47.5%     -    2s
+     0     2    0.49352    0   18    0.86860    0.49352  43.2%     -    3s
+H   48    44                       0.8462000    0.49352  41.7%   258    4s
+    89    82    0.49352    8   10    0.84620    0.49352  41.7%   193    5s
+
+Cutting planes:
+  Gomory: 7
+  MIR: 538
+  RLT: 29
+  Relax-and-lift: 454
+
+Explored 631 nodes (66000 simplex iterations) in 7.43 seconds (9.61 work units)
+Thread count was 32 (of 32 available processors)
+
+Solution count 5: 0.8462 0.8686 0.91308 ... 1
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 8.462000000000e-01, best bound 8.462000000000e-01, gap 0.0000%
+FULL MODEL:
+  Accruacy: 0.5769
+  Our objective: 0.15380000000000002
+
+IF 
+    (x0 = 0 AND x1 = 0 AND x2 = 0) <-- (term's our objective: 0.1538)
+THEN
+ target = 1.0 ELSE target = 0.0
+
+Seconds needed: 36.49602270126343
+Best over terms:
+  Our final objective: 0.15380000000000002
+    Its accruacy: 0.5769
+    Its hamming distance: 0
+  Shortest hamming distance: 0
+    Its our objective: 0.15380000000000002
+  Highest accruacy: 0.5769
+
+Errors:
+

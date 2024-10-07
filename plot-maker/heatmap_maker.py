@@ -7,23 +7,49 @@ import seaborn as sns
 from collections import defaultdict
 from datetime import date
 
+# one of ["brcg", "onerule", "mdss"]
+method = "brcg"
+
+# one of ["smallest_subclass", "linear_dependence", "constant_subclass"]
+scenario = "constant_subclass"
+
+# custom dimensions and n_samples for plotting
+dimensions_custom = None # [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+n_samples_custom = None # [10, 50, 100, 500, 1000, 5000, 10000, 50000]
+
+# main text on plot
+plot_title = "Logarithmic Difference Heatmap with method '" + method + "' and group type '" + scenario + "'"
+
+#------------------------------
+
+if scenario == "smallest_subclass":
+    base_dir = "multirun/2024-08-31-smallest_subclass/" + method
+elif scenario == "linear_dependence":
+    base_dir = "multirun/2024-09-20-linear_dependence/" + method
+elif scenario == "constant_subclass":
+    base_dir = "multirun/2024-10-06-constant_sublass(k=3)/" + method
+else:
+    raise BaseException("Unknown scenario!")
+
+
+
 # method = "brcg"
 # method = "onerule"
 # method = "ripper"
-method = "mdss"
+# method = "mdss"
 # method = "dnf_mio"
 
 # scenario = "smallest_subclass"
 # scenario = "linear_dependence"
-scenario = "constant_subclass"
+# scenario = "constant_subclass"
 
-base_dir = "multirun/2024-09-21-" + scenario + "/" + method
+# base_dir = "multirun/2024-09-21-" + scenario + "/" + method
 
 extracted_data = []
 
 extracted_true_value = []
 
-for i in range(400):
+for i in range(500):
     folder_path = os.path.join(base_dir, str(i))
     output_file = os.path.join(folder_path, "output.txt")
 
@@ -48,7 +74,7 @@ for i in range(400):
             dimension = int(dimension_match.group(1))
             n_samples = int(n_samples_match.group(1))
 
-            if dimension <= 9 and n_samples <= 50000:
+            if dimension <= 10 and n_samples <= 50000:
                 objective_value = None
                 true_objective_value = None
 
@@ -89,8 +115,17 @@ for n_samples, storage in data_dict.items():
 
 # dimensions = sorted({dim for values in data_dict.values() for dim in values.keys()})
 # n_samples = sorted(data_dict.keys())
-dimensions = [1, 2, 3, 4, 5, 6, 7, 8]
+
+dimensions = []
+for dimension, n_samples, objective_value in extracted_data:
+    if objective_value is not None and dimension not in dimensions:
+        dimensions.append(dimension)
 n_samples = [10, 50, 100, 500, 1000, 5000, 10000, 50000]
+
+if dimensions_custom is not None:
+    dimensions = dimensions_custom
+if n_samples_custom is not None:
+    n_samples = n_samples_custom
 
 # print(dimensions)
 # print(n_samples)
@@ -109,15 +144,12 @@ for i, n in enumerate(n_samples):
             fndMin = min(fndMin, heatmap_data[i, j])
         fndMax = max(fndMax, heatmap_data[i, j])
 
-# Set values < EPS to NaN for masking, but store a mask for them
 mask = heatmap_data < EPS
 heatmap_data_clipped = np.where(heatmap_data < EPS, EPS, heatmap_data)
 
-# Create a custom color map with black color for masked (NaN) values
 cmap = sns.color_palette("viridis", as_cmap=True)
 cmap_with_black = ListedColormap(['black'] + list(cmap.colors))
 
-# Plot the heatmap
 plt.figure(figsize=(10, 8))
 
 sns.heatmap(
@@ -133,7 +165,7 @@ sns.heatmap(
 
 plt.xlabel("Dimension")
 plt.ylabel("N Samples")
-plt.title("Logarithmic Difference Heatmap with method '" + method + "' and group type '" + scenario + "'")
+plt.title(plot_title)
 plt.gca().invert_yaxis()
 
 
