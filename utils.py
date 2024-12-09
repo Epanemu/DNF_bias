@@ -20,6 +20,7 @@ def our_metric(truth: np.ndarray[bool], estimate: np.ndarray[bool]) -> float:
     n_neg = truth.shape[0] - n_pos
     errors = truth != estimate
     return 1 - (np.sum(errors[truth]) / n_pos) - (np.sum(errors[~truth]) / n_neg)
+    # essentially  1 - np.mean(errors[truth]) - np.mean(errors[~truth])
 
 
 def accuracy(truth: np.ndarray[bool], estimate: np.ndarray[bool]) -> float:
@@ -130,3 +131,13 @@ def term_hamming_distance(term1: list[Bin], term2: list[Bin]) -> int:
             hd += 1
     hd_rest = len(term2) - (len(term1) - hd)
     return hd + hd_rest
+
+
+def eval_spsf(
+    y_true: np.ndarray[bool],
+    y_est: np.ndarray[bool],
+) -> float:
+    p_group = np.mean(y_est)
+    p_pos = np.mean(y_true)
+    p_joint = np.sum(y_est & y_true) / y_est.shape[0]
+    return p_group * p_pos - p_joint

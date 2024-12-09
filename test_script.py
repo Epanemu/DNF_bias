@@ -2,7 +2,14 @@ import argparse
 
 import numpy as np
 
-from methods import test_BRCG, test_dnf_mio, test_MDSS, test_one_rule, test_RIPPER
+from methods import (
+    test_BRCG,
+    test_dnf_mio,
+    test_MDSS,
+    test_one_rule,
+    test_RIPPER,
+    test_spsf_mio,
+)
 from scenarios.MEPS_scenarios import SCENARIOS as MEPS_SCENARIOS
 from scenarios.MEPS_scenarios import load_scenario as load_MEPS_scenario
 from scenarios.synthetic_scenarios import SCENARIOS as SYNTH_SCENARIOS
@@ -10,6 +17,7 @@ from scenarios.synthetic_scenarios import sample_scenario
 from utils import (
     accuracy,
     balance_datasets,
+    eval_spsf,
     eval_terms,
     our_metric,
     print_dnf,
@@ -53,7 +61,7 @@ parser.add_argument(
     "-m",
     "--method",
     required=True,
-    choices=["brcg", "ripper", "mdss", "onerule", "dnf_mio"],
+    choices=["brcg", "ripper", "mdss", "onerule", "dnf_mio", "spsf_mio"],
     help="A method to use for the search of a DNF.",
 )
 parser.add_argument(
@@ -95,6 +103,7 @@ if args.verbose:
     print(f"Computed total variation: {total_variation(X_bin[y_bin], X_bin[~y_bin])}")
 
 import time
+
 start_time = time.time()
 
 if args.method == "ripper":
@@ -126,6 +135,17 @@ elif args.method == "onerule":
         binarizer,
         verbose=args.verbose,
     )
+elif args.method == "spsf_mio":
+    y_est, rules = test_spsf_mio(
+        X_bin_neg,
+        y_bin,
+        X_bin_neg,
+        binarizer,
+        verbose=args.verbose,
+        spsf_params={
+            "n_min": 5,
+        },
+    )
 elif args.method == "mdss":
     y_est, rules = test_MDSS(
         X_bin,
@@ -147,6 +167,7 @@ elif args.method == "dnf_mio":
 y_terms = eval_terms(rules, binarizer, X_bin_neg)
 our_evals = [our_metric(y_bin, yhat) for yhat in y_terms]
 hamming_dists = [term_hamming_distance(true_term, term) for term in rules]
+spsf_evals = [eval_spsf(y_bin, yhat) for yhat in y_terms]
 if args.verbose:
     print("FULL MODEL:")
     print("  Accruacy:", accuracy(y_bin, y_est))
@@ -164,7 +185,12 @@ if len(y_terms) > 0:
     print("  Our final objective:", our_evals[max_i])
     print("    Its accruacy:", accuracy(y_bin, y_terms[max_i]))
     print("    Its hamming distance:", hamming_dists[max_i])
+    print("    Its statistical parity subgroup fairness violation:", spsf_evals[max_i])
     min_dist_i = np.argmin(hamming_dists)
     print("  Shortest hamming distance:", hamming_dists[min_dist_i])
     print("    Its our objective:", our_evals[min_dist_i])
+    print(
+        "    Its statistical parity subgroup fairness violation:",
+        spsf_evals[min_dist_i],
+    )
     print("  Highest accruacy:", np.max([accuracy(y_bin, yhat) for yhat in y_terms]))

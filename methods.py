@@ -146,6 +146,34 @@ def test_one_rule(
     return mask, [term]
 
 
+def test_spsf_mio(
+    X_train: np.ndarray[bool],
+    y_train: np.ndarray[bool],
+    X_test: np.ndarray[bool],
+    binarizer: Binarizer,
+    verbose: bool = False,
+    # trunk-ignore(ruff/B006)
+    spsf_params: dict = {},
+) -> tuple[np.ndarray[bool], list[list[Bin]]]:
+    from spsf_mio import SPSF
+
+    bin_feats = binarizer.get_bin_encodings(include_negations=True)
+    if X_train.shape[1] != len(bin_feats):
+        raise ValueError("SPSF (mio) method assumes that negations are also included")
+
+    if verbose:
+        print("SPSF (using MIO)")
+        spsf_params["verbose"] = True
+    spsf = SPSF()
+    res = spsf.find_rule(X_train, y_train, **spsf_params)
+
+    term = [bin_feats[r] for r in res]
+    mask = np.ones((X_test.shape[0],), dtype=bool)
+    for feat_i in res:
+        mask &= X_test[:, feat_i]
+    return mask, [term]
+
+
 def test_MDSS(
     X_train: np.ndarray[bool],
     y_train: np.ndarray[bool],
