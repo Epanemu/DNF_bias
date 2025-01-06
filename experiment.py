@@ -13,21 +13,23 @@ def run_experiment(cfg: DictConfig):
     command = ["python", "test_script.py"]
 
     # Add required parameters
-    command.extend(["-s", cfg.task])
-    if cfg.dimension is not None:
-        command.extend(["-d", str(cfg.dimension)])
-    if cfg.n_samples is not None:
-        command.extend(["-n", str(cfg.n_samples)])
-    if cfg.seed is not None:
+    command.extend(["-s", cfg.scenario])
+    if hasattr(cfg, "seed") and cfg.seed is not None:
         command.extend(["--seed", str(cfg.seed)])
-    if cfg.rho is not None:
-        command.extend(["--rho", str(cfg.rho)])
-    if cfg.method is not None:
-        command.extend(["-m", str(cfg.method)])
-    if cfg.method is not None:
-        command.extend(["-nm", str(cfg.n_min)])
-    if cfg.k is not None:
+
+    if hasattr(cfg, "n_samples") and cfg.n_samples is not None:
+        command.extend(["-n", str(cfg.n_samples)])
+    if hasattr(cfg, "dimension") and cfg.dimension is not None:
+        command.extend(["-d", str(cfg.dimension)])
+    if hasattr(cfg, "k") and cfg.k is not None:
         command.extend(["-k", str(cfg.k)])
+    if hasattr(cfg, "rho") and cfg.rho is not None:
+        command.extend(["--rho", str(cfg.rho)])
+
+    if hasattr(cfg, "method") and cfg.method is not None:
+        command.extend(["-m", str(cfg.method)])
+    if hasattr(cfg, "n_min") and cfg.n_min is not None:
+        command.extend(["-nm", str(cfg.n_min)])
 
     command.extend(["--verbose"])
 
@@ -35,7 +37,7 @@ def run_experiment(cfg: DictConfig):
 
     # Run the command and capture the output
     try:
-        result = subprocess.run(command, capture_output=True, text=True, timeout=310)
+        result = subprocess.run(command, capture_output=True, text=True, timeout=900)
     except subprocess.TimeoutExpired as exc:
         print("Worked too long. Process finished without result.")
         result = None
