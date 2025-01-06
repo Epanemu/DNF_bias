@@ -52,6 +52,8 @@ def run_experiment(cfg: DictConfig):
         if result is not None:
             out_file.write("Output:\n" + result.stdout + "\n")
             out_file.write("Errors:\n" + result.stderr + "\n")
+        else:
+            out_file.write("Timeout\n")
 
     print(f"Result saved to {os.path.join(run_dir, 'output.txt')}")
 
