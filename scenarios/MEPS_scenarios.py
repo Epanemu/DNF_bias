@@ -49,7 +49,7 @@ def load_scenario(name, seed, n_samples):
         raise ValueError(f'Scenario "{name}" does not exist.')
 
     np.random.seed(seed)
-    samples = np.random.choice(input_data.shape[0], size=n_samples)
+    samples = np.random.choice(data.shape[0], size=n_samples)
     input_data = data[data_cols].iloc[samples]
     target_data = data[target_label].iloc[samples]
     dhandler = DataHandler.from_data(
