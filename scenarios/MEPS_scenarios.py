@@ -27,7 +27,7 @@ def load_scenario(name):
         # "YRSINUS", # too many
     ]
 
-    data = pd.read_csv("data/data.csv")
+    data = pd.read_csv("data/MEPS.csv")
 
     if name == "stress":
         target_label = "SDSTRESS"
