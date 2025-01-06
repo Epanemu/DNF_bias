@@ -46,14 +46,16 @@ class SPSF:
         model.ingroup = pyo.Var(model.all_i, domain=pyo.NonNegativeReals, bounds=(0, 1))
 
         model.pos = pyo.Constraint(
-            model.pos_i,
+            # model.pos_i,
+            model.all_i,
             rule=lambda m, i: (
                 m.ingroup[i]
                 >= 1 - sum(m.use_feat[j] - Xint[i, j] * m.use_feat[j] for j in m.feat_i)
             ),
         )
         model.neg = pyo.Constraint(
-            model.all_i if n_min > 0 else model.neg_i,
+            # model.all_i if n_min > 0 else model.neg_i,
+            model.all_i,
             model.feat_i,
             rule=lambda m, i, j: (
                 m.ingroup[i] <= 1 - (m.use_feat[j] - Xint[i, j] * m.use_feat[j])
@@ -65,11 +67,34 @@ class SPSF:
                 expr=(sum(model.ingroup[i] for i in model.all_i) >= n_min),
             )
 
-        negw = len(model.pos_i) / n
-        posw = len(model.neg_i) / n
+        negw = len(model.pos_i) / n**2
+        posw = len(model.neg_i) / n**2
+        model.o = pyo.Var(domain=pyo.NonNegativeReals)
+        model.b = pyo.Var(domain=pyo.Binary)
+        model.abs_obj_u1 = pyo.Constraint(
+            expr=model.o
+            <= negw * sum(model.ingroup[i] for i in model.neg_i)
+            - posw * sum(model.ingroup[i] for i in model.pos_i)
+            + 2 * model.b
+        )
+        model.abs_obj_u2 = pyo.Constraint(
+            expr=model.o
+            <= posw * sum(model.ingroup[i] for i in model.pos_i)
+            - negw * sum(model.ingroup[i] for i in model.neg_i)
+            + 2 * (1 - model.b)
+        )
+        model.abs_obj_l1 = pyo.Constraint(
+            expr=model.o
+            >= negw * sum(model.ingroup[i] for i in model.neg_i)
+            - posw * sum(model.ingroup[i] for i in model.pos_i)
+        )
+        model.abs_obj_l2 = pyo.Constraint(
+            expr=model.o
+            >= posw * sum(model.ingroup[i] for i in model.pos_i)
+            - negw * sum(model.ingroup[i] for i in model.neg_i)
+        )
         model.obj = pyo.Objective(
-            expr=negw * sum(model.ingroup[i] for i in model.neg_i)
-            - posw * sum(model.ingroup[i] for i in model.pos_i),
+            expr=model.o,
             sense=pyo.maximize,
         )
 
@@ -82,7 +107,7 @@ class SPSF:
         n_min: int = 0,
         verbose: bool = False,
     ) -> list[int]:
-        """Find a single conjunction with lowest 0-1 error
+        """Find a single conjunction with highest SPSF violation
 
         Args:
             X (np.ndarray[bool]): Input data (boolean values), shape (n, d)
@@ -102,5 +127,8 @@ class SPSF:
         opt.solve(int_model, tee=verbose)
 
         self.model = int_model
+
+        if verbose:
+            print("OBJECTIVE:", int_model.o.value)
 
         return [i for i in int_model.feat_i if int_model.use_feat[i].value != 0]
