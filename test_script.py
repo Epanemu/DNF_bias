@@ -82,7 +82,7 @@ parser.add_argument(
 args = parser.parse_args()
 
 if args.scenario in MEPS_SCENARIOS:
-    binarizer, input_data, target_data = load_MEPS_scenario(args.scenario)
+    binarizer, input_data, target_data = load_MEPS_scenario(args.scenario, args.seed, args.n_samples)
     true_term = []
 elif args.scenario in SYNTH_SCENARIOS:
     binarizer, input_data, target_data, true_term = sample_scenario(

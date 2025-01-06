@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from binarizer import Binarizer
 from data_handler import DataHandler
@@ -12,7 +13,7 @@ SCENARIOS = [
 ]
 
 
-def load_scenario(name):
+def load_scenario(name, seed, n_samples):
     data_cols = [
         "SEX",
         "RACEV1X",
@@ -47,8 +48,10 @@ def load_scenario(name):
     else:
         raise ValueError(f'Scenario "{name}" does not exist.')
 
-    input_data = data[data_cols]
-    target_data = data[target_label]
+    np.random.seed(seed)
+    samples = np.random.choice(input_data.shape[0], size=n_samples)
+    input_data = data[data_cols].iloc[samples]
+    target_data = data[target_label].iloc[samples]
     dhandler = DataHandler.from_data(
         input_data, target_data, categ_map={c: [] for c in data_cols}
     )
