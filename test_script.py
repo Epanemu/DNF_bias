@@ -52,6 +52,13 @@ parser.add_argument(
     "-n", "--n_samples", help="Number of samples to sample", type=int, default=1000
 )
 parser.add_argument(
+    "-nm",
+    "--n_min",
+    help="Minimal size of a subgroup, as a number of samples",
+    type=int,
+    default=0,
+)
+parser.add_argument(
     "--seed", help="Seed integer for random processes", type=int, default=0
 )
 parser.add_argument(
@@ -143,7 +150,7 @@ elif args.method == "spsf_mio":
         binarizer,
         verbose=args.verbose,
         spsf_params={
-            "n_min": 5,
+            "n_min": args.n_min,
         },
     )
 elif args.method == "mdss":
