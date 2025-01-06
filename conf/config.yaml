@@ -4,24 +4,24 @@
 #   - override hydra/job_logging: disabled
 #   - override hydra/hydra_logging: disabled
 
-
 #smallest_subclass
 #linear_dependence
 #constant_subclass
 task: constant_subclass
+k: 3
 dimension: ${hydra:runtime.choice}
 n_samples: ${hydra:runtime.choice}
 seed: ${hydra:runtime.choice}
 rho: null
-method: mdss
-k: 3
+method: spsf
+# method: spsf_mio
+# n_min: ${hydra:runtime.choice}
+n_min: 0
 
 hydra:
   sweeper:
     params:
-      dimension: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+      dimension: 3, 5, 7, 9, 11
       n_samples: 10, 50, 100, 500, 1000, 5000, 10000, 50000
       seed: 43, 56, 73, 34, 21
-
-      
-  
+      # n_min: 0, 5
