@@ -2,6 +2,7 @@ import argparse
 
 import numpy as np
 
+import time
 from methods import (
     test_BRCG,
     test_dnf_mio,
@@ -110,7 +111,6 @@ print(f"Balancing dropped {n_orig-n} samples, {n} remain. \nDimension is {d}.\n"
 if args.verbose:
     print(f"Computed total variation: {total_variation(X_bin[y_bin], X_bin[~y_bin])}")
 
-import time
 
 start_time = time.time()
 
