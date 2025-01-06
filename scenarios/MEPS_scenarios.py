@@ -13,7 +13,7 @@ SCENARIOS = [
 ]
 
 
-def load_scenario(name, seed, n_samples):
+def load_scenario(name, seed, n_max):
     data_cols = [
         "SEX",
         "RACEV1X",
@@ -49,7 +49,8 @@ def load_scenario(name, seed, n_samples):
         raise ValueError(f'Scenario "{name}" does not exist.')
 
     np.random.seed(seed)
-    samples = np.random.choice(data.shape[0], size=n_samples)
+    n = data.shape[0]
+    samples = np.random.choice(n, size=min(n_max, n), replace=False)
     input_data = data[data_cols].iloc[samples]
     target_data = data[target_label].iloc[samples]
     dhandler = DataHandler.from_data(
