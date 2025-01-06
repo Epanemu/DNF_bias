@@ -217,3 +217,23 @@ def test_MDSS(
         mask &= X_test[:, feat_i] == val
 
     return mask, [term]
+
+
+def test_SPSF(
+    X_test: np.ndarray[bool],
+    y_test: np.ndarray[bool],
+    verbose: bool = False,
+):
+    from gerryfair.model import Auditor
+
+    X_test = pd.DataFrame(X_test)
+
+    # by seting the true ys to 0, this becomes equivalent to SP
+    auditor = Auditor(X_test, np.zeros(X_test.shape[0]), "FP")
+
+    [ingroup, fairness_violation] = auditor.audit(y_test)
+    if verbose:
+        print("Fairness violation of the SPSF subgroup is ", fairness_violation)
+        # print(np.unique(X_test.values[ingroup], axis=0))
+        # print(np.unique(X_test.values[np.array(ingroup) == 0, :], axis=0))
+    return np.array(ingroup) == 1, None

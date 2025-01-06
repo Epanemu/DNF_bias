@@ -8,6 +8,7 @@ from methods import (
     test_MDSS,
     test_one_rule,
     test_RIPPER,
+    test_SPSF,
     test_spsf_mio,
 )
 from scenarios.MEPS_scenarios import SCENARIOS as MEPS_SCENARIOS
@@ -68,7 +69,7 @@ parser.add_argument(
     "-m",
     "--method",
     required=True,
-    choices=["brcg", "ripper", "mdss", "onerule", "dnf_mio", "spsf_mio"],
+    choices=["brcg", "ripper", "mdss", "onerule", "dnf_mio", "spsf_mio", "spsf"],
     help="A method to use for the search of a DNF.",
 )
 parser.add_argument(
@@ -152,6 +153,12 @@ elif args.method == "spsf_mio":
         spsf_params={
             "n_min": args.n_min,
         },
+    )
+elif args.method == "spsf":
+    y_est, rules = test_SPSF(
+        X_bin,
+        y_bin,
+        verbose=args.verbose,
     )
 elif args.method == "mdss":
     y_est, rules = test_MDSS(
