@@ -74,6 +74,13 @@ parser.add_argument(
     help="A method to use for the search of a DNF.",
 )
 parser.add_argument(
+    "-tv",
+    "--total_variation",
+    action="store_true",
+    default=False,
+    help="Compute total variation",
+)
+parser.add_argument(
     "-v",
     "--verbose",
     action="store_true",
@@ -108,7 +115,7 @@ y_bin, X_bin, X_bin_neg = balance_datasets(
 n, d = X_bin.shape
 print(f"Balancing dropped {n_orig-n} samples, {n} remain. \nDimension is {d}.\n")
 
-if args.verbose:
+if args.total_variation:
     print(f"Computed total variation: {total_variation(X_bin[y_bin], X_bin[~y_bin])}")
 
 
