@@ -308,7 +308,7 @@ def convert_to_csv():
     print("Reading the final xlsx file.")
     df = pd.read_excel(interpreted_xlsx_path, engine="openpyxl")
     print("Converting to the csv.")
-    df.to_csv("data.csv", index=False, header=True)
+    df.to_csv("data/MEPS.csv", index=False, header=True)
     print("Converted!")
 
 
