@@ -163,23 +163,25 @@ elif args.method == "dnf_mio":
         verbose=args.verbose,
     )
 
-
-y_terms = eval_terms(rules, binarizer, X_bin_neg)
-our_evals = [our_metric(y_bin, yhat) for yhat in y_terms]
-hamming_dists = [term_hamming_distance(true_term, term) for term in rules]
-spsf_evals = [eval_spsf(y_bin, yhat) for yhat in y_terms]
+if rules is not None:
+    y_terms = eval_terms(rules, binarizer, X_bin_neg)
+    our_evals = [our_metric(y_bin, yhat) for yhat in y_terms]
+    hamming_dists = [term_hamming_distance(true_term, term) for term in rules]
+    spsf_evals = [eval_spsf(y_bin, yhat) for yhat in y_terms]
 if args.verbose:
     print("FULL MODEL:")
     print("  Accruacy:", accuracy(y_bin, y_est))
     print("  Our objective:", our_metric(y_bin, y_est))
+    print("  SPSF violation:", eval_spsf(y_bin, y_est))
     print()
 
-    print_dnf(rules, binarizer, our_evals)
-    print()
+    if rules is not None:
+        print_dnf(rules, binarizer, our_evals)
+        print()
 
 
-if len(y_terms) > 0:
-    print("Seconds needed:", (time.time() - start_time))
+print("Seconds needed:", (time.time() - start_time))
+if rules is not None and len(y_terms) > 0:
     print("Best over terms:")
     max_i = np.argmax(our_evals)
     print("  Our final objective:", our_evals[max_i])
