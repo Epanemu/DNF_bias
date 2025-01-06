@@ -149,10 +149,10 @@ class Auditor:
         reg0.fit(X_subset, cost_0)
         reg1 = linear_model.LinearRegression()
         reg1.fit(X_subset, cost_1)
-        coefs = np.zeros_like(reg1.coef_)
-        coefs[:3] = -1
-        reg1.coef_ = coefs
-        reg1.intercept_ = 0.1
+        # coefs = np.zeros_like(reg1.coef_)
+        # coefs[:3] = -1
+        # reg1.coef_ = coefs
+        # reg1.intercept_ = 0.1
         func = RegOracle(reg0, reg1)
         # func = ConjunctionOracle(X_subset, cost_0, cost_1)
         group_members_0 = func.predict(X_subset)
@@ -175,10 +175,10 @@ class Auditor:
         reg0_neg.fit(X_subset, cost_0_neg)
         reg1_neg = linear_model.LinearRegression()
         reg1_neg.fit(X_subset, cost_1_neg)
-        coefs = np.zeros_like(reg1_neg.coef_)
-        coefs[:3] = -1
-        reg1_neg.coef_ = coefs
-        reg1_neg.intercept_ = 0.1
+        # coefs = np.zeros_like(reg1_neg.coef_)
+        # coefs[:3] = -1
+        # reg1_neg.coef_ = coefs
+        # reg1_neg.intercept_ = 0.1
         func_neg = RegOracle(reg0_neg, reg1_neg)
         # func_neg = ConjunctionOracle(X_subset, cost_0_neg, cost_1_neg)
         group_members_0_neg = func_neg.predict(X_subset)
