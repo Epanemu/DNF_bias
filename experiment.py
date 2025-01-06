@@ -46,7 +46,7 @@ def run_experiment(cfg: DictConfig):
     # Save the output and error logs to a file in the current run directory
     with open(os.path.join(run_dir, "output.txt"), "w") as out_file:
         out_file.write("Command:\n" + " ".join(command) + "\n")
-        out_file.write(f"Git hash: {githash}\n")
+        out_file.write(f"\nGit hash: {githash}\n\n")
         if result is not None:
             out_file.write("Output:\n" + result.stdout + "\n")
             out_file.write("Errors:\n" + result.stderr + "\n")
