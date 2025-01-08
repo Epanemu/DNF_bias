@@ -17,6 +17,8 @@ def run_experiment(cfg: DictConfig):
     command.extend(["-s", cfg.scenario])
     if hasattr(cfg, "seed") and cfg.seed is not None:
         command.extend(["--seed", str(cfg.seed)])
+    if hasattr(cfg, "balance_data") and cfg.balance_data:
+        command.extend(["-b"])
 
     if hasattr(cfg, "n_samples") and cfg.n_samples is not None:
         command.extend(["-n", str(cfg.n_samples)])
