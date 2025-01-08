@@ -12,6 +12,8 @@ from methods import (
     test_SPSF,
     test_spsf_mio,
 )
+from scenarios.folktables_scenarios import SCENARIOS as FOLK_SCENARIOS
+from scenarios.folktables_scenarios import load_scenario as load_folktables_scenario
 from scenarios.MEPS_scenarios import SCENARIOS as MEPS_SCENARIOS
 from scenarios.MEPS_scenarios import load_scenario as load_MEPS_scenario
 from scenarios.synthetic_scenarios import SCENARIOS as SYNTH_SCENARIOS
@@ -27,7 +29,7 @@ from utils import (
     total_variation,
 )
 
-SCENARIOS = MEPS_SCENARIOS + SYNTH_SCENARIOS
+SCENARIOS = FOLK_SCENARIOS + MEPS_SCENARIOS + SYNTH_SCENARIOS
 
 parser = argparse.ArgumentParser(
     prog="test_script.py",
@@ -98,6 +100,11 @@ args = parser.parse_args()
 
 if args.scenario in MEPS_SCENARIOS:
     binarizer, input_data, target_data = load_MEPS_scenario(
+        args.scenario, args.seed, args.n_samples
+    )
+    true_term = []
+elif args.scenario in FOLK_SCENARIOS:
+    binarizer, input_data, target_data = load_folktables_scenario(
         args.scenario, args.seed, args.n_samples
     )
     true_term = []
