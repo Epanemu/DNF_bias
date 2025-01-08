@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn import linear_model
 
-from gerryfair.reg_oracle_class import RegOracle, ConjunctionOracle
+from gerryfair.reg_oracle_class import ConjunctionOracle, RegOracle
 
 
 class Group(object):

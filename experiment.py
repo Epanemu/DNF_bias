@@ -8,6 +8,7 @@ from omegaconf import DictConfig
 
 githash = ""
 
+
 @hydra.main(version_base="1.3", config_path="conf", config_name="config")
 def run_experiment(cfg: DictConfig):
     command = ["python", "test_script.py"]
@@ -59,9 +60,13 @@ def run_experiment(cfg: DictConfig):
 
 
 if __name__ == "__main__":
-    result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+    result = subprocess.run(
+        ["git", "status", "--porcelain"], capture_output=True, text=True
+    )
     if result.stdout.strip() == "":
-        res = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True)
+        res = subprocess.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True
+        )
         githash = res.stdout.strip()
         run_experiment()
     else:

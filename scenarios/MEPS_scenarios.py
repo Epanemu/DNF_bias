@@ -1,5 +1,5 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from binarizer import Binarizer
 from data_handler import DataHandler
