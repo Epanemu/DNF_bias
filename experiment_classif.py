@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import sys
 
 import hydra
 import numpy as np
@@ -66,6 +67,7 @@ def run_experiment(cfg: DictConfig):
 
     # Save the output and error logs to a file in the current run directory
     with open(os.path.join(run_dir, "output.txt"), "w") as out_file:
+        print(f"Config:\n {cfg}", file=sys.stderr)
         out_file.write(f"Config:\n {cfg}\n")
         out_file.write(f"\nGit hash: {githash}\n\n")
         if result is not None:
