@@ -74,6 +74,13 @@ parser.add_argument(
     help="A method to use for the search of a DNF.",
 )
 parser.add_argument(
+    "-b",
+    "--balance_data",
+    action="store_true",
+    default=False,
+    help="Whether to balance data so that each class has half of data",
+)
+parser.add_argument(
     "-tv",
     "--total_variation",
     action="store_true",
@@ -108,12 +115,12 @@ if np.mean(y_bin) >= 0.5:
 else:
     print("TRIVIAL ACCURACY - always FALSE:", 1 - np.mean(y_bin))
 
-
-y_bin, X_bin, X_bin_neg = balance_datasets(
-    y_bin, [y_bin, X_bin, X_bin_neg], seed=args.seed
-)
-n, d = X_bin.shape
-print(f"Balancing dropped {n_orig-n} samples, {n} remain. \nDimension is {d}.\n")
+if args.balance_data:
+    y_bin, X_bin, X_bin_neg = balance_datasets(
+        y_bin, [y_bin, X_bin, X_bin_neg], seed=args.seed
+    )
+    n, d = X_bin.shape
+    print(f"Balancing dropped {n_orig-n} samples, {n} remain. \nDimension is {d}.\n")
 
 if args.total_variation:
     print(f"Computed total variation: {total_variation(X_bin[y_bin], X_bin[~y_bin])}")
