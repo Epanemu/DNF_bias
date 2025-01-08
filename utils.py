@@ -136,11 +136,14 @@ def term_hamming_distance(term1: list[Bin], term2: list[Bin]) -> int:
 def eval_spsf(
     y_model: np.ndarray[bool],
     ingroup: np.ndarray[bool],
-) -> float:
+    get_direction: bool = False,
+) -> float | tuple[float, bool]:
     p_group = np.mean(ingroup)
     p_pos = np.mean(y_model)
     p_joint = np.mean(ingroup & y_model)
 
+    if get_direction:
+        return np.abs(p_group * p_pos - p_joint), p_group * p_pos > p_joint
     return np.abs(p_group * p_pos - p_joint)
 
 
@@ -152,4 +155,5 @@ def eval_fpsf(
     p_group = np.mean(ingroup & ~y_true)
     p_pos = np.mean(y_model[~y_true])
     p_joint = np.mean(ingroup & y_model & ~y_true)
+
     return np.abs(p_group * p_pos - p_joint)

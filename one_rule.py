@@ -109,10 +109,11 @@ class OneRule:
         # print(1 / size1, 1 / (y.shape[0] - size1))
         int_model = self._make_int_model(X, y, weights=w)
         opt = pyo.SolverFactory("gurobi", solver_io="python")
-        opt.solve(int_model, tee=verbose)
-
+        result = opt.solve(int_model, tee=verbose)
+        if result.solver.termination_condition != pyo.TerminationCondition.optimal:
+            raise ValueError("solver did not find an optimal sollution")
         self.model = int_model
 
         # print([int_model.error[i].value for i in int_model.all_i])
 
-        return [i for i in int_model.feat_i if int_model.use_feat[i].value != 0]
+        return [i for i in int_model.feat_i if int_model.use_feat[i].value >= 1e-4]
