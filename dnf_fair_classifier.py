@@ -122,7 +122,7 @@ class DNFFairClassifier:
         spsf_mio = SPSF()
         mask = self.true_y == 0
         group = spsf_mio.find_subgroup(self.X[mask], y_hat[mask], verbose=self.verbose)
-        violation, direction = eval_fpsf(y_hat, group, get_direction=True)
+        violation, direction = eval_fpsf(self.true_y, y_hat, group, get_direction=True)
         ingroup_i = np.where(group)[0]
         return ingroup_i, violation, direction
 
