@@ -2,7 +2,8 @@ import numpy as np
 import pyomo.environ as pyo
 from gurobipy import GRB
 
-from one_rule import OneRule
+# from one_rule import OneRule
+from one_rule_lp import OneRule
 from utils import eval_spsf
 
 # ignore assert warnings
@@ -186,7 +187,7 @@ class DNFFairClassifier:
                 if violation > self._gamma:
                     cb_opt.cbLazy(self._add_cut(group_i, pos_direction))
 
-        # opt.set_callback(callback)
+        opt.set_callback(callback)
         self.n_cuts = 0
         self.n_callbacks = 0
         result = opt.solve(tee=verbose)

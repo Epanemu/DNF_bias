@@ -83,7 +83,6 @@ class OneRule:
         self,
         X: np.ndarray[bool],
         y: np.ndarray[bool],
-        warmstart: bool = False,
         verbose: bool = False,
     ) -> list[int]:
         """Find a single conjunction with lowest 0-1 error
@@ -91,8 +90,6 @@ class OneRule:
         Args:
             X (np.ndarray[bool]): Input data (boolean values), shape (n, d)
             y (np.ndarray[bool]): Target (boolean values), shape (n,)
-            warmstart (bool, optional): If true, an approximate solution will be created first to warmstart the MIO.
-                Defaults to False.
             verbose (bool, optional): If true, solver output is printed to stdout. Defaults to False.
 
         Returns:
@@ -103,6 +100,10 @@ class OneRule:
 
         w = np.ones_like(y, dtype=float)
         size1 = np.sum(y)
+        if size1 == 0:
+            return list(range(X.shape[1]))
+        if size1 == y.shape[0]:
+            return []
         w[y] = 1 / size1
         w[~y] = 1 / (y.shape[0] - size1)
         # print(1 / size1, 1 / (y.shape[0] - size1))
@@ -114,4 +115,26 @@ class OneRule:
 
         # print([model.error[i].value for i in model.all_i])
 
-        return [i for i in model.feat_i if model.use_feat[i].value != 0]
+        return [i for i in model.feat_i if model.use_feat[i].value >= 1e-8]
+
+    def find_subgroup(
+        self,
+        X: np.ndarray[bool],
+        y: np.ndarray[bool],
+        verbose: bool = False,
+    ) -> np.ndarray[bool]:
+        """Find a single conjunction with lowest 0-1 error and returns the y_hat vector of classifications
+
+        Args:
+            X (np.ndarray[bool]): Input data (boolean values), shape (n, d)
+            y (np.ndarray[bool]): Target (boolean values), shape (n,)
+            verbose (bool, optional): If true, solver output is printed to stdout. Defaults to False.
+
+        Returns:
+            np.ndarray[int]: List of indices of the literals in the final conjunction
+        """
+        conjuncts = self.find_rule(X, y, verbose=verbose)
+        y_hat = np.ones_like(y, dtype=bool)
+        for conj in conjuncts:
+            y_hat &= X[:, conj]
+        return y_hat
