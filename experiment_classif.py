@@ -58,7 +58,7 @@ def run_experiment(cfg: DictConfig):
     X = binarizer.encode(input_data, include_negations=True)
     y = binarizer.encode_y(target_data)
 
-    dnf = DNFFairClassifier(gamma=0.1)
+    dnf = DNFFairClassifier(gamma=0.01)
 
     result = dnf.find_dnf(X, y, n_terms=5, time_limit=300, verbose=True)
 

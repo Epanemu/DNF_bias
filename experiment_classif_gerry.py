@@ -64,7 +64,7 @@ def run_experiment(cfg: DictConfig):
     X = pd.DataFrame(binarizer.encode(train_data, include_negations=False))
     y = pd.Series(binarizer.encode_y(train_y_data))
 
-    fair_model = Model(printflag=True, gamma=0.1, fairness_def="FP")
+    fair_model = Model(printflag=True, gamma=0.01, fairness_def="FP")
     fair_model.set_options(max_iters=30)
     # train_data.index = np.arange(train_data.index.shape[0])
     # train_y_data.index = np.arange(train_data.index.shape[0])
