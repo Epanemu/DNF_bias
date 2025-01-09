@@ -5,7 +5,7 @@ from gurobipy import GRB
 # from one_rule import OneRule
 # from one_rule_lp import OneRule
 from spsf_mio import SPSF
-from utils import eval_fpsf, eval_spsf
+from utils import eval_fpsf
 
 # ignore assert warnings
 # trunk-ignore-all(bandit/B101)
@@ -121,7 +121,10 @@ class DNFFairClassifier:
         y_hat = np.logical_xor(self.true_y, errors)
         spsf_mio = SPSF()
         mask = self.true_y == 0
-        group = spsf_mio.find_subgroup(self.X[mask], y_hat[mask], verbose=self.verbose)
+        rule = spsf_mio.find_rule(self.X[mask], y_hat[mask], verbose=self.verbose)
+        group = np.ones_like(self.true_y, dtype=bool)
+        for conj in rule:
+            group &= self.X[:, conj]
         violation, direction = eval_fpsf(self.true_y, y_hat, group, get_direction=True)
         ingroup_i = np.where(group)[0]
         return ingroup_i, violation, direction
