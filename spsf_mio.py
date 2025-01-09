@@ -132,3 +132,25 @@ class SPSF:
             print("OBJECTIVE:", int_model.o.value)
 
         return [i for i in int_model.feat_i if int_model.use_feat[i].value != 0]
+
+    def find_subgroup(
+        self,
+        X: np.ndarray[bool],
+        y: np.ndarray[bool],
+        verbose: bool = False,
+    ) -> np.ndarray[bool]:
+        """Find a single conjunction with highest SPSF violation and returns the y_hat vector of the group
+
+        Args:
+            X (np.ndarray[bool]): Input data (boolean values), shape (n, d)
+            y (np.ndarray[bool]): Target (boolean values), shape (n,)
+            verbose (bool, optional): If true, solver output is printed to stdout. Defaults to False.
+
+        Returns:
+            np.ndarray[int]: List of indices of the literals in the final conjunction
+        """
+        conjuncts = self.find_rule(X, y, verbose=verbose)
+        y_hat = np.ones_like(y, dtype=bool)
+        for conj in conjuncts:
+            y_hat &= X[:, conj]
+        return y_hat

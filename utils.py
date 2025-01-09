@@ -151,9 +151,12 @@ def eval_fpsf(
     y_true: np.ndarray[bool],
     y_model: np.ndarray[bool],
     ingroup: np.ndarray[bool],
+    get_direction: bool = False,
 ) -> float:
     p_group = np.mean(ingroup & ~y_true)
     p_pos = np.mean(y_model[~y_true])
     p_joint = np.mean(ingroup & y_model & ~y_true)
 
+    if get_direction:
+        return np.abs(p_group * p_pos - p_joint), p_group * p_pos > p_joint
     return np.abs(p_group * p_pos - p_joint)

@@ -3,8 +3,9 @@ import pyomo.environ as pyo
 from gurobipy import GRB
 
 # from one_rule import OneRule
-from one_rule_lp import OneRule
-from utils import eval_spsf
+# from one_rule_lp import OneRule
+from spsf_mio import SPSF
+from utils import eval_fpsf, eval_spsf
 
 # ignore assert warnings
 # trunk-ignore-all(bandit/B101)
@@ -95,22 +96,20 @@ class DNFFairClassifier:
     def _add_cut(self, ingroup_i: np.ndarray[int], positive_direction: bool):
         self.n_cuts += 1
         p_group = ingroup_i.shape[0] / self.n_samples
-        sum_all_y_hat = sum(1 - self.model.error[i] for i in self.model.pos_i)
-        sum_all_y_hat += sum(self.model.error[i] for i in self.model.neg_i)
+        sum_all_y_hat = sum(self.model.error[i] for i in self.model.neg_i)
         sum_group_y_hat = sum(
-            1 - self.model.error[i] if i in self.model.pos_i else self.model.error[i]
-            for i in ingroup_i
+            0 if i in self.model.pos_i else self.model.error[i] for i in ingroup_i
         )
         if positive_direction:
             return self.model.fair_cuts.add(
-                (p_group / self.n_samples) * sum_all_y_hat
+                (p_group / len(self.model.neg_i)) * sum_all_y_hat
                 - (1 / self.n_samples) * sum_group_y_hat
                 <= self._gamma
             )
         else:
             return self.model.fair_cuts.add(
                 (1 / self.n_samples) * sum_group_y_hat
-                - (p_group / self.n_samples) * sum_all_y_hat
+                - (p_group / len(self.model.neg_i)) * sum_all_y_hat
                 <= self._gamma
             )
 
@@ -120,9 +119,10 @@ class DNFFairClassifier:
     ) -> tuple[np.ndarray[int], float]:
         self.n_callbacks += 1
         y_hat = np.logical_xor(self.true_y, errors)
-        onerule = OneRule()
-        group = onerule.find_subgroup(self.X, y_hat, verbose=self.verbose)
-        violation, direction = eval_spsf(y_hat, group, get_direction=True)
+        spsf_mio = SPSF()
+        mask = self.true_y == 0
+        group = spsf_mio.find_subgroup(self.X[mask], y_hat[mask], verbose=self.verbose)
+        violation, direction = eval_fpsf(y_hat, group, get_direction=True)
         ingroup_i = np.where(group)[0]
         return ingroup_i, violation, direction
 
