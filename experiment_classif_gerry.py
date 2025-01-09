@@ -6,6 +6,7 @@ import sys
 
 import hydra
 import numpy as np
+import pandas as pd
 from folktables import ACSDataSource
 from omegaconf import DictConfig
 
@@ -58,10 +59,10 @@ def run_experiment(cfg: DictConfig):
     )
     binarizer = Binarizer(dhandler, target_positive_vals=[True])
 
-    X_test = binarizer.encode(input_data, include_negations=False)
-    y_test = binarizer.encode_y(target_data)
-    X = binarizer.encode(train_data, include_negations=False)
-    y = binarizer.encode_y(train_y_data)
+    X_test = pd.DataFrame(binarizer.encode(input_data, include_negations=False))
+    y_test = pd.Series(binarizer.encode_y(target_data))
+    X = pd.DataFrame(binarizer.encode(train_data, include_negations=False))
+    y = pd.Series(binarizer.encode_y(train_y_data))
 
     fair_model = Model(printflag=True, gamma=0.1, fairness_def="FP")
     fair_model.set_options(max_iters=30)
@@ -91,28 +92,37 @@ def run_experiment(cfg: DictConfig):
         out_file.write(f"\nGit hash: {githash}\n\n")
 
         out_file.write("RESULT\n")
-        out_file.write(f"Train Accuracy: {np.mean(y_hat_train == y)} \n")
-        out_file.write(f"Train SPSF: {eval_spsf(y_hat_train, violated_group_train)} \n")
         out_file.write(
-            f"Train FPSF: {eval_fpsf(y, y_hat_train, violated_group_train)} \n"
+            f"Train Accuracy: {np.mean(np.array(y_hat_train,dtype=bool) == y.values)} \n"
         )
-        out_file.write(f"Test Accuracy: {np.mean(y_hat == y_test)} \n")
-        out_file.write(f"Test SPSF: {eval_spsf(y_hat, violated_group)} \n")
-        out_file.write(f"Test FPSF: {eval_fpsf(y_test, y_hat, violated_group)} \n")
+        out_file.write(
+            f"Train SPSF: {eval_spsf(np.array(y_hat_train,dtype=bool), np.array(violated_group_train,dtype=bool))} \n"
+        )
+        out_file.write(
+            f"Train FPSF: {eval_fpsf(y.values, np.array(y_hat_train,dtype=bool), np.array(violated_group_train,dtype=bool))} \n"
+        )
+        out_file.write(
+            f"Test Accuracy: {np.mean(np.array(y_hat,dtype=bool) == y_test.values)} \n"
+        )
+        out_file.write(
+            f"Test SPSF: {eval_spsf(np.array(y_hat,dtype=bool), np.array(violated_group,dtype=bool))} \n"
+        )
+        out_file.write(
+            f"Test FPSF: {eval_fpsf(y_test.values, np.array(y_hat,dtype=bool), np.array(violated_group,dtype=bool))} \n"
+        )
 
     print(f"Result saved to {os.path.join(run_dir, 'output.txt')}")
 
 
 if __name__ == "__main__":
-    # result = subprocess.run(
-    #     ["git", "status", "--porcelain"], capture_output=True, text=True
-    # )
-    # if result.stdout.strip() == "":
-    #     res = subprocess.run(
-    #         ["git", "rev-parse", "HEAD"], capture_output=True, text=True
-    #     )
-    #     githash = res.stdout.strip()
-    if True:
+    result = subprocess.run(
+        ["git", "status", "--porcelain"], capture_output=True, text=True
+    )
+    if result.stdout.strip() == "":
+        res = subprocess.run(
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True
+        )
+        githash = res.stdout.strip()
         run_experiment()
     else:
         raise Exception("Git status is not clean. Commit changes first.")
