@@ -1,10 +1,11 @@
 # @package _global_
 scenario: ${hydra:runtime.choice}
-n_samples: ${hydra:runtime.choice}
+# n_samples: ${hydra:runtime.choice}
+n_samples: 1000
 
 hydra:
   sweeper:
     params:
-      n_samples: 1000, 5000, 10000, 50000, 100000 # there are up to ~200k rows, but some bellow 100k, so that is the limit.
+      # n_samples: 1000, 5000, 10000, 50000, 100000 # there are up to ~200k rows, but some bellow 100k, so that is the limit.
       scenario: ACSIncome, ACSPublicCoverage, ACSMobility, ACSEmployment, ACSTravelTime
 # run this as: python experiment.py +method=<method> +experiment=folktables -m
