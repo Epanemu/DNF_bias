@@ -104,6 +104,10 @@ class OneRule:
 
         w = np.ones_like(y, dtype=float)
         size1 = np.sum(y)
+        if size1 == 0:
+            return list(range(X.shape[1]))
+        if size1 == y.shape[0]:
+            return []
         w[y] = 1 / size1
         w[~y] = 1 / (y.shape[0] - size1)
         # print(1 / size1, 1 / (y.shape[0] - size1))
