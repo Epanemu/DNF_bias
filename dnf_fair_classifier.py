@@ -123,10 +123,10 @@ class DNFFairClassifier:
         y_hat = np.logical_xor(self.true_y, errors)
         spsf_mio = SPSF()
         mask = self.true_y == 0
-        rule = spsf_mio.find_rule(self.X[mask], y_hat[mask], verbose=self.verbose)
+        rule = spsf_mio.find_rule(self.X_prot[mask], y_hat[mask], verbose=self.verbose)
         group = np.ones_like(self.true_y, dtype=bool)
         for conj in rule:
-            group &= self.X[:, conj]
+            group &= self.X_prot[:, conj]
         violation, direction = eval_fpsf(self.true_y, y_hat, group, get_direction=True)
         ingroup_i = np.where(group)[0]
         return ingroup_i, violation, direction
@@ -138,16 +138,18 @@ class DNFFairClassifier:
     def find_dnf(
         self,
         X: np.ndarray[bool],
+        X_prot: np.ndarray[bool],
         y: np.ndarray[bool],
         n_terms: int,
         time_limit: int = 120,
         warmstart: bool = False,
         verbose: bool = False,
-    ) -> list[int]:
+    ) -> list[list[int]]:
         """Find a single conjunction with lowest 0-1 error
 
         Args:
             X (np.ndarray[bool]): Input data (boolean values), shape (n, d)
+            X_prot (np.ndarray[bool]): Input data only for protected attributes (boolean values), shape (n, d2)
             y (np.ndarray[bool]): Target (boolean values), shape (n,)
             warmstart (bool, optional): If true, an approximate solution will be created first to warmstart the MIO.
                 Defaults to False.
@@ -156,13 +158,14 @@ class DNFFairClassifier:
         Returns:
             list[int]: List of indices of the literals in the final conjunction
         """
-        assert y.shape == (X.shape[0],)
-        assert X.dtype == bool and y.dtype == bool
+        assert y.shape == (X.shape[0],) and y.shape == (X_prot.shape[0],)
+        assert X.dtype == bool and y.dtype == bool and X_prot.dtype == bool
 
         if warmstart:
             print("No warmstart available")
 
         self.X = X
+        self.X_prot = X_prot
         self.true_y = y
         self.verbose = verbose
 
