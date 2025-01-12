@@ -36,13 +36,13 @@ def run_experiment(cfg: DictConfig):
     fair_model.set_options(max_iters=30)
     fair_model.train(dfX, dfX_prot, dfy)
 
-    dfy_hat_train = fair_model.predict(X)
+    y_hat_prob = np.array(fair_model.predict(dfX))
     auditor = Auditor(dfX_prot, dfy, "FP")
-    gerrygroup_train, oracle = auditor.audit(dfy_hat_train, with_group_def=True)
+    gerrygroup_train, oracle = auditor.audit(y_hat_prob, with_group_def=True)
 
-    y_hat_train = dfy_hat_train.values
     spsf = SPSF()
     mask = y == 0
+    y_hat_train = y_hat_prob >= 0.5
     group_rule = spsf.find_rule(X_prot[mask], y_hat_train[mask])
 
     miogroup_train = np.ones_like(y, dtype=bool)
