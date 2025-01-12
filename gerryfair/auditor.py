@@ -205,7 +205,7 @@ class Auditor:
         else:
             return Group(func, g_size_0, fp_disp_w, fp_disp, 1, fp_group_rate_neg)
 
-    def audit(self, predictions):
+    def audit(self, predictions, with_group_def=False):
         """Takes in predictions on dataset (X',y) and returns:
         a vector which represents the group that violates the fairness metric, along with the u.
         """
@@ -217,4 +217,6 @@ class Auditor:
         # print(group.func.b0.coef_, group.func.b0.intercept_)
         # print(group.func.b1.coef_, group.func.b1.intercept_)
 
+        if with_group_def:
+            return group.func.predict(self.X_prime), group.func
         return group.func.predict(self.X_prime), group.weighted_disparity
