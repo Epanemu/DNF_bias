@@ -49,7 +49,7 @@ class Operation(Enum):
         elif op == Operation.NOT_IN:
             return ~Operation.perform(Operation.NOT_IN, vals, reference)
         elif op == Operation.BETWEEN:
-            return (vals >= reference[0]) & (vals <= reference[1])
+            return (vals >= reference[0]) & (vals < reference[1])
         elif op == Operation.OUTSIDE:
             return ~Operation.perform(Operation.BETWEEN, vals, reference)
         else:
@@ -100,8 +100,7 @@ class Bin:
 class Binarizer:
     """Handles binarizing the dataset"""
 
-    # TODO add bins for Cont variables
-    # TODO add specific options for binarization of categoricals
+    # TODO add specific options for binarization of categoricals (only positive and custom sets) and continuous (custom bins - i.e. quantiles)
     def __init__(
         self,
         data_handler: DataHandler,
@@ -113,7 +112,20 @@ class Binarizer:
         binarized_negations: list[list[Bin]] = []
         for feature in data_handler.features:
             if isinstance(feature, Contiguous):
-                raise NotImplementedError("Continuous features are not yet implemented")
+                binarizations = []
+                negations = []
+                minval, maxval = feature.bounds
+                # to make the last bin include the max value
+                eps = (maxval - minval) / 10000
+                n_bins = 10
+                prev = minval
+                for curr in np.linspace(minval, maxval + eps, n_bins + 1)[1:]:
+                    bounds = (prev, curr)
+                    binarizations.append(Bin(feature, Operation.BETWEEN, bounds))
+                    negations.append(Bin(feature, Operation.OUTSIDE, bounds))
+                    prev = curr
+                binarized_features.append(binarizations)
+                binarized_negations.append(negations)
             elif isinstance(feature, Mixed):
                 raise NotImplementedError("Mixed features are not yet implemented")
             elif isinstance(feature, Binary):
