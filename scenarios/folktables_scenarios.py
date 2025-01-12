@@ -1,8 +1,12 @@
+import logging
+
 import numpy as np
 from folktables import ACSDataSource
 
 from binarizer import Binarizer
 from data_handler import DataHandler
+
+logger = logging.getLogger(__name__)
 
 SCENARIOS = [
     "ACSIncome",
@@ -12,8 +16,126 @@ SCENARIOS = [
     "ACSTravelTime",
 ]
 
+# https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2018.pdf
+# TODO check if N/A are filtered
+PROTECTED_ATTRS = [
+    "SEX",  # sex
+    "RAC1P",  # race
+    "AGEP",  # age
+    # 'MAR', # marital status
+    "POBP",  # place of birth
+    "_POBP",  # simplified place of birth, custom
+    "DIS",  # disability
+    "CIT",  # citizenship
+    "MIL",  # military service - 2 = veteran?
+    "ANC",  # ancestry
+    "NATIVITY",  # foreign or US native
+    "DEAR",  # difficulty hearing
+    "DEYE",  # difficulty seeing
+    "DREM",  # cognitive difficulty
+    "FER",  # gave birth recently
+    "POVPIP",  # ratio of income to the poverty threshold
+    # not in folktables
+    # "DRATX",  # veteran service connected disability - binary
+    # "VPS",  # Veteran period of service
+]
 
-def load_scenario(name, seed, n_max):
+# optionally simplify some features
+FEATURE_PROCESSING = {
+    "POBP": lambda x: int(x) // 100,  # 219 to 6
+    "OCCP": lambda x: int(x) // 100,  # from ~500 to 100
+    "PUMA": lambda x: int(x) // 100,  # from ~250 to 40
+    "POWPUMA": lambda x: int(x) // 1000,  # from ~114 to 20
+    # "PINCP": lambda x: np.sign(x) * np.log(np.abs(x)) if x != 0 else 0, # scaling for a narrower range
+    # "SCHL": could be binned
+    # "RELP": could be binned
+}
+
+FEATURE_NAMES = {
+    "SEX": "Sex",
+    "RAC1P": "Race",
+    "AGEP": "Age",
+    "MAR": "Marital status",
+    "POBP": "Place of birth",
+    "_POBP": "Place of birth",
+    "DIS": "Disability",
+    "CIT": "Citizenship",
+    "MIL": "Military service",
+    "ANC": "Ancestry",
+    "NATIVITY": "Foreign or US native",
+    "DEAR": "Difficulty hearing",
+    "DEYE": "Difficulty seeing",
+    "DREM": "Cognitive difficulty",
+    "FER": "Gave birth last year",
+    "POVPIP": "Income / Poverty threshold",
+}
+
+# not exact, shortened for succinctness
+PROTECTED_VALUES_MAP = {
+    "SEX": {1: "Male", 2: "Female"},
+    "RAC1P": {
+        1: "White",
+        2: "Black",
+        3: "American Indian",
+        4: "Alaska Native",
+        5: "Native tribes specified",
+        6: "Asian",
+        7: "Pacific Islander",
+        8: "Some Other Race",
+        9: "Two or More Races",
+    },
+    # "AGEP": {}, Age is not categorical
+    "MAR": {
+        1: "Married",
+        2: "Widowed",
+        3: "Divorced",
+        4: "Separated",
+        5: "Never married",
+    },
+    # "POBP": {}, Too many values, one for each country
+    "_POBP": {
+        0: "US",
+        1: "Europe",
+        2: "Asia",
+        3: "Non-US Americas",
+        4: "Africa",
+        5: "Oceania",
+    },
+    "DIS": {1: "With a disability", 2: "Without a disability"},
+    "CIT": {
+        1: "Born in the US",
+        2: "Born in external US teritories",
+        3: "Born abroad of US parent(s)",
+        4: "Naturalized US citizen",
+        5: "Not a US citizen",
+    },
+    "MIL": {
+        None: "N/A (<17 years)",
+        1: "On active duty",
+        2: "No more active duty",
+        3: "Active duty for training",
+        4: "Never served",
+    },
+    "ANC": {
+        1: "Single",
+        2: "Multiple",
+        3: "Unclassified",
+        4: "Not reported",
+        8: "Hidden",
+    },
+    "NATIVITY": {1: "Native", 2: "Foreign born"},
+    "DEAR": {1: "Yes", 2: "No"},
+    "DEYE": {1: "Yes", 2: "No"},
+    "DREM": {1: "Yes", 2: "No", None: "N/A (<5 years)"},
+    "FER": {1: "Yes", 2: "No", None: "N/A"},
+    # "POVPIP": {}, Poverty ratio has numeric values
+}
+
+CONTINUOUS_FEATURES = ["AGEP", "PINCP", "WKHP", "JWMNP", "POVPIP"]
+# NONE for JWMNP should be checked if it happens
+
+
+def load_scenario(name, seed, n_max, state="CA", year="2018", horizon="1-Year"):
     if name == "ACSIncome":
         from folktables import ACSIncome as Dataset
     elif name == "ACSPublicCoverage":
@@ -27,9 +149,8 @@ def load_scenario(name, seed, n_max):
     else:
         raise ValueError(f'Scenario "{name}" does not exist.')
 
-    # TODO make the configuration parameterized
-    data_source = ACSDataSource(survey_year="2018", horizon="1-Year", survey="person")
-    data = data_source.get_data(states=["CA"], download=True)
+    data_source = ACSDataSource(survey_year=year, horizon=horizon, survey="person")
+    data = data_source.get_data(states=[state], download=True)
     input_data, target_data, _ = Dataset.df_to_pandas(data)
 
     # DROP COLS WITH TOO MANY OPTIONS
