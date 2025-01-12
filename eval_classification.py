@@ -17,18 +17,30 @@ from utils import eval_fpsf, eval_spsf
 methods = [
     "nofairDNF",
     "fairDNF",
-    "lpfairDNF",
+    # "lpfairDNF",
+    "gerryfair",
 ]
 
 base_dir_prefix = "multirun/2025-01-09/"
 
-method_colors = {"nofairDNF": "red", "fairDNF": "blue", "lpfairDNF": "green"}
+method_colors = {
+    "nofairDNF": "green",
+    "fairDNF": "blue",
+    "lpfairDNF": "magenta",
+    "gerryfair": "red",
+}
 method_names = {
     "nofairDNF": "vanilla DNF",
     "fairDNF": "DNF + onerule cuts",
     "lpfairDNF": "DNF + LP onerule cuts",
+    "gerryfair": "GerryFair",
 }
-method_paths = {"nofairDNF": "07-49-37", "fairDNF": "06-15-02", "lpfairDNF": "09-02-17"}
+method_paths = {
+    "nofairDNF": "07-49-37",
+    "fairDNF": "12-29-08",  # "06-15-02",
+    "lpfairDNF": "09-02-17",
+    "gerryfair": "12-01-23",
+}
 
 
 def prepare_data(scenario, seed, n_samples=1000, test=False):
@@ -188,6 +200,22 @@ def extract_data_for_method(method):
                                     eval_fpsf(y, y_hat, np.array(group, dtype=bool)),
                                 )
                             )
+                    accuracy = re.search(r"Train Accuracy:\s*([0-9.]+)", line)
+                    if accuracy:
+                        extracted_data.append(
+                            ("Train Accuracy", scenario, float(accuracy.group(1)))
+                        )
+                    spsf = re.search(r"Train SPSF:\s*([0-9.]+)", line)
+                    if spsf:
+                        extracted_data.append(
+                            ("Train SPSF", scenario, float(spsf.group(1)))
+                        )
+                    fpsf = re.search(r"Train FPSF:\s*([0-9.]+)", line)
+                    if fpsf:
+                        extracted_data.append(
+                            ("Train FPSF", scenario, float(fpsf.group(1)))
+                        )
+
                     cuts = re.search(r"Number of cuts: (\d+)", line)
                     if cuts:
                         extracted_data.append(
@@ -224,15 +252,20 @@ fig, axs = plt.subplots(r, c, figsize=(12, 12))
 
 for method in methods:
     data_dict = all_data[method]
-    for i, measure in enumerate(sorted(data_dict.keys())):
+    for i, measure in enumerate(all_data["fairDNF"].keys()):
         ax = axs[i // c, i % c]
 
+        if measure not in data_dict:
+            continue
         names = sorted(data_dict[measure].keys())
         sorted_mean = [np.mean(data_dict[measure][n]) for n in names]
         sorted_std = [np.std(data_dict[measure][n]) for n in names]
 
-        barwidth = 0.35
-        shift = (barwidth / 2) if method == methods[0] else (-barwidth / 2)
+        n = len(methods)
+        w = 0.6
+        barwidth = w / n
+        j = methods.index(method)
+        shift = barwidth / 2 + j * barwidth - w / 2
         # barplot with std band for each method side by side in one axes
         ax.bar(
             np.arange(len(names)) + shift,
@@ -251,7 +284,7 @@ for method in methods:
         ax.legend()
 
 plt.tight_layout()
-output_path = "multirun_images/" + str(date.today()) + "_real_data.png"
+output_path = "multirun_images/" + str(date.today()) + "_classification_gamma1e-2.png"
 plt.savefig(output_path)
 
 plt.show()
