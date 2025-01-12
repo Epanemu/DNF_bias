@@ -85,7 +85,7 @@ class DataHandler:
         if isinstance(X, pd.DataFrame):
             if feature_names is None:
                 feature_names = X.columns
-            if target_name is not None:
+            if target_name is not None and y is None:
                 print("Taking target values from the X matrix")
                 y = X[target_name]
                 X = X.drop(columns=target_name)
