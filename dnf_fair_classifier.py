@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import pyomo.environ as pyo
 from gurobipy import GRB
@@ -180,6 +182,7 @@ class DNFFairClassifier:
 
         def callback(cb_m, cb_opt, cb_where):
             if cb_where == GRB.Callback.MIPSOL:
+                t_start = time.perf_counter()
                 cb_opt.cbGetSolution(
                     vars=[self.model.error[i] for i in self.model.all_i]
                 )
@@ -189,11 +192,17 @@ class DNFFairClassifier:
                 group_i, violation, pos_direction = self._find_subgroup(errors)
                 if violation > self._gamma:
                     cb_opt.cbLazy(self._add_cut(group_i, pos_direction))
+                self.__callback_time += time.perf_counter() - t_start
 
         opt.set_callback(callback)
         self.n_cuts = 0
         self.n_callbacks = 0
+        self.__callback_time = 0
+        t_start_solve = time.perf_counter()
         result = opt.solve(tee=verbose)
+        t_diff = time.perf_counter() - t_start_solve
+        print(f"~Time~ in callbacks: {self.__callback_time}")
+        self.callback_time_proportion = self.__callback_time / t_diff
         self.mio_result = result
 
         dnf = [
