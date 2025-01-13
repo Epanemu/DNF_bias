@@ -72,12 +72,13 @@ def run_experiment(cfg: DictConfig):
             out_file.write(
                 f"Time in callbacks proportion: {dnf.callback_time_proportion} \n"
             )
+            out_file.write(f"Accuracy: {np.mean(y_hat_train == y)} \n")
             out_file.write(f"MIO group: {group_rule} \n")
             out_file.write(f"MIO SPSF: {eval_spsf(y_hat_train, miogroup_train)} \n")
             out_file.write(f"MIO FPSF: {eval_fpsf(y, y_hat_train, miogroup_train)} \n")
-            out_file.write(f"Gerry oracle b0 coef:\n {oracle.b0.coef_} \n")
+            out_file.write(f"Gerry oracle b0 coef: {list(oracle.b0.coef_)} \n")
             out_file.write(f"Gerry oracle b0 intercept: {oracle.b0.intercept_} \n")
-            out_file.write(f"Gerry oracle b1 coef:\n {oracle.b1.coef_} \n")
+            out_file.write(f"Gerry oracle b1 coef: {list(oracle.b1.coef_)} \n")
             out_file.write(f"Gerry oracle b1 intercept: {oracle.b1.intercept_} \n")
             out_file.write(f"Gerry SPSF: {eval_spsf(y_hat_train, gerrygroup_train)} \n")
             out_file.write(
