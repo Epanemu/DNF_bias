@@ -59,7 +59,8 @@ class DNFFairClassifier:
             domain=pyo.Binary,
             initialize=feat_init,
         )
-        model.error = pyo.Var(model.all_i, domain=pyo.NonNegativeReals)
+        # model.error = pyo.Var(model.all_i, domain=pyo.NonNegativeReals, bounds=(0, 1))
+        model.error = pyo.Var(model.all_i, domain=pyo.Binary, bounds=(0, 1))
 
         model.pos = pyo.Constraint(
             model.pos_i,
