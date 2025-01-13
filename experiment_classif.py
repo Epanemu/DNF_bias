@@ -82,6 +82,8 @@ def run_experiment(cfg: DictConfig):
             out_file.write(
                 f"Gerry FPSF: {eval_fpsf(y, y_hat_train, gerrygroup_train)} \n"
             )
+            out_file.write(f"Protected dimension: {X_prot.shape[1]} \n")
+            out_file.write(f"Full dimension: {X.shape[1]} \n")
         else:
             out_file.write("Error\n")
 

@@ -69,6 +69,8 @@ def run_experiment(cfg: DictConfig):
         out_file.write(f"Gerry oracle b1 intercept: {oracle.b1.intercept_} \n")
         out_file.write(f"Gerry SPSF: {eval_spsf(y_hat_train, gerrygroup_train)} \n")
         out_file.write(f"Gerry FPSF: {eval_fpsf(y, y_hat_train, gerrygroup_train)} \n")
+        out_file.write(f"Protected dimension: {X_prot.shape[1]} \n")
+        out_file.write(f"Full dimension: {X.shape[1]} \n")
 
     print(f"Result saved to {os.path.join(run_dir, 'output.txt')}")
     with open(os.path.join(run_dir, "gerrymodel.pickle"), "wb") as f:
