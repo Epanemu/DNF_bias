@@ -1,5 +1,3 @@
-# python experiment.py -m
-
 import os
 import subprocess
 import sys
@@ -30,7 +28,7 @@ def run_experiment(cfg: DictConfig):
 
     dnf = DNFFairClassifier(gamma=0.01)
 
-    result = dnf.find_dnf(X, X_prot, y, n_terms=1, time_limit=900, verbose=True)
+    result = dnf.find_dnf(X, X_prot, y, n_terms=5, time_limit=300, verbose=True)
     y_hat_train = np.zeros_like(y, dtype=bool)
     for term in result:
         y_term = np.ones_like(y, dtype=bool)
