@@ -1,3 +1,4 @@
+import logging
 import time
 
 import numpy as np
@@ -11,6 +12,9 @@ from utils import eval_fpsf
 
 # ignore assert warnings
 # trunk-ignore-all(bandit/B101)
+
+
+logger = logging.getLogger(__name__)
 
 
 class DNFFairClassifier:
@@ -107,6 +111,7 @@ class DNFFairClassifier:
         p_group = ingroup_i.shape[0] / self.n_samples
         sum_y_hat = sum(self.model.error[i] for i in neg_i)
         sum_group_y_hat = sum(self.model.error[i] for i in ingroup_i)
+        logger.debug(f"ADDING CUT ingroup_i={ingroup_i} p={p_group}")
         if positive_direction:
             return self.model.fair_cuts.add(
                 (p_group / len(neg_i)) * sum_y_hat
@@ -133,6 +138,9 @@ class DNFFairClassifier:
         for conj in rule:
             group &= self.X_prot[:, conj]
         violation, direction = eval_fpsf(self.true_y, y_hat, group, get_direction=True)
+        logger.debug(
+            f"FOUND SUBGROUP {rule} with violation {violation} in {'positive' if direction else 'negative'} direction"
+        )
         ingroup_i = np.where(group & ~self.true_y)[0]
         return ingroup_i, violation, direction
 
