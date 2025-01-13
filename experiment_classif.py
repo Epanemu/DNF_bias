@@ -24,13 +24,13 @@ def run_experiment(cfg: DictConfig):
         cfg.scenario, cfg.seed, cfg.n_samples
     )
 
-    X = binarizer.encode(X_orig, include_negations=True)
-    X_prot = binarizer_protected.encode(X_prot_orig, include_negations=True)
+    X = binarizer.encode(X_orig, include_negations=False)
+    X_prot = binarizer_protected.encode(X_prot_orig, include_negations=False)
     y = binarizer.encode_y(y_orig)
 
     dnf = DNFFairClassifier(gamma=0.01)
 
-    result = dnf.find_dnf(X, X_prot, y, n_terms=5, time_limit=900, verbose=True)
+    result = dnf.find_dnf(X, X_prot, y, n_terms=1, time_limit=900, verbose=True)
     y_hat_train = np.zeros_like(y, dtype=bool)
     for term in result:
         y_term = np.ones_like(y, dtype=bool)
