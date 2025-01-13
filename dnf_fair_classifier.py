@@ -97,22 +97,26 @@ class DNFFairClassifier:
         return model
 
     def _add_cut(self, ingroup_i: np.ndarray[int], positive_direction: bool):
+        # indices of negative and positive classifications are swapped,
+        #   since we learn a CNF equivalent to sought DNF (because of convexity)
+        # here we swap them to the correct values as used for FPSF
+        neg_i = self.model.pos_i
+
         self.n_cuts += 1
+        # ingroup contains only those indices where y_true == 0!
         p_group = ingroup_i.shape[0] / self.n_samples
-        sum_all_y_hat = sum(self.model.error[i] for i in self.model.neg_i)
-        sum_group_y_hat = sum(
-            0 if i in self.model.pos_i else self.model.error[i] for i in ingroup_i
-        )
+        sum_y_hat = sum(self.model.error[i] for i in neg_i)
+        sum_group_y_hat = sum(self.model.error[i] for i in ingroup_i)
         if positive_direction:
             return self.model.fair_cuts.add(
-                (p_group / len(self.model.neg_i)) * sum_all_y_hat
+                (p_group / len(neg_i)) * sum_y_hat
                 - (1 / self.n_samples) * sum_group_y_hat
                 <= self._gamma
             )
         else:
             return self.model.fair_cuts.add(
                 (1 / self.n_samples) * sum_group_y_hat
-                - (p_group / len(self.model.neg_i)) * sum_all_y_hat
+                - (p_group / len(neg_i)) * sum_y_hat
                 <= self._gamma
             )
 
@@ -129,7 +133,7 @@ class DNFFairClassifier:
         for conj in rule:
             group &= self.X_prot[:, conj]
         violation, direction = eval_fpsf(self.true_y, y_hat, group, get_direction=True)
-        ingroup_i = np.where(group)[0]
+        ingroup_i = np.where(group & ~self.true_y)[0]
         return ingroup_i, violation, direction
 
     @property
