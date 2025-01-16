@@ -24,6 +24,7 @@ def run_experiment(cfg: DictConfig):
         load_classif_scenario(cfg.scenario, cfg.seed, cfg.n_samples)
     )
 
+    n_samples = X_orig.shape[0]
     X = binarizer.encode(X_orig, include_negations=False)
     X_prot = binarizer_protected.encode(X_prot_orig, include_negations=False)
     y = binarizer.encode_y(y_orig)
@@ -78,10 +79,18 @@ def run_experiment(cfg: DictConfig):
     # Evaluate using gerryfair !and! SPSF_mio
     auditor = Auditor(dfX_prot, dfy, "FP")
     gerrygroup_train, oracle = auditor.audit(y_hat_train_prob, with_group_def=True)
+    gerrygroup_train = np.array(gerrygroup_train, dtype=bool)
 
     spsf = SPSF()
-    mask = y == 0
-    group_rule = spsf.find_rule(X_prot[mask], y_hat_train[mask])
+    if n_samples > 20000:
+        np.random.seed(cfg.seed)
+        eval_idx = np.random.choice(n_samples, 10000, replace=False)
+        mask = y[eval_idx] == 0
+        group_rule = spsf.find_rule(X_prot[eval_idx][mask], y_hat_train[eval_idx][mask])
+    else:
+        mask = y == 0
+        group_rule = spsf.find_rule(X_prot[mask], y_hat_train[mask])
+
     miogroup_train = np.ones_like(y, dtype=bool)
     for feat_i in group_rule:
         miogroup_train &= X_prot[:, feat_i]
