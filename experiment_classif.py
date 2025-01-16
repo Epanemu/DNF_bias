@@ -11,6 +11,7 @@ from omegaconf import DictConfig
 from dnf_fair_classifier import DNFFairClassifier
 from gerryfair.model import Auditor, Model
 from linear_fair_classifier import LinearFairClassifier
+from NN_fair_classifier import NNFairClassifier, SimpleDataset
 from scenarios.folktables_scenarios import load_classif_scenario
 from spsf_mio import SPSF
 from utils import eval_fpsf, eval_spsf
@@ -57,11 +58,17 @@ def run_experiment(cfg: DictConfig):
         y_hat_train = y_hat_train.flatten()
         y_hat_train_prob = y_hat_train.astype(int)
     elif cfg.model == "NN":
-        raise NotImplementedError("TODO: implement the NNs")
-        # NN = NNFairClassifier(gamma=0.01)
-        # y_hat_train_prob = NN.train(X_enc, y, X_prot)
-        # y_hat_train_prob = NN.predict_prob(X_enc)
-        # y_hat_train = y_hat_train_prob >= 0.5
+        # alpha = 1/gamma
+        NN = NNFairClassifier(X_enc.shape[1], [500, 200, 50, 10], gamma=0.01, alpha=100)
+        np.random.seed(cfg.seed)
+        eval_idx = np.random.choice(n_samples, n_samples // 10, replace=False)
+        eval_mask = np.zeros_like(y, dtype=bool)
+        eval_mask[eval_idx] = True
+        train = SimpleDataset(X_enc[~eval_mask], X_prot[~eval_mask], y[~eval_mask])
+        eval = SimpleDataset(X_enc[eval_mask], X_prot[eval_mask], y[eval_mask])
+        NN.train(train, eval, batch_size=2000, fpsf_size=20000, epochs=10)
+        y_hat_train_prob = NN.predict_proba(X_enc)
+        y_hat_train = y_hat_train_prob >= 0.5
     elif cfg.model == "GerryFair":
         gerryfair_model = Model(printflag=True, gamma=0.01, fairness_def="FP")
         n_iters = cfg.time_limit // 5
@@ -120,6 +127,10 @@ def run_experiment(cfg: DictConfig):
             out_file.write(
                 f"Time in callbacks proportion: {mio_setup.callback_time_proportion} \n"
             )
+        elif cfg.model == "NN":
+            out_file.write(f"Number of subgroups: {NN.n_subgroups} \n")
+            out_file.write(f"List of subgroups: {NN.subgroups} \n")
+            out_file.write(f"Number of checks: {NN.n_FPSF_checks} \n")
         out_file.write(f"Accuracy: {np.mean(y_hat_train == y)} \n")
         out_file.write(f"MIO group: {group_rule} \n")
         out_file.write(f"MIO SPSF: {eval_spsf(y_hat_train, miogroup_train)} \n")
@@ -137,6 +148,9 @@ def run_experiment(cfg: DictConfig):
     if cfg.model == "GerryFair":
         with open(os.path.join(run_dir, "gerrymodel.pickle"), "wb") as f:
             pickle.dump(gerryfair_model, f)
+    elif cfg.model == "NN":
+        path = os.path.join(run_dir, "NN.pth")
+        NN.save_model(path)
 
 
 if __name__ == "__main__":
