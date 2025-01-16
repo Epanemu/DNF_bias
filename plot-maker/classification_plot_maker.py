@@ -16,7 +16,7 @@ base_dir_prefix = "multirun/2025-01-13/"
 method_colors = {"GerryFair": "red", "fairDNF": "blue"}
 method_names = {"GerryFair": "GerryFair", "fairDNF": "DNF via MIO with lazy FPSF"}
 method_paths = {
-    "GerryFair": {"folktables": "11-29-22"},
+    "GerryFair": {"folktables": "12-47-17"},
     "fairDNF": {"folktables": "11-29-47"},
 }
 
@@ -57,7 +57,7 @@ def extract_data_for_method(method):
                         if mio_fpsf:
                             extracted_data.append(
                                 (
-                                    "FPSF (conjunction)",
+                                    "FPSF (measured by conjunction)",
                                     scenario,
                                     float(mio_fpsf.group(1)),
                                 )
@@ -66,7 +66,7 @@ def extract_data_for_method(method):
                         if gerry_fpsf:
                             extracted_data.append(
                                 (
-                                    "FPSF (linear oracle)",
+                                    "FPSF (measured by linear oracle)",
                                     scenario,
                                     float(gerry_fpsf.group(1)),
                                 )
@@ -91,6 +91,20 @@ def extract_data_for_method(method):
                         if callbacks:
                             extracted_data.append(
                                 ("# Callbacks", scenario, float(callbacks.group(1)))
+                            )
+                        prot_dim = re.search(r"Protected dimension: (\d+)", line)
+                        if prot_dim:
+                            extracted_data.append(
+                                (
+                                    "Dimension - protected",
+                                    scenario,
+                                    float(prot_dim.group(1)),
+                                )
+                            )
+                        full_dim = re.search(r"Full dimension: (\d+)", line)
+                        if full_dim:
+                            extracted_data.append(
+                                ("Dimension - all", scenario, float(full_dim.group(1)))
                             )
                     extracted_data.append(("# Samples", scenario, n_samples))
 
@@ -119,12 +133,14 @@ fig, axs = plt.subplots(r, c, figsize=(12, 12))
 names = sorted(list(all_data[methods[0]].values())[0].keys())
 measuers = [
     "Accuracy",
-    "FPSF (conjunction)",
-    "FPSF (linear oracle)",
+    "FPSF (measured by conjunction)",
+    "FPSF (measured by linear oracle)",
+    "# Samples",
+    "Dimension - all",
+    "Dimension - protected",
     "# Callbacks",
     "# Cuts",
     "Proportion of time spent in callbacks",
-    "# Samples",
 ]
 
 for method in methods:
@@ -147,15 +163,24 @@ for method in methods:
             yerr=sorted_std,
             capsize=5,
             color=method_colors[method],
-            label=f"{method_names[method]} + std band",
+            label=f"{method_names[method]} + std",
         )
 
+        if "FPSF" in measure:
+            ax.set_ylim((0, 0.02))
+            ax.plot(
+                [-barwidth, len(names) - 1 + barwidth],
+                [0.01, 0.01],
+                label="Gamma threshold",
+                color="black",
+                linestyle="dashed",
+            )
         ax.set_ylabel(measure)
         ax.set_xticks(np.arange(len(names)))
         ax.set_xticklabels(names, rotation=90)
         ax.grid(True, which="both", ls=":")
         if i == 0:
-            ax.legend()
+            ax.legend(loc="lower left")
 
 plt.tight_layout()
 output_path = "multirun_images/" + str(date.today()) + "_classification.png"
