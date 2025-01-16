@@ -149,13 +149,14 @@ def eval_spsf(
 
 def eval_fpsf(
     y_true: np.ndarray[bool],
-    y_model: np.ndarray[bool],
+    y_model: np.ndarray[bool] | np.ndarray[float],
     ingroup: np.ndarray[bool],
     get_direction: bool = False,
 ) -> float:
+    assert y_true.shape == y_model.shape and y_model.shape == ingroup.shape
     p_group = np.mean(ingroup & ~y_true)
     p_pos = np.mean(y_model[~y_true])
-    p_joint = np.mean(ingroup & y_model & ~y_true)
+    p_joint = np.sum(y_model[ingroup & ~y_true]) / y_true.shape[0]
 
     if get_direction:
         return np.abs(p_group * p_pos - p_joint), p_group * p_pos > p_joint
