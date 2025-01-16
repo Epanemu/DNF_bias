@@ -1,4 +1,5 @@
 import os
+import pickle
 import subprocess
 import sys
 
@@ -8,7 +9,8 @@ import pandas as pd
 from omegaconf import DictConfig
 
 from dnf_fair_classifier import DNFFairClassifier
-from gerryfair.auditor import Auditor
+from gerryfair.model import Auditor, Model
+from linear_fair_classifier import LinearFairClassifier
 from scenarios.folktables_scenarios import load_classif_scenario
 from spsf_mio import SPSF
 from utils import eval_fpsf, eval_spsf
@@ -18,34 +20,68 @@ githash = ""
 
 @hydra.main(version_base="1.3", config_path="conf", config_name="config")
 def run_experiment(cfg: DictConfig):
-    binarizer, X_orig, y_orig, binarizer_protected, X_prot_orig = load_classif_scenario(
-        cfg.scenario, cfg.seed, cfg.n_samples
+    binarizer, dhandler, X_orig, y_orig, binarizer_protected, X_prot_orig = (
+        load_classif_scenario(cfg.scenario, cfg.seed, cfg.n_samples)
     )
 
     X = binarizer.encode(X_orig, include_negations=False)
     X_prot = binarizer_protected.encode(X_prot_orig, include_negations=False)
     y = binarizer.encode_y(y_orig)
 
-    dnf = DNFFairClassifier(gamma=0.01)
+    X_enc = dhandler.encode(X_orig)
 
-    result = dnf.find_dnf(X, X_prot, y, n_terms=5, time_limit=300, verbose=True)
-    y_hat_train = np.zeros_like(y, dtype=bool)
-    for term in result:
-        y_term = np.ones_like(y, dtype=bool)
-        for conj in term:
-            y_term &= X[:, conj]
-        y_hat_train |= y_term
+    dfX = pd.DataFrame(X)
+    dfX_prot = pd.DataFrame(X_prot)
+    dfy = pd.Series(y)
+
+    if cfg.model == "DNF":
+        mio_setup = DNFFairClassifier(gamma=0.01)
+        dnf_model = mio_setup.find_dnf(
+            X, X_prot, y, n_terms=5, time_limit=cfg.time_limit, verbose=True
+        )
+
+        y_hat_train = np.zeros_like(y, dtype=bool)
+        for term in dnf_model:
+            y_term = np.ones_like(y, dtype=bool)
+            for conj in term:
+                y_term &= X[:, conj]
+            y_hat_train |= y_term
+        y_hat_train_prob = y_hat_train.astype(int)
+    elif cfg.model == "Linear":
+        mio_setup = LinearFairClassifier(gamma=0.01)
+        coefs, threshold = mio_setup.find_classifier(
+            X_enc, X_prot, y, time_limit=cfg.time_limit, epsilon=1e-4, verbose=True
+        )
+        y_hat_train = X_enc @ coefs.reshape((-1, 1)) >= threshold
+        y_hat_train = y_hat_train.flatten()
+        y_hat_train_prob = y_hat_train.astype(int)
+    elif cfg.model == "NN":
+        raise NotImplementedError("TODO: implement the NNs")
+        # NN = NNFairClassifier(gamma=0.01)
+        # y_hat_train_prob = NN.train(X_enc, y, X_prot)
+        # y_hat_train_prob = NN.predict_prob(X_enc)
+        # y_hat_train = y_hat_train_prob >= 0.5
+    elif cfg.model == "GerryFair":
+        gerryfair_model = Model(printflag=True, gamma=0.01, fairness_def="FP")
+        gerryfair_model.set_options(max_iters=30)
+        gerryfair_model.train(dfX, dfX_prot, dfy)
+
+        y_hat_train_prob = np.array(gerryfair_model.predict(dfX))
+        y_hat_train = y_hat_train_prob >= 0.5
+    elif cfg.model == "FAMS":
+        raise NotImplementedError("TODO: implement the FAMS")
+        # y_hat_train variable must be set, a numpy array with bool values representing classifications - True for 1
+        # y_hat_train_prob variable must be set as well, containing the probability of a positive classification (if model does not give probability, make it same as y_hat_train, but with ints)
+    else:
+        raise ValueError(f"Unknown fair classifier {cfg.model}")
 
     # Evaluate using gerryfair !and! SPSF_mio
-    auditor = Auditor(pd.DataFrame(X_prot), pd.Series(y), "FP")
-    gerrygroup_train, oracle = auditor.audit(
-        pd.Series(y_hat_train), with_group_def=True
-    )
+    auditor = Auditor(dfX_prot, dfy, "FP")
+    gerrygroup_train, oracle = auditor.audit(y_hat_train_prob, with_group_def=True)
 
     spsf = SPSF()
     mask = y == 0
     group_rule = spsf.find_rule(X_prot[mask], y_hat_train[mask])
-
     miogroup_train = np.ones_like(y, dtype=bool)
     for feat_i in group_rule:
         miogroup_train &= X_prot[:, feat_i]
@@ -58,36 +94,39 @@ def run_experiment(cfg: DictConfig):
         print(f"Config:\n {cfg}", file=sys.stderr)
         out_file.write(f"Config:\n {cfg}\n")
         out_file.write(f"\nGit hash: {githash}\n\n")
-        if result is not None:
-            out_file.write("RESULT\n")
-            out_file.write(f"DNF: {result} \n")
-            out_file.write(f"Status: {dnf.mio_result.solver.status} \n")
+        out_file.write("RESULT\n")
+        if cfg.model == "DNF":
+            out_file.write(f"DNF: {dnf_model} \n")
+        if cfg.model == "Linear":
+            out_file.write(f"Classif Coefs: {coefs} \n")
+            out_file.write(f"Classif Threshold: {threshold} \n")
+        if cfg.model in ["DNF", "Linear"]:
+            out_file.write(f"Status: {mio_setup.mio_result.solver.status} \n")
             out_file.write(
-                f"Termination Condition: {dnf.mio_result.solver.termination_condition} \n"
+                f"Termination Condition: {mio_setup.mio_result.solver.termination_condition} \n"
             )
-            out_file.write(f"Number of cuts: {dnf.n_cuts} \n")
-            out_file.write(f"Number of callbacks: {dnf.n_callbacks} \n")
+            out_file.write(f"Number of cuts: {mio_setup.n_cuts} \n")
+            out_file.write(f"Number of callbacks: {mio_setup.n_callbacks} \n")
             out_file.write(
-                f"Time in callbacks proportion: {dnf.callback_time_proportion} \n"
+                f"Time in callbacks proportion: {mio_setup.callback_time_proportion} \n"
             )
-            out_file.write(f"Accuracy: {np.mean(y_hat_train == y)} \n")
-            out_file.write(f"MIO group: {group_rule} \n")
-            out_file.write(f"MIO SPSF: {eval_spsf(y_hat_train, miogroup_train)} \n")
-            out_file.write(f"MIO FPSF: {eval_fpsf(y, y_hat_train, miogroup_train)} \n")
-            out_file.write(f"Gerry oracle b0 coef: {list(oracle.b0.coef_)} \n")
-            out_file.write(f"Gerry oracle b0 intercept: {oracle.b0.intercept_} \n")
-            out_file.write(f"Gerry oracle b1 coef: {list(oracle.b1.coef_)} \n")
-            out_file.write(f"Gerry oracle b1 intercept: {oracle.b1.intercept_} \n")
-            out_file.write(f"Gerry SPSF: {eval_spsf(y_hat_train, gerrygroup_train)} \n")
-            out_file.write(
-                f"Gerry FPSF: {eval_fpsf(y, y_hat_train, gerrygroup_train)} \n"
-            )
-            out_file.write(f"Protected dimension: {X_prot.shape[1]} \n")
-            out_file.write(f"Full dimension: {X.shape[1]} \n")
-        else:
-            out_file.write("Error\n")
+        out_file.write(f"Accuracy: {np.mean(y_hat_train == y)} \n")
+        out_file.write(f"MIO group: {group_rule} \n")
+        out_file.write(f"MIO SPSF: {eval_spsf(y_hat_train, miogroup_train)} \n")
+        out_file.write(f"MIO FPSF: {eval_fpsf(y, y_hat_train, miogroup_train)} \n")
+        out_file.write(f"Gerry oracle b0 coef: {list(oracle.b0.coef_)} \n")
+        out_file.write(f"Gerry oracle b0 intercept: {oracle.b0.intercept_} \n")
+        out_file.write(f"Gerry oracle b1 coef: {list(oracle.b1.coef_)} \n")
+        out_file.write(f"Gerry oracle b1 intercept: {oracle.b1.intercept_} \n")
+        out_file.write(f"Gerry SPSF: {eval_spsf(y_hat_train, gerrygroup_train)} \n")
+        out_file.write(f"Gerry FPSF: {eval_fpsf(y, y_hat_train, gerrygroup_train)} \n")
+        out_file.write(f"Protected dimension: {X_prot.shape[1]} \n")
+        out_file.write(f"Full dimension: {X.shape[1]} \n")
 
     print(f"Result saved to {os.path.join(run_dir, 'output.txt')}")
+    if cfg.model == "GerryFair":
+        with open(os.path.join(run_dir, "gerrymodel.pickle"), "wb") as f:
+            pickle.dump(gerryfair_model, f)
 
 
 if __name__ == "__main__":

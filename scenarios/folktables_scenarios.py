@@ -246,6 +246,7 @@ def load_classif_scenario(name, seed, n_max, state="CA", year="2018", horizon="1
 
     return (
         binarizer,
+        dhandler,
         input_data,
         target_data,
         binarizer_protected,
