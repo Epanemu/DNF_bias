@@ -5,8 +5,6 @@ import numpy as np
 import pyomo.environ as pyo
 from gurobipy import GRB
 
-# from one_rule import OneRule
-# from one_rule_lp import OneRule
 from spsf_mio import SPSF
 from utils import eval_fpsf
 
@@ -18,14 +16,11 @@ logger = logging.getLogger(__name__)
 
 
 class LinearFairClassifier:
-    """Implementation of a MIO formulation for finding an optimal DNF with the lowest 0-1 error constrained to gamma-fairness.
-    The formulation is based on an implementation of eq. (10) in https://krvarshney.github.io/pubs/SuWVM_mlsp2016.pdf
-    """
+    """Implementation of a MIO formulation for finding an optimal DNF with the lowest 0-1 error constrained to gamma-fairness."""
 
     def __init__(self, gamma: float) -> None:
         self._gamma = gamma
 
-    # TODO implement hamming loss
     def _make_linear_classif(
         self,
         X: np.ndarray[float],
