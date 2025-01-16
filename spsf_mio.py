@@ -96,7 +96,7 @@ class SPSF:
     def find_rule(
         self,
         X: np.ndarray[bool],
-        y: np.ndarray[bool],
+        y: np.ndarray[bool] | None = None,
         y_prob: np.ndarray[float] | None = None,
         n_min: int = 0,
         verbose: bool = False,
@@ -113,8 +113,10 @@ class SPSF:
         Returns:
             list[int]: List of indices of the literals in the final conjunction
         """
-        assert y.shape == (X.shape[0],)
-        assert X.dtype == bool and y.dtype == bool
+        assert (y is not None and y.shape == (X.shape[0],)) or (
+            y_prob is not None and y_prob.shape == (X.shape[0],)
+        )
+        assert X.dtype == bool
 
         if y_prob is not None:
             int_model = self._make_int_model(X, y_prob, n_min=n_min, probabilistic=True)
