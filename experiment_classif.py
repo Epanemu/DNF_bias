@@ -64,7 +64,8 @@ def run_experiment(cfg: DictConfig):
         # y_hat_train = y_hat_train_prob >= 0.5
     elif cfg.model == "GerryFair":
         gerryfair_model = Model(printflag=True, gamma=0.01, fairness_def="FP")
-        gerryfair_model.set_options(max_iters=30)
+        n_iters = cfg.time_limit // 5
+        gerryfair_model.set_options(max_iters=n_iters)
         gerryfair_model.train(dfX_enc, dfX_prot, dfy)
 
         y_hat_train_prob = np.array(gerryfair_model.predict(dfX_enc))
