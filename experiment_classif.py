@@ -108,7 +108,7 @@ def run_experiment(cfg: DictConfig):
         if cfg.model == "DNF":
             out_file.write(f"DNF: {dnf_model} \n")
         if cfg.model == "Linear":
-            out_file.write(f"Classif Coefs: {coefs} \n")
+            out_file.write(f"Classif Coefs: {list(coefs)} \n")
             out_file.write(f"Classif Threshold: {threshold} \n")
         if cfg.model in ["DNF", "Linear"]:
             out_file.write(f"Status: {mio_setup.mio_result.solver.status} \n")
