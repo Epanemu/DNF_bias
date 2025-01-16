@@ -16,8 +16,9 @@ class SPSF:
     def _make_int_model(
         self,
         X: np.ndarray[bool],
-        y: np.ndarray[bool],
+        y: np.ndarray[bool] | np.ndarray[float],
         n_min: int = 0,
+        probabilistic: bool = False,
         # trunk-ignore(ruff/B006)
         feat_init: dict[int, int] = {},
     ) -> pyo.ConcreteModel:
@@ -25,7 +26,7 @@ class SPSF:
 
         Args:
             X (np.ndarray[bool]): input matrix
-            y (np.ndarray[bool]): target labels
+            y (np.ndarray[bool] | np.ndarray[float]): target labels or probability of label 1 if argument probabilistic is True
             feat_init (dict[int, int], optional): Initialization of the conjunction.
                 A dictionary containing feature indices as keys and 0/1 values of whether they are used. Defaults to {}.
 
@@ -39,14 +40,11 @@ class SPSF:
         model = pyo.ConcreteModel()
         model.all_i = pyo.Set(initialize=np.arange(n))
         model.feat_i = pyo.Set(initialize=np.arange(d))
-        model.pos_i = pyo.Set(initialize=np.where(y)[0])
-        model.neg_i = pyo.Set(initialize=np.where(~y)[0])
 
         model.use_feat = pyo.Var(model.feat_i, domain=pyo.Binary, initialize=feat_init)
         model.ingroup = pyo.Var(model.all_i, domain=pyo.NonNegativeReals, bounds=(0, 1))
 
         model.pos = pyo.Constraint(
-            # model.pos_i,
             model.all_i,
             rule=lambda m, i: (
                 m.ingroup[i]
@@ -54,7 +52,6 @@ class SPSF:
             ),
         )
         model.neg = pyo.Constraint(
-            # model.all_i if n_min > 0 else model.neg_i,
             model.all_i,
             model.feat_i,
             rule=lambda m, i, j: (
@@ -67,32 +64,28 @@ class SPSF:
                 expr=(sum(model.ingroup[i] for i in model.all_i) >= n_min),
             )
 
-        negw = len(model.pos_i) / n**2
-        posw = len(model.neg_i) / n**2
+        if probabilistic:
+            p_base = np.mean(y)
+            subgroup = sum(model.ingroup[i] for i in model.all_i)
+            joint = sum(y[i] * model.ingroup[i] for i in model.all_i)
+            term1 = (p_base / n) * subgroup
+            term2 = (1 / n) * joint
+        else:
+            model.pos_i = pyo.Set(initialize=np.where(y)[0])
+            model.neg_i = pyo.Set(initialize=np.where(~y)[0])
+            negw = len(model.pos_i) / n**2
+            posw = len(model.neg_i) / n**2
+            term1 = negw * sum(model.ingroup[i] for i in model.neg_i)
+            term2 = posw * sum(model.ingroup[i] for i in model.pos_i)
+
         model.o = pyo.Var(domain=pyo.NonNegativeReals)
         model.b = pyo.Var(domain=pyo.Binary)
-        model.abs_obj_u1 = pyo.Constraint(
-            expr=model.o
-            <= negw * sum(model.ingroup[i] for i in model.neg_i)
-            - posw * sum(model.ingroup[i] for i in model.pos_i)
-            + 2 * model.b
-        )
+        model.abs_obj_u1 = pyo.Constraint(expr=model.o <= term1 - term2 + 2 * model.b)
         model.abs_obj_u2 = pyo.Constraint(
-            expr=model.o
-            <= posw * sum(model.ingroup[i] for i in model.pos_i)
-            - negw * sum(model.ingroup[i] for i in model.neg_i)
-            + 2 * (1 - model.b)
+            expr=model.o <= term2 - term1 + 2 * (1 - model.b)
         )
-        model.abs_obj_l1 = pyo.Constraint(
-            expr=model.o
-            >= negw * sum(model.ingroup[i] for i in model.neg_i)
-            - posw * sum(model.ingroup[i] for i in model.pos_i)
-        )
-        model.abs_obj_l2 = pyo.Constraint(
-            expr=model.o
-            >= posw * sum(model.ingroup[i] for i in model.pos_i)
-            - negw * sum(model.ingroup[i] for i in model.neg_i)
-        )
+        model.abs_obj_l1 = pyo.Constraint(expr=model.o >= term1 - term2)
+        model.abs_obj_l2 = pyo.Constraint(expr=model.o >= term2 - term1)
         model.obj = pyo.Objective(
             expr=model.o,
             sense=pyo.maximize,
@@ -104,6 +97,7 @@ class SPSF:
         self,
         X: np.ndarray[bool],
         y: np.ndarray[bool],
+        y_prob: np.ndarray[float] | None = None,
         n_min: int = 0,
         verbose: bool = False,
     ) -> list[int]:
@@ -122,7 +116,10 @@ class SPSF:
         assert y.shape == (X.shape[0],)
         assert X.dtype == bool and y.dtype == bool
 
-        int_model = self._make_int_model(X, y, n_min=n_min)
+        if y_prob is not None:
+            int_model = self._make_int_model(X, y_prob, n_min=n_min, probabilistic=True)
+        else:
+            int_model = self._make_int_model(X, y, n_min=n_min, probabilistic=False)
         opt = pyo.SolverFactory("gurobi", solver_io="python")
         opt.solve(int_model, tee=verbose)
 
@@ -133,10 +130,12 @@ class SPSF:
 
         return [i for i in int_model.feat_i if int_model.use_feat[i].value != 0]
 
+    # TODO move this wrapper to utils?
     def find_subgroup(
         self,
         X: np.ndarray[bool],
         y: np.ndarray[bool],
+        y_prob: np.ndarray[float] | None = None,
         verbose: bool = False,
     ) -> np.ndarray[bool]:
         """Find a single conjunction with highest SPSF violation and returns the y_hat vector of the group
@@ -149,7 +148,7 @@ class SPSF:
         Returns:
             np.ndarray[int]: List of indices of the literals in the final conjunction
         """
-        conjuncts = self.find_rule(X, y, verbose=verbose)
+        conjuncts = self.find_rule(X, y, y_prob=y_prob, verbose=verbose)
         y_hat = np.ones_like(y, dtype=bool)
         for conj in conjuncts:
             y_hat &= X[:, conj]
