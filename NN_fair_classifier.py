@@ -102,16 +102,25 @@ class NNFairClassifier(torch.nn.Module):
         fpsf_y = []
         fair_loss = torch.tensor(torch.nan)
 
+        n_data = len(train_loader.dataset)
+        n_batches = len(train_loader)
+
         for epoch_i in range(epochs):
             logger.info(f"EPOCH {epoch_i+1}/{epochs}: ---------------------------")
 
+            cum_class_loss = 0
+            cum_fair_loss = 0
+            n_corr = 0
             self._model.train()
             for batch_i, (X, X_prot, y) in enumerate(train_loader):
                 pred = self._model(X)
                 class_loss = self._bce_loss(pred, y)
+                cum_class_loss += class_loss.item()
                 loss = class_loss
 
+                n_corr += ((pred > 0) == y).type(torch.float).sum().item()
                 fair_loss = self._fpsf_loss(y, self._sigmoid(pred), X_prot.numpy())
+                cum_fair_loss += fair_loss.item()
                 # multiply the loss to account for all the batch updates
                 loss += fair_loss
 
@@ -156,20 +165,24 @@ class NNFairClassifier(torch.nn.Module):
                         f"[{data:>5d}/{trainsize:>5d}] - BCE loss: {class_loss.item():>7f} | FPSF loss: {(fair_loss.item() if fair_loss is not None else torch.nan):>7f}"
                     )
 
+            logger.info("TRAIN:")
+            logger.info(f"Accuracy: {(100*(n_corr/n_data)):>0.1f}%")
+            logger.info(f"Avg BCE loss: {cum_class_loss/n_batches:>8f}")
+            logger.info(f"Avg FPSF loss: {cum_fair_loss/n_batches:>8f}")
             self._eval(eval_loader)
 
     def _eval(self, eval_loader):
         self._model.eval()
         n_data = len(eval_loader.dataset)
         n_batches = len(eval_loader)
-        test_loss = 0
+        eval_loss = 0
         fair_loss = 0
         n_corr = 0
 
         with torch.no_grad():
             for X, X_prot, y in eval_loader:
                 pred = self._model(X)
-                test_loss += self._bce_loss(pred, y).item()
+                eval_loss += self._bce_loss(pred, y).item()
                 fair_loss += self._fpsf_loss(
                     y, self._sigmoid(pred), X_prot.numpy()
                 ).item()
@@ -185,7 +198,7 @@ class NNFairClassifier(torch.nn.Module):
 
         logger.info("VALIDATION:")
         logger.info(f"Accuracy: {(100*(n_corr/n_data)):>0.1f}%")
-        logger.info(f"Avg BCE loss: {test_loss/n_batches:>8f}")
+        logger.info(f"Avg BCE loss: {eval_loss/n_batches:>8f}")
         logger.info(f"Avg FPSF loss: {fair_loss/n_batches:>8f}")
         # logger.info(f"FPSF violation of last batch ([{rule}]): {violation:>8f}")
 
@@ -213,11 +226,10 @@ class NNFairClassifier(torch.nn.Module):
                 fpsf = (subg_size / n) * p_base - p_joint
             else:
                 fpsf = p_joint - (subg_size / n) * p_base
-            # violations.append(F.relu(fpsf - self._gamma) * n_occurences)
-            # violations.append(F.relu(fpsf - self._gamma / 2) * n_occurences)
-            violations.append(
-                F.softplus(self._alpha * (fpsf - self._gamma)) * n_occurences
-            )
+            violations.append(self._alpha * F.relu(fpsf - self._gamma) * n_occurences)
+            # violations.append(
+            #     F.softplus(self._alpha * (fpsf - self._gamma)) * n_occurences
+            # )
             tot_subgroups += n_occurences
         return torch.sum(torch.tensor(violations)) / tot_subgroups
 
