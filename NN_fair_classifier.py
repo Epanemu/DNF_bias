@@ -61,7 +61,7 @@ class NNFairClassifier(torch.nn.Module):
         self._bce_loss = nn.BCEWithLogitsLoss()
         # TODO test with some regression loss?
         # self._bce_loss = nn.MSELoss()
-        self._optimizer = torch.optim.Adam(self._model.parameters())
+        self._optimizer = torch.optim.Adam(self._model.parameters(), lr=0.0001)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self._model.to(self.device)
 
