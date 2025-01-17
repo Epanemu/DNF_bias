@@ -9,15 +9,29 @@ import numpy as np
 methods = [
     "GerryFair",
     "fairDNF",
+    "fairLinear",
+    "fairNN",
 ]
 
-base_dir_prefix = "multirun/2025-01-13/"
+base_dir_prefix = "multirun/"
 
-method_colors = {"GerryFair": "red", "fairDNF": "blue"}
-method_names = {"GerryFair": "GerryFair", "fairDNF": "DNF via MIO with lazy FPSF"}
+method_colors = {
+    "GerryFair": "red",
+    "fairDNF": "blue",
+    "fairLinear": "green",
+    "fairNN": "magenta",
+}
+method_names = {
+    "GerryFair": "GerryFair",
+    "fairDNF": "DNF via MIO with lazy FPSF",
+    "fairLinear": "Linear via MIO with lazy FPSF",
+    "fairNN": "NN with FPSF loss",
+}
 method_paths = {
-    "GerryFair": {"folktables": "12-47-17"},
-    "fairDNF": {"folktables": "11-29-47"},
+    "GerryFair": {"folktables": "2025-01-16/23-43-03"},
+    "fairDNF": {"folktables": "2025-01-17/06-05-57"},
+    "fairLinear": {"folktables": "2025-01-17/10-54-37"},
+    "fairNN": {"folktables": "2025-01-16/23-42-57"},
 }
 
 
@@ -85,12 +99,22 @@ def extract_data_for_method(method):
                         cuts = re.search(r"Number of cuts: (\d+)", line)
                         if cuts:
                             extracted_data.append(
-                                ("# Cuts", scenario, float(cuts.group(1)))
+                                ("# Subgroups", scenario, float(cuts.group(1)))
+                            )
+                        subgs = re.search(r"Number of subgroups: (\d+)", line)
+                        if subgs:
+                            extracted_data.append(
+                                ("# Subgroups", scenario, float(subgs.group(1)))
                             )
                         callbacks = re.search(r"Number of callbacks: (\d+)", line)
                         if callbacks:
                             extracted_data.append(
-                                ("# Callbacks", scenario, float(callbacks.group(1)))
+                                ("# Checks", scenario, float(callbacks.group(1)))
+                            )
+                        checks = re.search(r"Number of checks: (\d+)", line)
+                        if checks:
+                            extracted_data.append(
+                                ("# Checks", scenario, float(checks.group(1)))
                             )
                         prot_dim = re.search(r"Protected dimension: (\d+)", line)
                         if prot_dim:
@@ -138,8 +162,8 @@ measuers = [
     "# Samples",
     "Dimension - all",
     "Dimension - protected",
-    "# Callbacks",
-    "# Cuts",
+    "# Checks",
+    "# Subgroups",
     "Proportion of time spent in callbacks",
 ]
 
@@ -153,8 +177,11 @@ for method in methods:
         sorted_mean = [np.mean(data_dict[measure][n]) for n in names]
         sorted_std = [np.std(data_dict[measure][n]) for n in names]
 
-        barwidth = 0.35
-        shift = (barwidth / 2) if method == methods[0] else (-barwidth / 2)
+        n = len(methods)
+        w = 0.6
+        barwidth = w / n
+        j = methods.index(method)
+        shift = barwidth / 2 + j * barwidth - w / 2
         # barplot with std band for each method side by side in one axes
         ax.bar(
             np.arange(len(names)) + shift,
@@ -169,10 +196,10 @@ for method in methods:
         if "FPSF" in measure:
             ax.set_ylim((0, 0.02))
             ax.plot(
-                [-barwidth, len(names) - 1 + barwidth],
+                [-w / 2, len(names) - 1 + w / 2],
                 [0.01, 0.01],
                 label="Gamma threshold",
-                color="black",
+                color="grey",
                 linestyle="dashed",
             )
         ax.set_ylabel(measure)
