@@ -94,7 +94,10 @@ class LinearFairClassifier:
         p_group = ingroup_i.shape[0] / self.n_samples
         sum_y_hat = sum(self.model.y_hat[i] for i in neg_i)
         sum_group_y_hat = sum(self.model.y_hat[i] for i in ingroup_i)
-        logger.debug(f"ADDING CUT ingroup_i={ingroup_i} p={p_group}")
+        # logger.debug(f"ADDING CUT ingroup_i={ingroup_i} p={p_group}")
+        logger.info(
+            f"ADDING CUT p={p_group} FPSF={(p_group / len(neg_i)) * sum(self.model.y_hat[i].value for i in neg_i) - (1 / self.n_samples) * sum(self.model.y_hat[i].value for i in ingroup_i)}"
+        )
         if positive_direction:
             return self.model.fair_cuts.add(
                 (p_group / len(neg_i)) * sum_y_hat
@@ -120,8 +123,8 @@ class LinearFairClassifier:
         for conj in rule:
             group &= self.X_prot[:, conj]
         violation, direction = eval_fpsf(self.true_y, y_hat, group, get_direction=True)
-        logger.debug(
-            f"FOUND SUBGROUP {rule} with violation {violation} in {'positive' if direction else 'negative'} direction"
+        logger.info(
+            f"FOUND SUBGROUP {rule} with violation {violation} (MIO:{spsf_mio.model.o.value}) in {'positive' if direction else 'negative'} direction"
         )
         ingroup_i = np.where(group & ~self.true_y)[0]
         return ingroup_i, violation, direction
@@ -198,6 +201,9 @@ class LinearFairClassifier:
         result = opt.solve(tee=verbose)
         t_diff = time.perf_counter() - t_start_solve
         print(f"~Time~ in callbacks: {self.__callback_time}")
+        logger.info(
+            f"Estim. Train Accuracy: {1 - (sum(int_model.y_hat[i].value for i in int_model.neg_i) + sum(1 - int_model.y_hat[i].value for i in int_model.pos_i)) / self.n_samples}"
+        )
         self.callback_time_proportion = self.__callback_time / t_diff
         self.mio_result = result
 

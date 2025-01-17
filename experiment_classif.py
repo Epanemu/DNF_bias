@@ -52,7 +52,7 @@ def run_experiment(cfg: DictConfig):
     elif cfg.model == "Linear":
         mio_setup = LinearFairClassifier(gamma=0.01)
         coefs, threshold = mio_setup.find_classifier(
-            X_enc, X_prot, y, time_limit=cfg.time_limit, epsilon=1e-4, verbose=True
+            X_enc, X_prot, y, time_limit=cfg.time_limit, epsilon=1e-3, verbose=True
         )
         y_hat_train = X_enc @ coefs.reshape((-1, 1)) >= threshold
         y_hat_train = y_hat_train.flatten()
