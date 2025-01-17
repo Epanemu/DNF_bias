@@ -59,7 +59,9 @@ def run_experiment(cfg: DictConfig):
         y_hat_train_prob = y_hat_train.astype(int)
     elif cfg.model == "NN":
         # alpha = 1/gamma
-        NN = NNFairClassifier(X_enc.shape[1], [500, 200, 50, 10], gamma=0.01, alpha=100)
+        NN = NNFairClassifier(
+            X_enc.shape[1], [500, 200, 50, 10], gamma=0.01, alpha=1000
+        )
         np.random.seed(cfg.seed)
         eval_idx = np.random.choice(n_samples, n_samples // 10, replace=False)
         eval_mask = np.zeros_like(y, dtype=bool)
