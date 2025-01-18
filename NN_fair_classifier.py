@@ -53,14 +53,14 @@ class NNFairClassifier(torch.nn.Module):
             prev = h
         # Assume binary classification
         layers.append(nn.Linear(prev, 1))
-        layers.append(nn.Sigmoid())
+        # layers.append(nn.Sigmoid())
 
         self._model = nn.Sequential(*layers)
-        # self._sigmoid = nn.Sigmoid()
-        self._sigmoid = nn.Identity()
-        # self._bce_loss = nn.BCEWithLogitsLoss()
+        self._sigmoid = nn.Sigmoid()
+        # self._sigmoid = nn.Identity()
+        self._bce_loss = nn.BCEWithLogitsLoss()
         # TODO test with some regression loss?
-        self._bce_loss = nn.MSELoss()
+        # self._bce_loss = nn.MSELoss()
         self._optimizer = torch.optim.Adam(self._model.parameters(), lr=0.001)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self._model.to(self.device)
@@ -116,7 +116,8 @@ class NNFairClassifier(torch.nn.Module):
                 pred = self._model(X)
                 class_loss = self._bce_loss(pred, y)
                 cum_class_loss += class_loss.item()
-                loss = class_loss
+                loss = 0
+                loss += class_loss
 
                 n_corr += ((pred > 0) == y).type(torch.float).sum().item()
                 fair_loss = self._fpsf_loss(y, self._sigmoid(pred), X_prot.numpy())
