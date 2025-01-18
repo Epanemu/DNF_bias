@@ -16,11 +16,14 @@ from scenarios.folktables_scenarios import load_classif_scenario
 from spsf_mio import SPSF
 from utils import eval_fpsf, eval_spsf
 
-githash = ""
+gitcommit = ""
 
 
 @hydra.main(version_base="1.3", config_path="conf", config_name="config")
 def run_experiment(cfg: DictConfig):
+    # skip already finished tests
+    if cfg.seed == 0 and cfg.scenario in ["ACSPublicCoverage", "ACSIncome"]:
+        return
     binarizer, dhandler, X_orig, y_orig, binarizer_protected, X_prot_orig = (
         load_classif_scenario(cfg.scenario, cfg.seed, cfg.n_samples)
     )
@@ -114,7 +117,7 @@ def run_experiment(cfg: DictConfig):
     with open(os.path.join(run_dir, "output.txt"), "w") as out_file:
         print(f"Config:\n {cfg}", file=sys.stderr)
         out_file.write(f"Config:\n {cfg}\n")
-        out_file.write(f"\nGit hash: {githash}\n\n")
+        out_file.write(f"\nGit hash: {gitcommit}\n\n")
         out_file.write("RESULT\n")
         if cfg.model == "DNF":
             out_file.write(f"DNF: {dnf_model} \n")
@@ -163,9 +166,11 @@ if __name__ == "__main__":
     )
     if result.stdout.strip() == "":
         res = subprocess.run(
-            ["git", "rev-parse", "HEAD"], capture_output=True, text=True
+            ["git", "rev-list", "--format=%B", "-n", "1", "HEAD"],
+            capture_output=True,
+            text=True,
         )
-        githash = res.stdout.strip()
+        gitcommit = res.stdout.strip()
         run_experiment()
     else:
         raise Exception("Git status is not clean. Commit changes first.")
