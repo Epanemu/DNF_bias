@@ -7,31 +7,51 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 methods = [
-    "GerryFair",
-    "fairDNF",
-    "fairLinear",
-    "fairNN",
+    # "GerryFair",
+    # "fairDNF",
+    # "fairLinear",
+    # "fairNN",
+    "NN_base",
+    "NN_nofair",
+    "NN_alpha",
+    "NN_LR",
+    "NN_MSE",
 ]
 
 base_dir_prefix = "multirun/"
 
 method_colors = {
-    "GerryFair": "red",
-    "fairDNF": "blue",
-    "fairLinear": "green",
-    "fairNN": "magenta",
+    # "GerryFair": "red",
+    # "fairDNF": "blue",
+    # "fairLinear": "green",
+    # "fairNN": "magenta",
+    "NN_base": "blue",
+    "NN_nofair": "red",
+    "NN_alpha": "magenta",
+    "NN_LR": "green",
+    "NN_MSE": "cyan",
 }
 method_names = {
     "GerryFair": "GerryFair",
     "fairDNF": "DNF via MIO with lazy FPSF",
     "fairLinear": "Linear via MIO with lazy FPSF",
     "fairNN": "NN with FPSF loss",
+    "NN_base": "NN baseline",
+    "NN_nofair": "NN no FPSF loss",
+    "NN_alpha": "NN alpha=1k",
+    "NN_LR": "NN lr=0.0001",
+    "NN_MSE": "NN use MSE loss",
 }
 method_paths = {
     "GerryFair": {"folktables": "2025-01-16/23-43-03"},
     "fairDNF": {"folktables": "2025-01-17/06-05-57"},
     "fairLinear": {"folktables": "2025-01-17/10-54-37"},
     "fairNN": {"folktables": "2025-01-16/23-42-57"},
+    "NN_base": {"folktables": "2025-01-17/baseline"},
+    "NN_nofair": {"folktables": "2025-01-17/no_fairness"},
+    "NN_alpha": {"folktables": "2025-01-17/alpha1k"},
+    "NN_LR": {"folktables": "2025-01-17/LR"},
+    "NN_MSE": {"folktables": "2025-01-17/MSE"},
 }
 
 
@@ -194,7 +214,7 @@ for method in methods:
         )
 
         if "FPSF" in measure:
-            ax.set_ylim((0, 0.02))
+            # ax.set_ylim((0, 0.02))
             ax.plot(
                 [-w / 2, len(names) - 1 + w / 2],
                 [0.01, 0.01],

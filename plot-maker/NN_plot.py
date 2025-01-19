@@ -28,7 +28,7 @@ method_paths = {
     "GerryFair": {"folktables": "2025-01-16/23-43-03"},
     "fairDNF": {"folktables": "2025-01-17/06-05-57"},
     "fairLinear": {"folktables": "2025-01-16/23-43-00"},
-    "fairNN": {"folktables": "2025-01-16/23-42-57"},
+    "fairNN": {"folktables": "2025-01-17/MSE"},
 }
 
 
@@ -64,17 +64,26 @@ def extract_data_for_method(method):
                     ep = re.search(r"EPOCH (\d+)/", line)
                     if ep:
                         epoch = int(ep.group(1))
+                    if "TRAIN:" in line:
+                        data_part = "_train"
+                    if "VALIDATION:" in line:
+                        data_part = "_eval"
                     acc = re.search(r"Accuracy:\s*([0-9.]+)", line)
                     if acc:
                         extracted_data.append(
-                            ("Accuracy", scenario, epoch, float(acc.group(1)) / 100)
+                            (
+                                "Accuracy",
+                                scenario + data_part,
+                                epoch,
+                                float(acc.group(1)) / 100,
+                            )
                         )
                     bce = re.search(r"Avg BCE loss:\s*([0-9.]+)", line)
                     if bce:
                         extracted_data.append(
                             (
                                 "BCE loss",
-                                scenario,
+                                scenario + data_part,
                                 epoch,
                                 float(bce.group(1)),
                             )
@@ -84,7 +93,7 @@ def extract_data_for_method(method):
                         extracted_data.append(
                             (
                                 "FPSF loss",
-                                scenario,
+                                scenario + data_part,
                                 epoch,
                                 float(fpsf.group(1)),
                             )
@@ -112,16 +121,24 @@ for method in methods:
     print(method)
     all_data[method] = extract_data_for_method(method)
 
-r, c = 3, 2
-fig, axs = plt.subplots(r, c, figsize=(12, 12))
+r, c = 2, 5
+fig, axs = plt.subplots(r, c, figsize=(30, 12))
 
-scenarios = [
+scenario_names = [
     "ACSIncome",
     "ACSPublicCoverage",
     "ACSMobility",
     "ACSEmployment",
     "ACSTravelTime",
 ]
+scenarios = [s + "_train" for s in scenario_names] + [
+    s + "_eval" for s in scenario_names
+]
+
+# scenarios = []
+# for s in scenario_names:
+#     scenarios.append(s + "_train")
+#     scenarios.append(s + "_eval")
 
 names = sorted(list(all_data[methods[0]][scenarios[0]].values())[0].keys())
 measuers = [
@@ -181,7 +198,11 @@ for j, scenario in enumerate(scenarios):
         ax.legend()
 
 plt.tight_layout()
-output_path = "multirun_images/" + str(date.today()) + "_NN_training.png"
+output_path = (
+    "multirun_images/"
+    + str(date.today())
+    + f"_NN_training_{method_paths[mehtod]['folktables'].split('/')[-1]}.png"
+)
 plt.savefig(output_path)
 
 plt.show()
