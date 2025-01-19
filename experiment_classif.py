@@ -21,9 +21,6 @@ gitcommit = ""
 
 @hydra.main(version_base="1.3", config_path="conf", config_name="config")
 def run_experiment(cfg: DictConfig):
-    # skip already finished tests
-    if cfg.seed == 0 and cfg.scenario in ["ACSPublicCoverage", "ACSIncome"]:
-        return
     binarizer, dhandler, X_orig, y_orig, binarizer_protected, X_prot_orig = (
         load_classif_scenario(cfg.scenario, cfg.seed, cfg.n_samples)
     )
