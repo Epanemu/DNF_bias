@@ -39,6 +39,9 @@ def run_experiment(cfg: DictConfig):
     dfX_prot = pd.DataFrame(X_prot)
     dfy = pd.Series(y)
 
+    d = X_enc.shape[1]
+    d_prot = X_prot.shape[1]
+
     if cfg.model == "DNF":
         mio_setup = DNFFairClassifier(gamma=0.01)
         dnf_model = mio_setup.find_dnf(
@@ -52,6 +55,7 @@ def run_experiment(cfg: DictConfig):
                 y_term &= X[:, conj]
             y_hat_train |= y_term
         y_hat_train_prob = y_hat_train.astype(int)
+        d = X.shape[1]
     elif cfg.model == "Linear":
         mio_setup = LinearFairClassifier(gamma=0.01)
         coefs, threshold = mio_setup.find_classifier(
@@ -76,6 +80,8 @@ def run_experiment(cfg: DictConfig):
         )  # Base version
         y_hat_train_prob = NN.predict_proba(X_enc)
         y_hat_train = y_hat_train_prob >= 0.5
+        X_prot = X_prot[eval_mask]
+        n_samples = X_prot.shape[0]
     elif cfg.model == "GerryFair":
         gerryfair_model = Model(printflag=True, gamma=0.01, fairness_def="FP")
         n_iters = cfg.time_limit // 5
@@ -148,8 +154,9 @@ def run_experiment(cfg: DictConfig):
         out_file.write(f"Gerry oracle b1 intercept: {oracle.b1.intercept_} \n")
         out_file.write(f"Gerry SPSF: {eval_spsf(y_hat_train, gerrygroup_train)} \n")
         out_file.write(f"Gerry FPSF: {eval_fpsf(y, y_hat_train, gerrygroup_train)} \n")
-        out_file.write(f"Protected dimension: {X_prot.shape[1]} \n")
-        out_file.write(f"Full dimension: {X.shape[1]} \n")
+        out_file.write(f"True number of training samples: {n_samples} \n")
+        out_file.write(f"Protected dimension: {d_prot} \n")
+        out_file.write(f"Full dimension: {d} \n")
 
     print(f"Result saved to {os.path.join(run_dir, 'output.txt')}")
     if cfg.model == "GerryFair":
