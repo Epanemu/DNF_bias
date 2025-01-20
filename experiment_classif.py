@@ -64,7 +64,7 @@ def run_experiment(cfg: DictConfig):
     elif cfg.model == "NN":
         # alpha = 1/gamma
         NN = NNFairClassifier(
-            X_enc.shape[1], [500, 200, 50, 10], gamma=0.01, alpha=10000
+            X_enc.shape[1], [500, 200, 50, 10], gamma=0.01, alpha=1000
         )
         np.random.seed(cfg.seed)
         eval_idx = np.random.choice(n_samples, n_samples // 10, replace=False)
@@ -75,7 +75,7 @@ def run_experiment(cfg: DictConfig):
         NN.train(
             train, eval, batch_size=2000, fpsf_size=20000, epochs=20
         )  # Base version
-        y_hat_train_prob = NN.predict_proba(X_enc)
+        y_hat_train_prob = NN.predict_proba(X_enc[~eval_mask])
         y_hat_train = y_hat_train_prob >= 0.5
         y = y[~eval_mask]
         X_prot = X_prot[~eval_mask]
