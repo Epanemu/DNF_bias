@@ -28,7 +28,7 @@ method_paths = {
     "GerryFair": {"folktables": "2025-01-16/23-43-03"},
     "fairDNF": {"folktables": "2025-01-17/06-05-57"},
     "fairLinear": {"folktables": "2025-01-16/23-43-00"},
-    "fairNN": {"folktables": "2025-01-17/MSE"},
+    "fairNN": {"folktables": "2025-01-19/10kBCE"},
 }
 
 
@@ -45,14 +45,21 @@ def extract_data_for_method(method):
             if not os.path.isfile(log_file):
                 continue
 
-            with open(output_file, "r", errors="ignore") as file:
-                lines = file.readlines()
+            # with open(output_file, "r", errors="ignore") as file:
+            #     lines = file.readlines()
 
-                setup_line = lines[1].strip()
-                scenario_match = re.search(r"'scenario': '(\S+)'", setup_line)
+            #     setup_line = lines[1].strip()
+            #     scenario_match = re.search(r"'scenario': '(\S+)'", setup_line)
 
-                if scenario_match:
-                    scenario = scenario_match.group(1)
+            #     if scenario_match:
+            #         scenario = scenario_match.group(1)
+            scenario = [
+                "ACSIncome",
+                "ACSPublicCoverage",
+                "ACSMobility",
+                "ACSEmployment",
+                "ACSTravelTime",
+            ][i % 5]
 
             with open(log_file, "r", errors="ignore") as file:
                 lines = file.readlines()
@@ -164,7 +171,8 @@ for j, scenario in enumerate(scenarios):
             continue
 
         sorted_mean = [np.mean(data_dict[measure][n]) for n in names]
-        sorted_std = [np.std(data_dict[measure][n]) for n in names]
+        sorted_min = [np.min(data_dict[measure][n]) for n in names]
+        sorted_max = [np.max(data_dict[measure][n]) for n in names]
 
         n = len(methods)
         w = 0.6
@@ -174,8 +182,8 @@ for j, scenario in enumerate(scenarios):
         # barplot with std band for each method side by side in one axes
         ax.fill_between(
             np.arange(len(sorted_mean)),
-            np.array(sorted_mean) - np.array(sorted_std),
-            np.array(sorted_mean) + np.array(sorted_std),
+            np.array(sorted_min),
+            np.array(sorted_max),
             # color=method_colors[method],
             color=measure_colors[measure],
             alpha=0.2,
