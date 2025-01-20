@@ -60,7 +60,7 @@ class NNFairClassifier(torch.nn.Module):
         self._sigmoid = nn.Identity()
         # self._bce_loss = nn.BCEWithLogitsLoss()
         self._bce_loss = nn.MSELoss()
-        self._optimizer = torch.optim.Adam(self._model.parameters(), lr=0.001)
+        self._optimizer = torch.optim.Adam(self._model.parameters(), lr=0.002)
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self._model.to(self.device)
 
@@ -148,9 +148,9 @@ class NNFairClassifier(torch.nn.Module):
                     if violation > self._gamma:
                         self._add_subgroup(rule, direction)
 
-                    chunk_fair_loss = self._fpsf_loss(fpsf_y, preds, fpsf_X_prot)
+                    # chunk_fair_loss = self._fpsf_loss(fpsf_y, preds, fpsf_X_prot)
                     # # multiply the loss to account for all the batch updates
-                    loss += self._alpha * len(fpsf_X) * chunk_fair_loss
+                    # loss += self._alpha * len(fpsf_X) * chunk_fair_loss
 
                     fpsf_X = []
                     fpsf_X_prot = []

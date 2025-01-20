@@ -73,7 +73,7 @@ def run_experiment(cfg: DictConfig):
         train = SimpleDataset(X_enc[~eval_mask], X_prot[~eval_mask], y[~eval_mask])
         eval = SimpleDataset(X_enc[eval_mask], X_prot[eval_mask], y[eval_mask])
         NN.train(
-            train, eval, batch_size=2000, fpsf_size=20000, epochs=20
+            train, eval, batch_size=2000, fpsf_size=20000, epochs=100
         )  # Base version
         y_hat_train_prob = NN.predict_proba(X_enc[~eval_mask])
         y_hat_train = y_hat_train_prob >= 0.5
