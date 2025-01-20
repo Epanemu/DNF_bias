@@ -28,7 +28,7 @@ method_paths = {
     "GerryFair": {"folktables": "2025-01-16/23-43-03"},
     "fairDNF": {"folktables": "2025-01-17/06-05-57"},
     "fairLinear": {"folktables": "2025-01-16/23-43-00"},
-    "fairNN": {"folktables": "2025-01-19/10kBCE"},
+    "fairNN": {"folktables": "2025-01-20/07-44-20"},
 }
 
 
@@ -102,7 +102,7 @@ def extract_data_for_method(method):
                                 "FPSF loss",
                                 scenario + data_part,
                                 epoch,
-                                float(fpsf.group(1)),
+                                float(fpsf.group(1)) * 10000,
                             )
                         )
 
@@ -196,7 +196,7 @@ for j, scenario in enumerate(scenarios):
             # color=method_colors[method],
             color=measure_colors[measure],
             # label=f"{method_names[method]} + std band",
-            label=f"{measure} + std band",
+            label=f"{measure} + min/max band",
         )
 
         ax.set_ylabel("Validation Measures")
