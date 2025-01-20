@@ -77,7 +77,8 @@ def run_experiment(cfg: DictConfig):
         )  # Base version
         y_hat_train_prob = NN.predict_proba(X_enc)
         y_hat_train = y_hat_train_prob >= 0.5
-        X_prot = X_prot[eval_mask]
+        y = y[~eval_mask]
+        X_prot = X_prot[~eval_mask]
         n_samples = X_prot.shape[0]
     elif cfg.model == "GerryFair":
         gerryfair_model = Model(printflag=True, gamma=0.01, fairness_def="FP")
