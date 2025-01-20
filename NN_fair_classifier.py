@@ -148,9 +148,9 @@ class NNFairClassifier(torch.nn.Module):
                     if violation > self._gamma:
                         self._add_subgroup(rule, direction)
 
-                    chunk_fair_loss = self._fpsf_loss(fpsf_y, preds, fpsf_X_prot)
+                    # chunk_fair_loss = self._fpsf_loss(fpsf_y, preds, fpsf_X_prot)
                     # # multiply the loss to account for all the batch updates
-                    loss += self._alpha * len(fpsf_X) * chunk_fair_loss
+                    # loss += self._alpha * len(fpsf_X) * chunk_fair_loss
 
                     fpsf_X = []
                     fpsf_X_prot = []

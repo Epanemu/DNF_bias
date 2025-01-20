@@ -79,6 +79,8 @@ def run_experiment(cfg: DictConfig):
         y_hat_train = y_hat_train_prob >= 0.5
         y = y[~eval_mask]
         X_prot = X_prot[~eval_mask]
+        dfX_prot = pd.DataFrame(X_prot)
+        dfy = pd.Series(y)
         n_samples = X_prot.shape[0]
     elif cfg.model == "GerryFair":
         gerryfair_model = Model(printflag=True, gamma=0.01, fairness_def="FP")
