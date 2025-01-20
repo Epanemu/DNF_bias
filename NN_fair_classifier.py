@@ -124,7 +124,7 @@ class NNFairClassifier(torch.nn.Module):
                 fair_loss = self._fpsf_loss(y, self._sigmoid(pred), X_prot.numpy())
                 cum_fair_loss += fair_loss.item()
                 # multiply the loss to account for all the batch updates
-                loss += fair_loss
+                loss += self._alpha * fair_loss
 
                 fpsf_X.append(X)
                 fpsf_X_prot.append(X_prot)
@@ -148,9 +148,9 @@ class NNFairClassifier(torch.nn.Module):
                     if violation > self._gamma:
                         self._add_subgroup(rule, direction)
 
-                    # fair_loss = self._fpsf_loss(fpsf_y, preds, fpsf_X_prot)
+                    chunk_fair_loss = self._fpsf_loss(fpsf_y, preds, fpsf_X_prot)
                     # # multiply the loss to account for all the batch updates
-                    # loss += len(fpsf_X) * fair_loss
+                    loss += self._alpha * len(fpsf_X) * chunk_fair_loss
 
                     fpsf_X = []
                     fpsf_X_prot = []
@@ -230,7 +230,7 @@ class NNFairClassifier(torch.nn.Module):
                 fpsf = (subg_size / n) * p_base - p_joint
             else:
                 fpsf = p_joint - (subg_size / n) * p_base
-            violations.append(self._alpha * F.relu(fpsf - self._gamma) * n_occurences)
+            violations.append(F.relu(fpsf - self._gamma) ** 2 * n_occurences)
             # violations.append(
             #     F.softplus(self._alpha * (fpsf - self._gamma)) * n_occurences
             # )
