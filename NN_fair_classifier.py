@@ -32,12 +32,16 @@ class NNFairClassifier(torch.nn.Module):
     Implementation of a Neural Network classifier, trained with extra fairness loss
     """
 
+    # TODO paramterize MSE and bigupdates...
     def __init__(
         self,
         input_dim: int,
         hidden_dims: list[int],
         alpha: float,
         gamma: float,
+        dropout: bool = False,
+        learning_rate: float = 0.001,
+        weight_decay: float = 0,
         verbose: bool = False,
     ) -> None:
         super().__init__()
@@ -50,6 +54,8 @@ class NNFairClassifier(torch.nn.Module):
         for h in hidden_dims:
             layers.append(nn.Linear(prev, h))
             layers.append(nn.ReLU())
+            if dropout:
+                layers.append(nn.Dropout())
             prev = h
         # Assume binary classification
         layers.append(nn.Linear(prev, 1))
@@ -60,7 +66,9 @@ class NNFairClassifier(torch.nn.Module):
         self._sigmoid = nn.Identity()
         # self._bce_loss = nn.BCEWithLogitsLoss()
         self._bce_loss = nn.MSELoss()
-        self._optimizer = torch.optim.Adam(self._model.parameters(), lr=0.002)
+        self._optimizer = torch.optim.Adam(
+            self._model.parameters(), lr=learning_rate, weight_decay=weight_decay
+        )
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self._model.to(self.device)
 
