@@ -70,7 +70,7 @@ def run_experiment(cfg: DictConfig):
             gamma=0.01,
             alpha=1000,
             dropout=False,
-            learning_rate=0.01,
+            learning_rate=0.005,
             # weight_decay=2e-4,
             weight_decay=0,
         )
