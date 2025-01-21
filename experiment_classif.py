@@ -64,7 +64,14 @@ def run_experiment(cfg: DictConfig):
     elif cfg.model == "NN":
         # alpha = 1/gamma
         NN = NNFairClassifier(
-            X_enc.shape[1], [500, 200, 50, 10], gamma=0.01, alpha=1000
+            X_enc.shape[1],
+            # TODO make it smaller?
+            [500, 200, 50, 10],
+            gamma=0.01,
+            alpha=1000,
+            dropout=False,
+            learning_rate=0.002,
+            weight_decay=2e-4,
         )
         np.random.seed(cfg.seed)
         eval_idx = np.random.choice(n_samples, n_samples // 10, replace=False)
@@ -73,7 +80,7 @@ def run_experiment(cfg: DictConfig):
         train = SimpleDataset(X_enc[~eval_mask], X_prot[~eval_mask], y[~eval_mask])
         eval = SimpleDataset(X_enc[eval_mask], X_prot[eval_mask], y[eval_mask])
         NN.train(
-            train, eval, batch_size=2000, fpsf_size=20000, epochs=100
+            train, eval, batch_size=2000, fpsf_size=20000, epochs=20
         )  # Base version
         y_hat_train_prob = NN.predict_proba(X_enc[~eval_mask])
         y_hat_train = y_hat_train_prob >= 0.5
