@@ -14,7 +14,7 @@ methods = [
     # "NN_base",
     "NN_nofair",
     # "NN_alpha",
-    # "NN_LR",
+    "NN_LR",
     # "NN_MSE",
     "NN_squared",
     # "NN_squared_bigupdates",
@@ -30,7 +30,7 @@ method_colors = {
     # "NN_base": "blue",
     "NN_nofair": "cyan",
     # "NN_alpha": "blue",
-    # "NN_LR": "green",
+    "NN_LR": "violet",
     "NN_squared": "blue",
     # "NN_MSE": "cyan",
 }
@@ -43,6 +43,7 @@ method_names = {
     "NN_nofair": "NN no FPSF loss",
     "NN_alpha": "NN alpha=1k",
     # "NN_LR": "NN lr=0.0001",
+    "NN_LR": "NN lr=0.002",
     "NN_squared": "NN squared FPSF",
     "NN_MSE": "NN use MSE loss",
 }
@@ -55,7 +56,8 @@ method_paths = {
     "NN_squared_bigupdates": {"folktables": "2025-01-20/07-45-27"},
     "NN_nofair": {"folktables": "2025-01-17/no_fairness"},
     "NN_alpha": {"folktables": "2025-01-17/alpha1k"},
-    "NN_LR": {"folktables": "2025-01-17/LR"},
+    # "NN_LR": {"folktables": "2025-01-17/LR"},
+    "NN_LR": {"folktables": "2025-01-20/23-31-26"},
     "NN_squared": {"folktables": "2025-01-20/07-44-20"},
     "NN_MSE": {"folktables": "2025-01-17/MSE"},
 }

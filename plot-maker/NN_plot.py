@@ -28,7 +28,9 @@ method_paths = {
     "GerryFair": {"folktables": "2025-01-16/23-43-03"},
     "fairDNF": {"folktables": "2025-01-17/06-05-57"},
     "fairLinear": {"folktables": "2025-01-16/23-43-00"},
-    "fairNN": {"folktables": "2025-01-20/07-44-20"},
+    # "fairNN": {"folktables": "2025-01-20/07-44-20"},
+    # "fairNN": {"folktables": "2025-01-20/07-45-27"},
+    "fairNN": {"folktables": "2025-01-20/23-31-26"},
 }
 
 
