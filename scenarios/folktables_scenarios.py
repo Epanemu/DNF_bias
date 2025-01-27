@@ -150,7 +150,8 @@ def load_scenario(name, seed, n_max, state="CA", year="2018", horizon="1-Year"):
         raise ValueError(f'Scenario "{name}" does not exist.')
 
     data_source = ACSDataSource(survey_year=year, horizon=horizon, survey="person")
-    data = data_source.get_data(states=[state], download=True)
+    states = [state] if state is not None else None
+    data = data_source.get_data(states=states, download=True)
     input_data, target_data, _ = Dataset.df_to_pandas(data)
 
     # DROP COLS WITH TOO MANY OPTIONS
@@ -195,7 +196,8 @@ def load_classif_scenario(name, seed, n_max, state="CA", year="2018", horizon="1
         raise ValueError(f'Scenario "{name}" does not exist.')
 
     data_source = ACSDataSource(survey_year=year, horizon=horizon, survey="person")
-    data = data_source.get_data(states=[state], download=True)
+    states = [state] if state is not None else None
+    data = data_source.get_data(states=states, download=True)
     input_data, target_data, _ = Dataset.df_to_pandas(data)
     mask = ~input_data.isnull().any(axis=1)
     logger.debug(f"Removing {input_data.shape[0] - mask.sum()} rows with nans")
