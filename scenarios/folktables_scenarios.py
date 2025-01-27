@@ -154,17 +154,35 @@ def load_scenario(name, seed, n_max, state="CA", year="2018", horizon="1-Year"):
     data = data_source.get_data(states=states, download=True)
     input_data, target_data, _ = Dataset.df_to_pandas(data)
 
-    # DROP COLS WITH TOO MANY OPTIONS
-    to_drop = []
-    for col in input_data.columns:
-        vals = input_data[col].unique().shape[0]
-        if vals > 5 or vals <= 1:
-            to_drop.append(col)
-    input_data.drop(columns=to_drop, inplace=True)
-
-    # print(input_data.shape, target_data[target_data.columns[0]].unique())
+    # # DROP COLS WITH TOO MANY OPTIONS
+    # to_drop = []
     # for col in input_data.columns:
-    #     print(col, input_data[col].unique())
+    #     vals = input_data[col].unique().shape[0]
+    #     if vals > 5 or vals <= 1:
+    #         to_drop.append(col)
+    # input_data.drop(columns=to_drop, inplace=True)
+
+    mask = ~input_data.isnull().any(axis=1)
+    logger.debug(f"Removing {input_data.shape[0] - mask.sum()} rows with nans")
+    input_data = input_data[mask.values]
+    target_data = target_data[mask.values]
+
+    values = {}
+    bounds = {}
+    for col in input_data.columns:
+        vals = input_data[col].unique()
+        logger.debug(f"{col} has {vals.shape[0]} values")
+        if col in FEATURE_PROCESSING:
+            input_data[col] = input_data[col].map(FEATURE_PROCESSING[col])
+            vals = input_data[col].unique()
+            logger.debug(f"{col} changed - {vals.shape[0]} values")
+        if vals.shape[0] <= 1:
+            input_data.drop(columns=[col], inplace=True)
+            continue
+        if col not in CONTINUOUS_FEATURES:
+            values[col] = vals
+        else:
+            bounds[col] = (min(vals), max(vals))
 
     np.random.seed(seed)
     n = input_data.shape[0]
@@ -173,12 +191,31 @@ def load_scenario(name, seed, n_max, state="CA", year="2018", horizon="1-Year"):
     input_data = input_data.iloc[samples]
     target_data = target_data[target_data.columns[0]].iloc[samples]
     dhandler = DataHandler.from_data(
-        input_data, target_data, categ_map={c: [] for c in input_data.columns}
+        input_data,
+        target_data,
+        categ_map=values,
+        bounds_map=bounds,
     )
 
     binarizer = Binarizer(dhandler, target_positive_vals=[True])
 
-    return binarizer, input_data, target_data
+    protected_cols = [col for col in input_data.columns if col in PROTECTED_ATTRS]
+    dhandler_protected = DataHandler.from_data(
+        input_data[protected_cols],
+        target_data,
+        categ_map=values,
+        bounds_map=bounds,
+    )
+    binarizer_protected = Binarizer(dhandler_protected, target_positive_vals=[True])
+
+    return (
+        binarizer,
+        dhandler,
+        input_data,
+        target_data,
+        binarizer_protected,
+        input_data[protected_cols],
+    )
 
 
 def load_classif_scenario(name, seed, n_max, state="CA", year="2018", horizon="1-Year"):
@@ -237,9 +274,9 @@ def load_classif_scenario(name, seed, n_max, state="CA", year="2018", horizon="1
 
     binarizer = Binarizer(dhandler, target_positive_vals=[True])
 
-    protected = [col for col in input_data.columns if col in PROTECTED_ATTRS]
+    protected_cols = [col for col in input_data.columns if col in PROTECTED_ATTRS]
     dhandler_protected = DataHandler.from_data(
-        input_data[protected],
+        input_data[protected_cols],
         target_data,
         categ_map=values,
         bounds_map=bounds,
@@ -252,5 +289,5 @@ def load_classif_scenario(name, seed, n_max, state="CA", year="2018", horizon="1
         input_data,
         target_data,
         binarizer_protected,
-        input_data[protected],
+        input_data[protected_cols],
     )
