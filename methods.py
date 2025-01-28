@@ -30,6 +30,10 @@ def test_RIPPER(
     ripper.fit(X_pd, y_pd, target_label=1)
     ruleset = ripper.explain()
 
+    # print("\n\nHERE IS THE RULESET")
+    # print(ruleset)
+    # print("END OF RULESET\n\n")
+
     def uncover_value(literal):
         var_name = literal.feature.variable_names[0]
         feat = bin_feats[colnames.index(var_name)]
@@ -73,6 +77,10 @@ def test_BRCG(
         brcg_params["verbose"] = True
     model = BooleanRuleCG(**brcg_params)
     model.fit(X_train_pd, y_train)
+
+    # print("\n\nEXPLANATION")
+    # print(model.explain()["rules"])
+    # print("END OF EXPLANATION\n\n")
 
     split_dnf = [term.split(" AND ") for term in model.explain()["rules"]]
     colnames = [
