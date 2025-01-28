@@ -36,6 +36,8 @@ def run_experiment(cfg: DictConfig):
 
     command.extend(["--verbose"])
 
+    # command.extend(["-k", str(cfg.dimension)])
+
     print("Running command:", " ".join(command))
 
     # Run the command and capture the output
@@ -65,7 +67,7 @@ if __name__ == "__main__":
     result = subprocess.run(
         ["git", "status", "--porcelain"], capture_output=True, text=True
     )
-    if result.stdout.strip() == "":
+    if True or result.stdout.strip() == "":
         res = subprocess.run(
             ["git", "rev-parse", "HEAD"], capture_output=True, text=True
         )
