@@ -138,17 +138,16 @@ def run_experiment(cfg: DictConfig):
 
 
 if __name__ == "__main__":
-    # result = subprocess.run(
-    #     ["git", "status", "--porcelain"], capture_output=True, text=True
-    # )
-    # if result.stdout.strip() == "":
-    #     res = subprocess.run(
-    #         ["git", "rev-list", "--format=%B", "-n", "1", "HEAD"],
-    #         capture_output=True,
-    #         text=True,
-    #     )
-    #     gitcommit = res.stdout.strip()
-    if True:
+    result = subprocess.run(
+        ["git", "status", "--porcelain"], capture_output=True, text=True
+    )
+    if result.stdout.strip() == "":
+        res = subprocess.run(
+            ["git", "rev-list", "--format=%B", "-n", "1", "HEAD"],
+            capture_output=True,
+            text=True,
+        )
+        gitcommit = res.stdout.strip()
         run_experiment()
     else:
         raise Exception("Git status is not clean. Commit changes first.")
