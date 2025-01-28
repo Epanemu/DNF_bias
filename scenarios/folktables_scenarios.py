@@ -189,13 +189,29 @@ def load_custom_scenarios(name, seed, n_max, year="2018", horizon="1-Year", **kw
     data = data_source.get_data(states=kwargs["states"], download=True)
     input_data, target_data, _ = Dataset.df_to_pandas(data)
 
-    # to_drop = []
-    # for col in input_data.columns:
-    #     vals = input_data[col].unique().shape[0]
-    #     if vals > 5 or vals <= 1:
-    #         to_drop.append(col)
-    # input_data.drop(columns=to_drop, inplace=True)
+    mask = ~input_data.isnull().any(axis=1)
+    logger.debug(f"Removing {input_data.shape[0] - mask.sum()} rows with nans")
+    input_data = input_data[mask.values]
+    target_data = target_data[mask.values]
 
+    values = {}
+    bounds = {}
+    for col in input_data.columns:
+        vals = input_data[col].unique()
+        logger.debug(f"{col} has {vals.shape[0]} values")
+        if col in FEATURE_PROCESSING:
+            input_data[col] = input_data[col].map(FEATURE_PROCESSING[col])
+            vals = input_data[col].unique()
+            logger.debug(f"{col} changed - {vals.shape[0]} values")
+        if vals.shape[0] <= 1:
+            input_data.drop(columns=[col], inplace=True)
+            continue
+        if col not in CONTINUOUS_FEATURES:
+            values[col] = vals
+        else:
+            bounds[col] = (min(vals), max(vals))
+
+    # Splitting the dataset
     input_data_state_samples = {}
     target_data_state_samples = {}
     np.random.seed(seed)
@@ -206,14 +222,14 @@ def load_custom_scenarios(name, seed, n_max, year="2018", horizon="1-Year", **kw
         target_data_state = target_data[mask_state].reset_index(drop=True)
 
         n = input_data_state.shape[0]
-        samples = np.random.choice(n, size=min(n_max, n), replace=False)
+        samples = np.random.choice(n, size=min(n_max, n) // 2, replace=False)
 
         input_data_state_samples[state_type] = input_data_state.iloc[samples]
         target_data_state_samples[state_type] = target_data_state[
             target_data_state.columns[0]
         ].iloc[samples]
 
-    input_data_samples = pd.concat(
+    input_data = pd.concat(
         [
             input_data_state_samples[kwargs["code_states"][0]],
             input_data_state_samples[kwargs["code_states"][1]],
@@ -221,7 +237,7 @@ def load_custom_scenarios(name, seed, n_max, year="2018", horizon="1-Year", **kw
         axis=0,
         ignore_index=True,
     )
-    target_data_samples = pd.concat(
+    target_data = pd.concat(
         [
             target_data_state_samples[kwargs["code_states"][0]],
             target_data_state_samples[kwargs["code_states"][1]],
@@ -229,16 +245,36 @@ def load_custom_scenarios(name, seed, n_max, year="2018", horizon="1-Year", **kw
         axis=0,
         ignore_index=True,
     )
+    # Merged the two states into one dataset
+
+    print(input_data)
 
     dhandler = DataHandler.from_data(
-        input_data_samples,
-        target_data_samples,
-        categ_map={c: [] for c in input_data_samples.columns},
+        input_data,
+        target_data,
+        categ_map=values,
+        bounds_map=bounds,
     )
 
     binarizer = Binarizer(dhandler, target_positive_vals=[True])
 
-    return binarizer, input_data_samples, target_data_samples
+    protected_cols = [col for col in input_data.columns if col in PROTECTED_ATTRS]
+    dhandler_protected = DataHandler.from_data(
+        input_data[protected_cols],
+        target_data,
+        categ_map=values,
+        bounds_map=bounds,
+    )
+    binarizer_protected = Binarizer(dhandler_protected, target_positive_vals=[True])
+
+    return (
+        binarizer,
+        dhandler,
+        input_data,
+        target_data,
+        binarizer_protected,
+        input_data[protected_cols],
+    )
 
 
 def load_scenario(
@@ -285,6 +321,9 @@ def load_scenario(
             values[col] = vals
         else:
             bounds[col] = (min(vals), max(vals))
+        
+    print(values)
+    print(bounds)
 
     np.random.seed(seed)
     n = input_data.shape[0]
