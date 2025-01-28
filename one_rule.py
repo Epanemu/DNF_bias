@@ -1,8 +1,13 @@
+import logging
+
 import numpy as np
 import pyomo.environ as pyo
 
 # ignore assert warnings
 # trunk-ignore-all(bandit/B101)
+
+
+logger = logging.getLogger(__name__)
 
 
 class OneRule:
@@ -128,6 +133,7 @@ class OneRule:
         opt = True
         if result.solver.termination_condition != pyo.TerminationCondition.optimal:
             # raise ValueError("solver did not find an optimal sollution")
+            logger.info("Solver did not find an optimal sollution")
             opt = False
         self.model = int_model
 
