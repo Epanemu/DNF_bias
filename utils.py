@@ -190,6 +190,39 @@ def wasserstein_distance(
     return dist
 
 
+def _overlap_kernel(X: np.ndarray[float], Y: np.ndarray[float]):
+    m = X.shape[0]
+    n = Y.shape[0]
+    overlaps = np.stack([X for _ in range(n)]).transpose(1, 0, 2) == np.stack(
+        [Y for _ in range(m)]
+    )
+    return overlaps.mean(axis=2)
+
+
+def MMD(X0: np.ndarray[float], X1: np.ndarray[float]) -> float:
+    n0, n1 = X0.shape[0], X1.shape[0]
+    X0, counts0 = np.unique(X0, return_counts=True, axis=0)
+    X1, counts1 = np.unique(X1, return_counts=True, axis=0)
+
+    K00 = _overlap_kernel(X0, X0)
+    K00 = K00 * counts0.reshape((-1, 1)) * counts0
+    # only remove the computation on the same samples, samples with equivalent values are counted in
+    # this assumes kernel returns 1 for the same sample
+    K00[np.eye(X0.shape[0], X0.shape[0], dtype=bool)] -= counts0
+    K01 = _overlap_kernel(X0, X1)
+    K01 = K01 * counts0.reshape((-1, 1)) * counts1
+    K11 = _overlap_kernel(X1, X1)
+    K11 = K11 * counts1.reshape((-1, 1)) * counts1
+    K11[np.eye(X1.shape[0], X1.shape[0], dtype=bool)] -= counts1
+
+    mmd_estimate = (
+        K00.sum() / (n0 * (n0 - 1))
+        + K11.sum() / (n1 * (n1 - 1))
+        - 2 * K01.sum() / (n0 * n1)
+    )
+    return np.sqrt(mmd_estimate)
+
+
 def term_hamming_distance(term1: list[Bin], term2: list[Bin]) -> int:
     hd = 0
     for b in term1:

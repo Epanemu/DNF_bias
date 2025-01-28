@@ -12,6 +12,7 @@ from methods import test_BRCG, test_RIPPER
 from one_rule import OneRule
 from scenarios.folktables_scenarios import load_scenario
 from utils import (
+    MMD,
     TV_binarized,
     balance_datasets,
     eval_terms,
@@ -119,7 +120,10 @@ def run_experiment(cfg: DictConfig):
             X1 = X_prot[y].astype(int)
             dist = TV_binarized(X0, X1)
         elif cfg.model == "MMD":
-            pass
+            d = X_prot.shape[1]
+            X0 = X_prot[~y].astype(float)
+            X1 = X_prot[y].astype(float)
+            dist = MMD(X0, X1)
         else:
             raise ValueError(f"Unknown fair classifier {cfg.model}")
 
