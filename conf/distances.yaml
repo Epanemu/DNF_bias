@@ -1,0 +1,15 @@
+# cannot be run separately, method and experiment config need to be specified
+seed: 0
+model: TV
+state: CA
+scenario: ACSIncome
+n_samples: 1000000
+train_samples: 100000
+time_limit: 600
+
+hydra:
+  sweeper:
+    params:
+      seed: 0, 1, 2, 3, 4
+      model: BRCG, Ripper, OneRule, W1, W2, TV
+      scenario: ACSIncome, ACSPublicCoverage, ACSMobility, ACSEmployment, ACSTravelTime
