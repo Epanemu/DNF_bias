@@ -8,6 +8,8 @@ import numpy as np
 
 methods = [
     "OneRule",
+    "BRCG",
+    "Ripper",
     "W1",
     "W2",
     "TV",
@@ -22,16 +24,23 @@ methods = [
 # base_dir_prefix = "multirun/2025-01-28/08-30-25"  # only protected
 # base_dir_prefix = "multirun/2025-01-28/09-44-30"  # to send
 # base_dir_prefix = "multirun/2025-01-28/11-06-09"  # full data - mobility not enough time
-base_dir_prefix = "multirun/2025-01-28/13-59-47"  # full data - 100k sub samples
+# base_dir_prefix = "multirun/2025-01-28/13-59-47"  # full data - 100k sub samples
+base_dir_prefix = (
+    "multirun/2025-01-28/16-32-14"  # including the BRCG and Ripper and 100k sub samples
+)
 
 method_colors = {
     "OneRule": "red",
+    "BRCG": "orange",
+    "Ripper": "pink",
     "TV": "green",
     "W1": "blue",
     "W2": "magenta",
 }
 method_names = {
     "OneRule": "MSD (ours)",
+    "BRCG": "MSD (via BRCG)",
+    "Ripper": "MSD (via Ripper)",
     "W1": "Wasserstein-1",
     "W2": "Wasserstein-2",
     "TV": "Total Variation",
@@ -42,7 +51,7 @@ def extract_data():
     extracted_data = []
     base_dir = base_dir_prefix
 
-    for i in range(100):
+    for i in range(150):
         folder_path = os.path.join(base_dir, str(i))
         output_file = os.path.join(folder_path, "output.txt")
 

@@ -8,21 +8,29 @@ import numpy as np
 
 methods = [
     "OneRule",
+    "BRCG",
+    "Ripper",
     "W1",
     "W2",
     "TV",
 ]
 
-base_dir_prefix = "multirun/2025-01-28/12-39-15"
+# base_dir_prefix = "multirun/2025-01-28/12-39-15"
+# base_dir_prefix = "multirun/2025-01-28/16-32-29"  # from 1k, unfinished
+base_dir_prefix = "multirun/2025-01-28/"  # from 1k with BRCG and Ripper
 
 method_colors = {
     "OneRule": "red",
+    "BRCG": "orange",
+    "Ripper": "pink",
     "TV": "green",
     "W1": "blue",
     "W2": "magenta",
 }
 method_names = {
     "OneRule": "MSD (ours)",
+    "BRCG": "MSD (via BRCG)",
+    "Ripper": "MSD (via Ripper)",
     "W1": "Wasserstein-1",
     "W2": "Wasserstein-2",
     "TV": "Total Variation",
@@ -33,7 +41,7 @@ def extract_data():
     extracted_data = []
     base_dir = base_dir_prefix
 
-    for i in range(100):
+    for i in range(150):
         folder_path = os.path.join(base_dir, str(i))
         output_file = os.path.join(folder_path, "output.txt")
 
@@ -159,6 +167,8 @@ measuers = [
 print(all_data["W1"].keys())
 
 for method in methods:
+    if method not in all_data:
+        continue
     data_dict = all_data[method]
     for i, measure in enumerate(measuers):
         if measure not in data_dict:
