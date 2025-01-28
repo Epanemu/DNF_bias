@@ -83,6 +83,8 @@ class OneRule:
         y: np.ndarray[bool],
         warmstart: bool = False,
         verbose: bool = False,
+        time_limit: int = 300,
+        return_opt_flag: bool = False,
     ) -> list[int]:
         """Find a single conjunction with lowest 0-1 error
 
@@ -102,25 +104,40 @@ class OneRule:
         if warmstart:
             print("No warmstart available, previous attempts were useless")
 
-        w = np.ones_like(y, dtype=float)
+        # w = np.ones_like(y, dtype=float)
         size1 = np.sum(y)
         if size1 == 0:
             return list(range(X.shape[1]))
         if size1 == y.shape[0]:
             return []
-        w[y] = 1 / size1
-        w[~y] = 1 / (y.shape[0] - size1)
-        # print(1 / size1, 1 / (y.shape[0] - size1))
+        size0 = y.shape[0] - size1
+        # w[y] = 1 / size1
+        # w[~y] = 1 / size0
+
+        X0, counts0 = np.unique(X[~y], return_counts=True, axis=0)
+        X1, counts1 = np.unique(X[y], return_counts=True, axis=0)
+        X = np.concatenate([X0, X1], axis=0)
+        w = np.concatenate([counts0 / size0, counts1 / size1], axis=0)
+        y = np.zeros_like(w, dtype=bool)
+        y[X0.shape[0] :] = True
+
         int_model = self._make_int_model(X, y, weights=w)
         opt = pyo.SolverFactory("gurobi", solver_io="python")
+        opt.options["TimeLimit"] = time_limit
         result = opt.solve(int_model, tee=verbose)
+        opt = True
         if result.solver.termination_condition != pyo.TerminationCondition.optimal:
-            raise ValueError("solver did not find an optimal sollution")
+            # raise ValueError("solver did not find an optimal sollution")
+            opt = False
         self.model = int_model
 
         # print([int_model.error[i].value for i in int_model.all_i])
+        vals = [int_model.use_feat[i].value for i in int_model.feat_i]
 
-        return [i for i in int_model.feat_i if int_model.use_feat[i].value >= 1e-4]
+        rule = [i for i in int_model.feat_i if vals[i] is not None and vals[i] >= 1e-4]
+        if return_opt_flag:
+            return rule, opt
+        return rule
 
     def find_subgroup(
         self,
