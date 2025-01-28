@@ -155,7 +155,7 @@ elif args.method == "brcg":
         brcg_params={
             "lambda0": 0.0001,
             "lambda1": 0,
-            "solver": "CLARABEL",
+            # "solver": "CLARABEL",
         },
     )
 elif args.method == "onerule":

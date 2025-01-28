@@ -163,7 +163,9 @@ class Binarizer:
         self.__binarized_features = binarized_features
         self.__binarized_negations = binarized_negations
 
-    def encode(self, X: DataLike, include_negations=False) -> np.ndarray[bool]:
+    def encode(
+        self, X: DataLike, include_negations=False, include_binary_negations=False
+    ) -> np.ndarray[bool]:
         if isinstance(X, pd.DataFrame):
             X = X.values
 
@@ -177,6 +179,13 @@ class Binarizer:
                     values.append(
                         Operation.perform(bin.operation, X[:, [i]], bin.value)
                     )
+        elif include_binary_negations:
+            for i, binariaztions in enumerate(self.__binarized_negations):
+                for bin in binariaztions:
+                    if isinstance(bin.feature, Binary):
+                        values.append(
+                            Operation.perform(bin.operation, X[:, [i]], bin.value)
+                        )
         return np.hstack(values)
 
     def encode_y(self, y: OneDimData) -> np.ndarray[bool]:
@@ -187,21 +196,29 @@ class Binarizer:
         )
         return res.flatten()
 
-    def __feature_name_tuples(self, include_negations):
+    def __feature_name_tuples(self, include_negations, include_binary_negations):
         names = []
         if include_negations:
             feats = self.__binarized_features + self.__binarized_negations
         else:
-            feats = self.__binarized_features
-        for binariaztions in feats:
-            for bin in binariaztions:
+            feats = [f for f in self.__binarized_features]
+            if include_binary_negations:
+                for binarization in self.__binarized_negations:
+                    if isinstance(binarization[0].feature, Binary):
+                        feats.append(binarization)
+        for binarization in feats:
+            for bin in binarization:
                 names.append((bin.feature.name, bin.operation.value, str(bin.value)))
         return names
 
-    def feature_names(self, include_negations=False) -> list[str]:
+    def feature_names(
+        self, include_negations=False, include_binary_negations=False
+    ) -> list[str]:
         return [
             f"{feat} {op} {val}"
-            for (feat, op, val) in self.__feature_name_tuples(include_negations)
+            for (feat, op, val) in self.__feature_name_tuples(
+                include_negations, include_binary_negations
+            )
         ]
 
     def target_name(self) -> tuple[str, str]:
@@ -211,17 +228,25 @@ class Binarizer:
         negative = f"{bin.feature} {bin.operation.value} {bin.value}"
         return positive, negative
 
-    def multi_index_feats(self, include_negations=False) -> pd.MultiIndex:
+    def multi_index_feats(
+        self, include_negations=False, include_binary_negations=False
+    ) -> pd.MultiIndex:
         return pd.MultiIndex.from_tuples(
-            self.__feature_name_tuples(include_negations),
+            self.__feature_name_tuples(include_negations, include_binary_negations),
             names=["feature", "operation", "value"],
         )
 
-    def get_bin_encodings(self, include_negations=False):
+    def get_bin_encodings(
+        self, include_negations=False, include_binary_negations=False
+    ):
         if include_negations:
             feats = self.__binarized_features + self.__binarized_negations
         else:
-            feats = self.__binarized_features
+            feats = [f for f in self.__binarized_features]
+            if include_binary_negations:
+                for binarization in self.__binarized_negations:
+                    if isinstance(binarization[0].feature, Binary):
+                        feats.append(binarization)
         flat = []
         for binariaztions in feats:
             for bin in binariaztions:

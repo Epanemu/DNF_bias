@@ -1,6 +1,11 @@
+import logging
+
 import numpy as np
+import ot
 
 from binarizer import Bin, Binarizer
+
+logger = logging.getLogger(__name__)
 
 
 def our_metric(truth: np.ndarray[bool], estimate: np.ndarray[bool]) -> float:
@@ -122,6 +127,46 @@ def total_variation(set1: np.ndarray[int], set2: np.ndarray[int]) -> float:
     all_data = np.concatenate([set1, set2], axis=0)
     valid_values = [np.unique(all_data[:, i]) for i in range(all_data.shape[1])]
     return _tv_recurse(set1, set2, 0, valid_values, np.empty((set1.shape[1],))) / 2
+
+
+def TV_binarized(X0: np.ndarray[int], X1: np.ndarray[int]) -> float:
+    dist = 0
+    n0, n1 = X0.shape[0], X1.shape[0]
+    X0, counts0 = np.unique(X0, return_counts=True, axis=0)
+    X1, counts1 = np.unique(X1, return_counts=True, axis=0)
+    unseen_mask = np.ones((X1.shape[0],), dtype=bool)
+    for count0, x in zip(counts0, X0):
+        count1 = 0
+        indices = np.where(np.all(X1 == x, axis=1))[0]
+        if indices.shape[0] != 0:
+            unseen_mask[indices[0]] = False
+            count1 = counts1[indices[0]]
+        dist += abs(count0 / n0 - count1 / n1)
+    for count1, x in zip(counts1[unseen_mask], X1[unseen_mask]):
+        indices = np.where(np.all(X0 == x, axis=1))[0]
+        if indices.shape[0] != 0:
+            # already accounted for
+            logger.warning(f"Seen indices did not contain {indices}")
+            continue
+        dist += count1 / n1  # prob in the other is 0
+    return dist / 2
+
+
+def wasserstein_distance(
+    X0: np.ndarray[float], X1: np.ndarray[float], Wtype: str
+) -> float:
+    (n0, d), n1 = X0.shape, X1.shape[0]
+    X0, counts0 = np.unique(X0, return_counts=True, axis=0)
+    X1, counts1 = np.unique(X1, return_counts=True, axis=0)
+    if Wtype == "W1":
+        dist_matrix = ot.dist(X0, X1, p=2, metric="euclidean") / np.sqrt(2 * d)
+    else:
+        dist_matrix = ot.dist(X0, X1, p=2, metric="sqeuclidean") / (2 * d)
+    print(np.max(dist_matrix))
+    dist = ot.emd2(counts0 / n0, counts1 / n1, dist_matrix, numItermax=1e6)
+    if Wtype == "W2":
+        dist = np.sqrt(dist)
+    return dist
 
 
 def term_hamming_distance(term1: list[Bin], term2: list[Bin]) -> int:
