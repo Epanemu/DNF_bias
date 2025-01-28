@@ -304,6 +304,9 @@ class RipperExplainer(DISExplainer):
                 rule = self._grow_rule(pos, neg)
 
             rules.append(rule)
+            print("breaking away")
+            # ADDing a break once first rule is found
+            break
             dl_new = _mdl(pos, neg, rules, n)
 
             if dl_new > dl_min + d:
