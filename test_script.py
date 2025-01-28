@@ -104,7 +104,7 @@ if args.scenario in MEPS_SCENARIOS:
     )
     true_term = []
 elif args.scenario in FOLK_SCENARIOS:
-    binarizer, input_data, target_data = load_folktables_scenario(
+    _, _, target_data, binarizer, input_data = load_folktables_scenario(
         args.scenario, args.seed, args.n_samples
     )
     true_term = []
