@@ -30,7 +30,9 @@ method_paths = {
     "fairLinear": {"folktables": "2025-01-16/23-43-00"},
     # "fairNN": {"folktables": "2025-01-20/07-44-20"},
     # "fairNN": {"folktables": "2025-01-20/07-45-27"},
-    "fairNN": {"folktables": "2025-01-20/23-31-26"},
+    # "fairNN": {"folktables": "2025-01-20/23-31-26"},
+    "fairNN": {"folktables": "2025-01-20/lr002long"},
+    # "fairNN": {"folktables": "2025-01-21/lr01"},
 }
 
 
@@ -41,7 +43,7 @@ def extract_data_for_method(method):
 
         for i in range(25):
             folder_path = os.path.join(base_dir, str(i))
-            output_file = os.path.join(folder_path, "output.txt")
+            # output_file = os.path.join(folder_path, "output.txt")
             log_file = os.path.join(folder_path, "experiment_classif.log")
 
             if not os.path.isfile(log_file):
@@ -104,7 +106,7 @@ def extract_data_for_method(method):
                                 "FPSF loss",
                                 scenario + data_part,
                                 epoch,
-                                float(fpsf.group(1)) * 10000,
+                                float(fpsf.group(1)) * 1000,
                             )
                         )
 
