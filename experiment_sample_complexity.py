@@ -93,7 +93,7 @@ def run_experiment(cfg: DictConfig):
             )
             true_n, d = X_prot.shape
             y_hat, dnf = test_RIPPER(X_prot, y, X_prot, binarizer_protected)
-            y_hat_true = eval_terms(dnf, binarizer_protected, X_prot)[0]
+            y_hat_true = eval_terms(dnf, binarizer_protected, X_prot_ripper_eval)[0]
             if not (np.array(y_hat) == y_hat_true).all():
                 logger.warning("There is an issue in the RIPPER changes")
             dist = our_metric(y, y_hat_true)

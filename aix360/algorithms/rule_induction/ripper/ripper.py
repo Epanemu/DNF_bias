@@ -501,6 +501,13 @@ class RipperExplainer(DISExplainer):
 
         for condition in rule:
             name = self._column_name_list[condition.name]
+            if "between" in name:
+                name = name.replace("(", "^").replace(")", "$")
+                feat = Feature(name)
+                conjunction.add_predicate(
+                    Predicate(feat, Relation.EQ, condition.nom_val)
+                )
+                continue
             feature = Feature(name)
             if condition.op == EQ:
                 relation = Relation.EQ

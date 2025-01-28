@@ -35,7 +35,12 @@ def test_RIPPER(
     # print("END OF RULESET\n\n")
 
     def uncover_value(literal):
-        var_name = literal.feature.variable_names[0]
+        var_name = (
+            literal.feature.variable_names[0]
+            .replace(",", ", ")
+            .replace("^", "(")
+            .replace("$", ")")
+        )
         feat = bin_feats[colnames.index(var_name)]
         if literal.value == 1:
             return feat
