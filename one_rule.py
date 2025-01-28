@@ -82,12 +82,80 @@ class OneRule:
 
         return model
 
+    def _make_abs_model(
+        self,
+        X: np.ndarray[bool],
+        y: np.ndarray[bool],
+        weights: np.ndarray[float],
+        n_min: int,
+        # trunk-ignore(ruff/B006)
+        feat_init: dict[int, int] = {},
+    ) -> pyo.ConcreteModel:
+        """Create the Integer Optimiztion formulation to find an optimal conjunction.
+
+        Args:
+            X (np.ndarray[bool]): input matrix
+            y (np.ndarray[bool]): target labels
+            feat_init (dict[int, int], optional): Initialization of the conjunction.
+                A dictionary containing feature indices as keys and 0/1 values of whether they are used. Defaults to {}.
+
+        Returns:
+            pyo.ConcreteModel: The MIO model containing the formulation
+        """
+        n, d = X.shape
+        Xint = np.zeros_like(X, dtype=int)
+        Xint[X] = 1
+
+        model = pyo.ConcreteModel()
+        model.all_i = pyo.Set(initialize=np.arange(n))
+        model.feat_i = pyo.Set(initialize=np.arange(d))
+        model.pos_i = pyo.Set(initialize=np.where(y)[0])
+        model.neg_i = pyo.Set(initialize=np.where(~y)[0])
+
+        model.use_feat = pyo.Var(model.feat_i, domain=pyo.Binary, initialize=feat_init)
+        model.ingroup = pyo.Var(model.all_i, domain=pyo.NonNegativeReals, bounds=(0, 1))
+
+        model.force_0 = pyo.Constraint(
+            model.all_i,
+            model.feat_i,
+            rule=lambda m, i, j: (
+                m.ingroup[i] <= 1 - (m.use_feat[j] - Xint[i, j] * m.use_feat[j])
+            ),
+        )
+        model.force_1 = pyo.Constraint(
+            model.all_i,
+            rule=lambda m, i: (
+                m.ingroup[i]
+                >= 1 - sum(m.use_feat[j] - Xint[i, j] * m.use_feat[j] for j in m.feat_i)
+            ),
+        )
+
+        model.minimum = pyo.Constraint(
+            expr=sum(model.ingroup[i] for i in model.all_i) >= n_min
+        )
+
+        model.o = pyo.Var(domain=pyo.NonNegativeReals)
+        model.b = pyo.Var(domain=pyo.Binary)
+        term1 = sum(model.ingroup[i] * weights[i] for i in model.pos_i)
+        term2 = sum(model.ingroup[i] * weights[i] for i in model.neg_i)
+        model.abs_obj_u1 = pyo.Constraint(expr=model.o <= term1 - term2 + 2 * model.b)
+        model.abs_obj_u2 = pyo.Constraint(
+            expr=model.o <= term2 - term1 + 2 * (1 - model.b)
+        )
+        model.obj = pyo.Objective(
+            expr=model.o,
+            sense=pyo.maximize,
+        )
+
+        return model
+
     def find_rule(
         self,
         X: np.ndarray[bool],
         y: np.ndarray[bool],
         warmstart: bool = False,
         verbose: bool = False,
+        n_min: int = 0,
         time_limit: int = 300,
         return_opt_flag: bool = False,
     ) -> list[int]:
@@ -126,7 +194,8 @@ class OneRule:
         y = np.zeros_like(w, dtype=bool)
         y[X0.shape[0] :] = True
 
-        int_model = self._make_int_model(X, y, weights=w)
+        # int_model = self._make_int_model(X, y, weights=w)
+        int_model = self._make_abs_model(X, y, weights=w, n_min=n_min)
         opt = pyo.SolverFactory("gurobi", solver_io="python")
         opt.options["TimeLimit"] = time_limit
         result = opt.solve(int_model, tee=verbose)

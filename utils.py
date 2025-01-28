@@ -21,10 +21,11 @@ def our_metric(truth: np.ndarray[bool], estimate: np.ndarray[bool]) -> float:
         print("assuming estimate values are 0, 1")
         estimate = estimate == 1
 
-    n_pos = np.sum(truth)
-    n_neg = truth.shape[0] - n_pos
-    errors = truth != estimate
-    return 1 - (np.sum(errors[truth]) / n_pos) - (np.sum(errors[~truth]) / n_neg)
+    return np.abs(np.mean(estimate[truth]) - np.mean(estimate[~truth]))
+    # n_pos = np.sum(truth)
+    # n_neg = truth.shape[0] - n_pos
+    # errors = truth != estimate
+    # return 1 - (np.sum(errors[truth]) / n_pos) - (np.sum(errors[~truth]) / n_neg)
     # essentially  1 - np.mean(errors[truth]) - np.mean(errors[~truth])
 
 

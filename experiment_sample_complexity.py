@@ -80,6 +80,7 @@ def run_experiment(cfg: DictConfig):
                 y,
                 verbose=True,
                 time_limit=cfg.time_limit,
+                n_min=cfg.n_min,
                 return_opt_flag=True,
             )
             y_hat = np.ones_like(y, dtype=bool)
