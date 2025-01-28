@@ -154,7 +154,6 @@ def all_protected_attributes_scenario(state_code):
             "RAC1P",
             "AGEP",
             "POBP",
-            "_POBP",
             "DIS",
             "CIT",
             "MIL",
@@ -241,7 +240,7 @@ def load_custom_scenarios(seed, n_max, year="2018", horizon="1-Year", **kwargs):
     )
     # Merged the two states into one dataset
 
-    print(input_data)
+    # print(input_data)
 
     dhandler = DataHandler.from_data(
         input_data,
@@ -336,8 +335,8 @@ def load_scenario(
         else:
             bounds[col] = (min(vals), max(vals))
         
-    print(values)
-    print(bounds)
+    # print(values)
+    # print(bounds)
 
     np.random.seed(seed)
     n = input_data.shape[0]
