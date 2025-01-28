@@ -15,7 +15,11 @@ SCENARIOS = [
     "ACSMobility",
     "ACSEmployment",
     "ACSTravelTime",
-    "custom_1",
+    "DifferentStates-HI-ME",
+    "DifferentStates-CA-WY",
+    "DifferentStates-MS-NH",
+    "DifferentStates-MD-MS",
+    "DifferentStates-LA-UT",
 ]
 
 # https://www2.census.gov/programs-surveys/acs/tech_docs/pums/data_dict/PUMS_Data_Dictionary_2018.pdf
@@ -137,28 +141,20 @@ CONTINUOUS_FEATURES = ["AGEP", "PINCP", "WKHP", "JWMNP", "POVPIP"]
 # NONE for JWMNP should be checked if it happens
 
 
-def custom_1_scenario(state_code):
+def all_protected_attributes_scenario(state_code):
     from folktables import BasicProblem
 
     def custom_filter(data):
         df = data.copy()
-
-        # Only keep rows with valid person weight
-        df = df[df["PWGTP"] > 0]
-
-        # Keep individuals at least 17 years old
-        df = df[df["AGEP"] >= 17]
-
-        # Remove rows where poverty ratio is missing or invalid
-        df = df[df["POVPIP"] >= 0]
-
         return df
 
-    ACSCustomScenario = BasicProblem(
+    scenario = BasicProblem(
         features=[
             "SEX",
             "RAC1P",
             "AGEP",
+            "POBP",
+            "_POBP",
             "DIS",
             "CIT",
             "MIL",
@@ -167,7 +163,9 @@ def custom_1_scenario(state_code):
             "DEAR",
             "DEYE",
             "DREM",
-            "ST",
+            "FER",
+            "POVPIP", 
+            "ST"
         ],
         target="ST",
         target_transform=lambda x: x == state_code,
@@ -176,14 +174,10 @@ def custom_1_scenario(state_code):
         postprocess=lambda x: np.nan_to_num(x, -1),
     )
 
-    return ACSCustomScenario
+    return scenario
 
-
-def load_custom_scenarios(name, seed, n_max, year="2018", horizon="1-Year", **kwargs):
-    kwargs["states"] = ["ME", "HI"]
-    kwargs["code_states"] = [23.0, 15.0]
-
-    Dataset = custom_1_scenario(kwargs["code_states"][0])
+def load_custom_scenarios(seed, n_max, year="2018", horizon="1-Year", **kwargs):
+    Dataset = all_protected_attributes_scenario(kwargs["code_states"][0])
 
     data_source = ACSDataSource(survey_year=year, horizon=horizon, survey="person")
     data = data_source.get_data(states=kwargs["states"], download=True)
@@ -290,8 +284,28 @@ def load_scenario(
         from folktables import ACSEmployment as Dataset
     elif name == "ACSTravelTime":
         from folktables import ACSTravelTime as Dataset
-    elif name == "custom_1":
-        return load_custom_scenarios(name, seed, n_max, year, horizon, **kwargs)
+    elif name.split("-")[0] == "DifferentStates":
+        states = sorted([name.split("-")[1], name.split("-")[2]])
+        if states == ["HI", "ME"]:  # Hawaii and Maine
+            kwargs["states"] = ["HI", "ME"]
+            kwargs["code_states"] = [15.0, 23.0]
+            return load_custom_scenarios(seed, n_max, year, horizon, **kwargs)
+        elif states == ["CA", "WY"]:  # California and Wyoming
+            kwargs["states"] = ["CA", "WY"]
+            kwargs["code_states"] = [6.0, 56.0]
+        elif states == ["MS", "NH"]:  # Mississippi and New Hampshire
+            kwargs["states"] = ["MS", "NH"]
+            kwargs["code_states"] = [28.0, 33.0]
+        elif states == ["MD", "MS"]:  # Maryland and Mississippi
+            kwargs["states"] = ["MD", "MS"]
+            kwargs["code_states"] = [24.0, 28.0]
+        elif states == ["LA", "UT"]:  # Louisiana and Utah
+            kwargs["states"] = ["LA", "UT"]
+            kwargs["code_states"] = [22.0, 49.0]
+        else:
+            raise ValueError(f'Scenario "{name}" with given states does not exist.')
+        
+        return load_custom_scenarios(seed, n_max, year, horizon, **kwargs)
     else:
         raise ValueError(f'Scenario "{name}" does not exist.')
 
