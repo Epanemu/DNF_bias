@@ -132,15 +132,19 @@ class BooleanRuleCG(BaseEstimator, ClassifierMixin):
             if not self.silent:
                 print('Iteration: {}, Objective: {:.4f}'.format(self.it, prob.value))
 
-            # Add to existing conjunctions
-            z = pd.concat([z, zNew], axis=1, ignore_index=True)
-            A = np.concatenate((A, Anew), axis=1)
+            # MODIFIED NEXT LINES FOR SAVING ONLY FIRST RULE
+            z = pd.concat([z, zNew.iloc[:, [0]]], axis=1, ignore_index=True)
+            A = np.concatenate((A, Anew[:, [0]]), axis=1)
+            #!! # Add to existing conjunctions
+            #!! z = pd.concat([z, zNew], axis=1, ignore_index=True)
+            #!! A = np.concatenate((A, Anew), axis=1)
 
             # Reformulate master LP
             # Variables
             w = cvx.Variable(A.shape[1], nonneg=True)
             # Objective function
-            cs = np.concatenate((cs, self.lambda0 + self.lambda1 * zNew.sum().values))
+            cs = np.concatenate((cs, [self.lambda0 + self.lambda1 * zNew.sum().values[0]]))
+            #!! cs = np.concatenate((cs, self.lambda0 + self.lambda1 * zNew.sum().values))
             obj = cvx.Minimize(cvx.sum(xi) / n + cvx.sum(A[Z,:] * w) / n + cs * w)
             # Constraints
             constraints = [xi + A[P,:] * w >= 1]
@@ -148,6 +152,8 @@ class BooleanRuleCG(BaseEstimator, ClassifierMixin):
             # Solve problem
             prob = cvx.Problem(obj, constraints)
             prob.solve(solver=self.solver, verbose=self.verbose)
+
+            break
 
             # Extract dual variables
             r[P] = -constraints[0].dual_value
@@ -158,6 +164,7 @@ class BooleanRuleCG(BaseEstimator, ClassifierMixin):
             UB = min(UB.min(), 0)
             v, zNew, Anew = beam_search(r, X, self.lambda0, self.lambda1,
                                         K=self.K, UB=UB, D=self.D, B=self.B, eps=self.eps)
+            
 
         # Save generated conjunctions and LP solution
         self.z = z
@@ -238,9 +245,6 @@ class BooleanRuleCG(BaseEstimator, ClassifierMixin):
             # String representation of rule
             strFeat = strFeat.str.cat(sep=' AND ')
             conj.append(strFeat)
-
-            # UPDATED THIS PART FOR BRCG. JUST ONE OUTPUT
-            break
 
         return {
             'isCNF': self.CNF,
