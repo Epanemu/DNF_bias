@@ -63,17 +63,37 @@ def balance_datasets(
     return pruned_datasets
 
 
-def _eval_term(term: list[Bin], binarizer: Binarizer, X_test: np.ndarray[bool]):
+def _eval_term(
+    term: list[Bin],
+    binarizer: Binarizer,
+    X_test: np.ndarray[bool],
+    binary_negs_only: bool,
+):
     mask = np.ones((X_test.shape[0],), dtype=bool)
-    bin_feats = [str(f) for f in binarizer.get_bin_encodings(include_negations=True)]
+    if binary_negs_only:
+        bin_feats = [
+            str(f)
+            for f in binarizer.get_bin_encodings(
+                include_negations=False, include_binary_negations=True
+            )
+        ]
+    else:
+        bin_feats = [
+            str(f) for f in binarizer.get_bin_encodings(include_negations=True)
+        ]
     for feat in term:
         feat_i = bin_feats.index(str(feat))
         mask &= X_test[:, feat_i]
     return mask
 
 
-def eval_terms(dnf: list[list[Bin]], binarizer: Binarizer, X_test: np.ndarray[bool]):
-    masks = [_eval_term(term, binarizer, X_test) for term in dnf]
+def eval_terms(
+    dnf: list[list[Bin]],
+    binarizer: Binarizer,
+    X_test: np.ndarray[bool],
+    binary_negs_only: bool = False,
+):
+    masks = [_eval_term(term, binarizer, X_test, binary_negs_only) for term in dnf]
     return masks
 
 

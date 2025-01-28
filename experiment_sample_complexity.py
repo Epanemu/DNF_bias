@@ -39,6 +39,8 @@ def run_experiment(cfg: DictConfig):
     distances = []
     times = []
     opts = []
+    true_ns = []
+    true_n = None
     for sample_size in sample_sizes:
         train_i = np.random.choice(n_samples, size=sample_size, replace=False)
         train_mask = np.zeros((n_samples,), dtype=bool)
@@ -57,6 +59,10 @@ def run_experiment(cfg: DictConfig):
             X_prot_orig[train_mask],
             include_negations=False,
             include_binary_negations=True,
+        )
+        # for evaluating Ripper, we need all negations
+        X_prot_ripper_eval = binarizer_protected.encode(
+            X_prot_orig[train_mask], include_negations=True
         )
         y = binarizer.encode_y(y_orig[train_mask])
         # X_enc = dhandler.encode(X_orig[train_mask])
@@ -82,20 +88,24 @@ def run_experiment(cfg: DictConfig):
             dist = our_metric(y, y_hat)
             d = X_prot_full.shape[1]
         elif cfg.model == "Ripper":
-            y, X_prot = balance_datasets(y, [y, X_prot], seed=cfg.seed)
-            n_samples, d = X_prot.shape
+            y, X_prot, X_prot_ripper_eval = balance_datasets(
+                y, [y, X_prot, X_prot_ripper_eval], seed=cfg.seed
+            )
+            true_n, d = X_prot.shape
             y_hat, dnf = test_RIPPER(X_prot, y, X_prot, binarizer_protected)
             y_hat_true = eval_terms(dnf, binarizer_protected, X_prot)[0]
-            if not (y_hat == y_hat_true).all():
+            if not (np.array(y_hat) == y_hat_true).all():
                 logger.warning("There is an issue in the RIPPER changes")
-            dist = our_metric(y, y_hat)
+            dist = our_metric(y, y_hat_true)
         elif cfg.model == "BRCG":
             y, X_prot_full = balance_datasets(y, [y, X_prot_full], seed=cfg.seed)
-            n_samples, d = X_prot_full.shape
+            true_n, d = X_prot_full.shape
             _, dnf = test_BRCG(X_prot_full, y, X_prot_full, binarizer_protected)
             # y_hat is not correct for the returned single conjuntion
             # print((y_hat == eval_terms(dnf, binarizer_protected, X_prot_full)[0]).all())
-            y_hat = eval_terms(dnf, binarizer_protected, X_prot_full)[0]
+            y_hat = eval_terms(
+                dnf, binarizer_protected, X_prot_full, binary_negs_only=True
+            )[0]
             dist = our_metric(y, y_hat)
         elif cfg.model in ["W1", "W2"]:
             d = X_prot.shape[1]
@@ -120,6 +130,7 @@ def run_experiment(cfg: DictConfig):
         distances.append(dist)
         times.append(t_tot)
         opts.append(opt)
+        true_ns.append(true_n if true_n is not None else sample_size)
 
     # Get the current working directory, which Hydra sets for each run
     run_dir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir
@@ -133,7 +144,7 @@ def run_experiment(cfg: DictConfig):
         out_file.write(f"Distances reported: {distances} \n")
         out_file.write(f"Times spent: {times} \n")
         out_file.write(f"Optimal/Valid flags: {opts} \n")
-        out_file.write(f"True numbers of training samples: {sample_sizes} \n")
+        out_file.write(f"True numbers of training samples: {true_ns} \n")
         out_file.write(f"Protected dimension: {d_prot} \n")
         out_file.write(f"Full dimension: {d} \n")
 
@@ -141,16 +152,17 @@ def run_experiment(cfg: DictConfig):
 
 
 if __name__ == "__main__":
-    result = subprocess.run(
-        ["git", "status", "--porcelain"], capture_output=True, text=True
-    )
-    if result.stdout.strip() == "":
-        res = subprocess.run(
-            ["git", "rev-list", "--format=%B", "-n", "1", "HEAD"],
-            capture_output=True,
-            text=True,
-        )
-        gitcommit = res.stdout.strip()
+    # result = subprocess.run(
+    #     ["git", "status", "--porcelain"], capture_output=True, text=True
+    # )
+    # if result.stdout.strip() == "":
+    #     res = subprocess.run(
+    #         ["git", "rev-list", "--format=%B", "-n", "1", "HEAD"],
+    #         capture_output=True,
+    #         text=True,
+    #     )
+    #     gitcommit = res.stdout.strip()
+    if True:
         run_experiment()
     else:
         raise Exception("Git status is not clean. Commit changes first.")

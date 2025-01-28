@@ -79,7 +79,9 @@ class Bin:
 
     def negate_self(self):
         if isinstance(self.feature, Binary):
-            return Bin(self.feature, self.operation, 1 - self.value)
+            vals = list(self.feature.value_mapping.keys())
+            negated_value = vals[0] if vals[1] == self.value else vals[1]
+            return Bin(self.feature, self.operation, negated_value)
         else:
             return Bin(self.feature, Operation.negated(self.operation), self.value)
 
