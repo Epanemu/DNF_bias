@@ -13,11 +13,12 @@ methods = [
     "W1",
     "W2",
     "TV",
+    "MMD",
 ]
 
 # base_dir_prefix = "multirun/2025-01-28/12-39-15"
 # base_dir_prefix = "multirun/2025-01-28/16-32-29"  # from 1k, unfinished
-base_dir_prefix = "multirun/2025-01-28/"  # from 1k with BRCG and Ripper
+base_dir_prefix = "multirun/2025-01-29/00-31-04"  # from 1k with MMD, BRCG and Ripper
 
 method_colors = {
     "OneRule": "red",
@@ -26,6 +27,7 @@ method_colors = {
     "TV": "green",
     "W1": "blue",
     "W2": "magenta",
+    "MMD": "cyan",
 }
 method_names = {
     "OneRule": "MSD (ours)",
@@ -34,6 +36,7 @@ method_names = {
     "W1": "Wasserstein-1",
     "W2": "Wasserstein-2",
     "TV": "Total Variation",
+    "MMD": "MMD",
 }
 
 
@@ -103,7 +106,7 @@ def extract_data():
                                 "# Samples",
                                 scenario,
                                 method,
-                                [int(v) for v in nsamples.group(1).split()],
+                                [int(v) for v in nsamples.group(1).split(", ")],
                             )
                         )
                     prot_dim = re.search(r"Protected dimension: (\d+)", line)
