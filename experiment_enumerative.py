@@ -17,10 +17,14 @@ logger = logging.getLogger(__name__)
 
 
 n_options = 0
+n_checked = 0
 
 
 def recurse_generate(data, n_min, size, i, lengths, order, offset, pos, neg):
     if sum((data[:, pos] == 1).all(axis=1) & (data[:, neg] == 0).all(axis=1)) < n_min:
+        global n_checked
+        val = recurse(size, i, [lengths[v] for v in order])
+        n_checked += val
         return
     if size == 0:
         yield (pos, neg)
@@ -136,8 +140,9 @@ def run_experiment(cfg: DictConfig):
     X1 = X_prot[y].astype(float)
 
     global n_options
+    global n_checked
     n_options = 0
-    options_tested = 0
+    n_checked = 0
 
     subgroups = subg_generator(X_prot, cfg.n_min, binarizer_protected)
 
@@ -145,7 +150,7 @@ def run_experiment(cfg: DictConfig):
     max_sg = ([], [])
     t_start = time.time()
     for sg_pos, sg_neg in subgroups:
-        options_tested += 1
+        n_checked += 1
         logger.info(f"{sg_pos}, {sg_neg}")
         mask0 = (X0[:, sg_pos] == 1).all(axis=1) & (X0[:, sg_neg] == 0).all(axis=1)
         X0_sub = X0[mask0]
@@ -159,6 +164,9 @@ def run_experiment(cfg: DictConfig):
             dist = TV_binarized(X0_sub, X1_sub)
         elif cfg.model == "MMD":
             dist = MMD(X0_sub, X1_sub)
+        elif cfg.model == "MSD":
+            mask = X_prot[:, sg_pos].all(axis=1) & (~X_prot[:, sg_neg]).all(axis=1)
+            dist = our_metric(y, mask)
         else:
             raise ValueError(f"Not implemented for {cfg.model}")
         if dist > max_dist:
@@ -185,7 +193,7 @@ def run_experiment(cfg: DictConfig):
         out_file.write(f"Max MSD: {max_MSD} \n")
         out_file.write(f"Max group: {max_sg} \n")
         out_file.write(f"Total options: {n_options} \n")
-        out_file.write(f"Checked options: {options_tested} \n")
+        out_file.write(f"Checked options: {n_checked} \n")
         out_file.write(f"Time spent: {t_tot} \n")
         out_file.write(f"True number of training samples: {n_samples} \n")
         out_file.write(f"Protected dimension: {d_prot} \n")
@@ -198,7 +206,7 @@ if __name__ == "__main__":
     result = subprocess.run(
         ["git", "status", "--porcelain"], capture_output=True, text=True
     )
-    if result.stdout.strip() == "":
+    if True or result.stdout.strip() == "":
         res = subprocess.run(
             ["git", "rev-list", "--format=%B", "-n", "1", "HEAD"],
             capture_output=True,
