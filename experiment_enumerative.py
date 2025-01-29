@@ -158,7 +158,7 @@ def run_experiment(cfg: DictConfig):
             mask = (X_prot[:, sg_pos] == 1).all(axis=1) & (X_prot[:, sg_neg] == 0).all(
                 axis=1
             )
-            max_dist = our_metric(y, mask)
+            max_MSD = our_metric(y, mask)
             max_sg = (sg_pos, sg_neg)
         if time.time() - t_start >= cfg.time_limit:
             break
@@ -174,7 +174,7 @@ def run_experiment(cfg: DictConfig):
         out_file.write(f"\nGit hash: {gitcommit}\n\n")
         out_file.write("RESULT\n")
         out_file.write(f"Max distance: {max_dist} \n")
-        out_file.write(f"Max MSD: {max_dist} \n")
+        out_file.write(f"Max MSD: {max_MSD} \n")
         out_file.write(f"Max group: {max_sg} \n")
         out_file.write(f"Time spent: {t_tot} \n")
         out_file.write(f"True number of training samples: {n_samples} \n")
