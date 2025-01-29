@@ -99,6 +99,9 @@ def run_experiment(cfg: DictConfig):
             if not (np.array(y_hat) == y_hat_true).all():
                 logger.warning("There is an issue in the RIPPER changes")
             dist = our_metric(y, y_hat_true)
+            _, dnf = test_RIPPER(X_prot, ~y, X_prot, binarizer_protected)
+            y_hat_true2 = eval_terms(dnf, binarizer_protected, X_prot_ripper_eval)[0]
+            dist = max(dist, our_metric(y, y_hat_true2))
         elif cfg.model == "BRCG":
             y, X_prot_full = balance_datasets(y, [y, X_prot_full], seed=cfg.seed)
             true_n, d = X_prot_full.shape
@@ -109,6 +112,11 @@ def run_experiment(cfg: DictConfig):
                 dnf, binarizer_protected, X_prot_full, binary_negs_only=True
             )[0]
             dist = our_metric(y, y_hat)
+            _, dnf = test_BRCG(X_prot_full, ~y, X_prot_full, binarizer_protected)
+            y_hat2 = eval_terms(
+                dnf, binarizer_protected, X_prot_full, binary_negs_only=True
+            )[0]
+            dist = max(dist, our_metric(y, y_hat2))
         elif cfg.model in ["W1", "W2"]:
             d = X_prot.shape[1]
             X0 = X_prot[~y].astype(float)
