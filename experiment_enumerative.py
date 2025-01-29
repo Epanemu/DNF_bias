@@ -16,6 +16,9 @@ gitcommit = ""
 logger = logging.getLogger(__name__)
 
 
+n_options = 0
+
+
 def recurse_generate(data, n_min, size, i, lengths, order, offset, pos, neg):
     if sum((data[:, pos] == 1).all(axis=1) & (data[:, neg] == 0).all(axis=1)) < n_min:
         return
@@ -89,8 +92,8 @@ def subg_generator(data, n_min, binarizer):
         else:
             feature_lens[bin.feature.name] += 1
 
+    global n_options
     # feature_lens = {k: max(v, 2) for k, v in feature_lens.items()}
-    n_options = 0
     for size in range(1, len(feature_order)):
         n_options += recurse(size, 0, list(feature_lens.values()))
     logger.info(f"In total, there are {n_options} possible subgroups")
@@ -111,12 +114,12 @@ def run_experiment(cfg: DictConfig):
     # state, scenario, seed, n_samples ~ total n of samples, train_samples, model
 
     n_samples = X_orig.shape[0]
-    n_train_samples = cfg.train_samples
-    while n_train_samples > n_samples:
-        n_train_samples = n_train_samples // 2
-    train_i = np.random.choice(n_samples, size=n_train_samples, replace=False)
-    train_mask = np.zeros((n_samples,), dtype=bool)
-    train_mask[train_i] = True
+    # n_train_samples = cfg.train_samples
+    # while n_train_samples > n_samples:
+    #     n_train_samples = n_train_samples // 2
+    # train_i = np.random.choice(n_samples, size=n_train_samples, replace=False)
+    train_mask = np.ones((n_samples,), dtype=bool)
+    # train_mask[train_i] = True
 
     X = binarizer.encode(X_orig[train_mask], include_negations=False)
     X_prot = binarizer_protected.encode(
@@ -132,12 +135,17 @@ def run_experiment(cfg: DictConfig):
     X0 = X_prot[~y].astype(float)
     X1 = X_prot[y].astype(float)
 
+    global n_options
+    n_options = 0
+    options_tested = 0
+
     subgroups = subg_generator(X_prot, cfg.n_min, binarizer_protected)
 
     max_dist = 0
     max_sg = ([], [])
     t_start = time.time()
     for sg_pos, sg_neg in subgroups:
+        options_tested += 1
         logger.info(f"{sg_pos}, {sg_neg}")
         mask0 = (X0[:, sg_pos] == 1).all(axis=1) & (X0[:, sg_neg] == 0).all(axis=1)
         X0_sub = X0[mask0]
@@ -176,6 +184,8 @@ def run_experiment(cfg: DictConfig):
         out_file.write(f"Max distance: {max_dist} \n")
         out_file.write(f"Max MSD: {max_MSD} \n")
         out_file.write(f"Max group: {max_sg} \n")
+        out_file.write(f"Total options: {n_options} \n")
+        out_file.write(f"Checked options: {options_tested} \n")
         out_file.write(f"Time spent: {t_tot} \n")
         out_file.write(f"True number of training samples: {n_samples} \n")
         out_file.write(f"Protected dimension: {d_prot} \n")
@@ -188,7 +198,7 @@ if __name__ == "__main__":
     result = subprocess.run(
         ["git", "status", "--porcelain"], capture_output=True, text=True
     )
-    if result.stdout.strip() == "":
+    if True or result.stdout.strip() == "":
         res = subprocess.run(
             ["git", "rev-list", "--format=%B", "-n", "1", "HEAD"],
             capture_output=True,
