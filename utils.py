@@ -193,10 +193,15 @@ def wasserstein_distance(
 def _overlap_kernel(X: np.ndarray[float], Y: np.ndarray[float]):
     m = X.shape[0]
     n = Y.shape[0]
-    overlaps = np.stack([X for _ in range(n)]).transpose(1, 0, 2) == np.stack(
-        [Y for _ in range(m)]
-    )
-    return overlaps.mean(axis=2)
+    # takes too much memory
+    # overlaps = np.stack([X for _ in range(n)]).transpose(1, 0, 2) == np.stack(
+    #     [Y for _ in range(m)]
+    # )
+    # return overlaps.mean(axis=2)
+    mean_overlaps = np.empty((m, n))
+    for i in range(m):
+        mean_overlaps[i] = np.mean(Y == X[i].reshape((1, -1)), axis=1)
+    return mean_overlaps
 
 
 def MMD(X0: np.ndarray[float], X1: np.ndarray[float]) -> float:
