@@ -84,6 +84,8 @@ def test_BRCG(
     if verbose:
         print("BRCG")
         brcg_params["verbose"] = True
+    if "solver" not in brcg_params:
+        brcg_params["solver"] = "GUROBI"
     model = BooleanRuleCG(**brcg_params)
     model.fit(X_train_pd, y_train)
 
