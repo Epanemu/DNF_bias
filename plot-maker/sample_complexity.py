@@ -159,6 +159,11 @@ scenarios = [
     "ACSMobility",
     "ACSEmployment",
     "ACSTravelTime",
+    # "DifferentStates-HI-ME",
+    # "DifferentStates-CA-WY",
+    # "DifferentStates-MS-NH",
+    # "DifferentStates-MD-MS",
+    # "DifferentStates-LA-UT",
 ]
 measuers = [
     "Distance",
