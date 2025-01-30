@@ -65,9 +65,9 @@ method_lines = {
     "MMD": "-",
 }
 method_names = {
-    "OneRule": "MSD (ours)",
-    "BRCG": "MSD (via BRCG)",
-    "Ripper": "MSD (via Ripper)",
+    "OneRule": "MSD$_\\mathrm{{diff}}$ (ours)",
+    "BRCG": "MSD$_\\mathrm{{diff}}$ (via BRCG)",
+    "Ripper": "MSD$_\\mathrm{{diff}}$ (via Ripper)",
     "W1": "Wasserstein-1",
     "W2": "Wasserstein-2",
     "TV": "Total Variation",
@@ -202,6 +202,32 @@ for method in methods:
 
             if j % c == 0:
                 ax.set_ylabel("Relative distance measure")
+            if j // c == 1:
+                ax.set_xlabel("Number of samples")
+            ax.set_xscale("log")
+            ax.set_title(scenario_titles[scenario])
+            ax.grid(True, which="both", ls=":")
+            # ax.legend(loc="upper right")
+            handles, labels = ax.get_legend_handles_labels()
+
+        elif sys.argv[1] == "base":
+            ax.fill_between(
+                x,
+                (np.array(sorted_mean) - np.array(sorted_std)),
+                (np.array(sorted_mean) + np.array(sorted_std)),
+                color=method_colors[method],
+                alpha=0.2,
+            )
+            ax.plot(
+                x,
+                sorted_mean,
+                linestyle=method_lines[method],
+                color=method_colors[method],
+                label=f"{method_names[method]}",
+            )
+
+            if j % c == 0:
+                ax.set_ylabel("Distance measures")
             if j // c == 1:
                 ax.set_xlabel("Number of samples")
             ax.set_xscale("log")
