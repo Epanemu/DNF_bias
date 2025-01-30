@@ -7,17 +7,77 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 methods = [
-    "GerryFair",
-    "fairDNF",
+    # "GerryFair",
+    # "fairDNF",
+    "fairLinear",
+    # "fairNN",
+    # "NN_base",
+    "NN_nofair",
+    # "NN_alpha",
+    # "NN_LR",
+    "NN_LR2",
+    "NN_LR5",
+    "NN_LR1",
+    "NN_drop",
+    "NN_reg",
+    # "NN_MSE",
+    # "NN_squared",
+    # "NN_squared_bigupdates",
 ]
 
-base_dir_prefix = "multirun/2025-01-13/"
+base_dir_prefix = "multirun/"
 
-method_colors = {"GerryFair": "red", "fairDNF": "blue"}
-method_names = {"GerryFair": "GerryFair", "fairDNF": "DNF via MIO with lazy FPSF"}
+method_colors = {
+    # "GerryFair": "red",
+    # "fairDNF": "magenta",
+    "fairLinear": "green",
+    # "fairNN": "magenta",
+    # "NN_base": "blue",
+    "NN_nofair": "cyan",
+    # "NN_alpha": "blue",
+    # "NN_LR": "violet",
+    "NN_LR2": "violet",
+    "NN_LR5": "magenta",
+    "NN_LR1": "grey",
+    "NN_drop": "blue",
+    "NN_reg": "yellow",
+    # "NN_squared": "blue",
+    # "NN_MSE": "cyan",
+}
+method_names = {
+    "GerryFair": "GerryFair",
+    "fairDNF": "DNF via MIO with lazy FPSF",
+    "fairLinear": "Linear via MIO with lazy FPSF",
+    "fairNN": "NN with FPSF loss",
+    "NN_base": "NN baseline",
+    "NN_nofair": "NN no FPSF loss",
+    "NN_alpha": "NN alpha=1k",
+    "NN_LR": "NN lr=0.0001",
+    "NN_LR2": "NN lr=0.002 100 epochs",
+    "NN_LR5": "NN lr=0.005",
+    "NN_LR1": "NN lr=0.01",
+    "NN_drop": "NN dropout 0.5",
+    "NN_reg": "NN L2 regularized",
+    "NN_squared": "NN squared FPSF",
+    "NN_MSE": "NN use MSE loss",
+}
 method_paths = {
-    "GerryFair": {"folktables": "12-47-17"},
-    "fairDNF": {"folktables": "11-29-47"},
+    "GerryFair": {"folktables": "2025-01-16/23-43-03"},
+    "fairDNF": {"folktables": "2025-01-17/06-05-57"},
+    "fairLinear": {"folktables": "2025-01-17/10-54-37"},
+    "fairNN": {"folktables": "2025-01-16/23-42-57"},
+    "NN_base": {"folktables": "2025-01-17/baseline"},
+    "NN_squared_bigupdates": {"folktables": "2025-01-20/07-45-27"},
+    "NN_nofair": {"folktables": "2025-01-17/no_fairness"},
+    "NN_alpha": {"folktables": "2025-01-17/alpha1k"},
+    "NN_LR": {"folktables": "2025-01-17/LR"},
+    "NN_LR2": {"folktables": "2025-01-20/lr002long"},
+    "NN_LR5": {"folktables": "2025-01-21/lr005"},
+    "NN_LR1": {"folktables": "2025-01-21/lr01"},
+    "NN_drop": {"folktables": "2025-01-21/dropout"},
+    "NN_reg": {"folktables": "2025-01-21/l2reg"},
+    "NN_squared": {"folktables": "2025-01-20/07-44-20"},
+    "NN_MSE": {"folktables": "2025-01-17/MSE"},
 }
 
 
@@ -85,12 +145,22 @@ def extract_data_for_method(method):
                         cuts = re.search(r"Number of cuts: (\d+)", line)
                         if cuts:
                             extracted_data.append(
-                                ("# Cuts", scenario, float(cuts.group(1)))
+                                ("# Subgroups", scenario, float(cuts.group(1)))
+                            )
+                        subgs = re.search(r"Number of subgroups: (\d+)", line)
+                        if subgs:
+                            extracted_data.append(
+                                ("# Subgroups", scenario, float(subgs.group(1)))
                             )
                         callbacks = re.search(r"Number of callbacks: (\d+)", line)
                         if callbacks:
                             extracted_data.append(
-                                ("# Callbacks", scenario, float(callbacks.group(1)))
+                                ("# Checks", scenario, float(callbacks.group(1)))
+                            )
+                        checks = re.search(r"Number of checks: (\d+)", line)
+                        if checks:
+                            extracted_data.append(
+                                ("# Checks", scenario, float(checks.group(1)))
                             )
                         prot_dim = re.search(r"Protected dimension: (\d+)", line)
                         if prot_dim:
@@ -138,8 +208,8 @@ measuers = [
     "# Samples",
     "Dimension - all",
     "Dimension - protected",
-    "# Callbacks",
-    "# Cuts",
+    "# Checks",
+    "# Subgroups",
     "Proportion of time spent in callbacks",
 ]
 
@@ -153,8 +223,11 @@ for method in methods:
         sorted_mean = [np.mean(data_dict[measure][n]) for n in names]
         sorted_std = [np.std(data_dict[measure][n]) for n in names]
 
-        barwidth = 0.35
-        shift = (barwidth / 2) if method == methods[0] else (-barwidth / 2)
+        n = len(methods)
+        w = 0.6
+        barwidth = w / n
+        j = methods.index(method)
+        shift = barwidth / 2 + j * barwidth - w / 2
         # barplot with std band for each method side by side in one axes
         ax.bar(
             np.arange(len(names)) + shift,
@@ -167,12 +240,12 @@ for method in methods:
         )
 
         if "FPSF" in measure:
-            ax.set_ylim((0, 0.02))
+            # ax.set_ylim((0, 0.02))
             ax.plot(
-                [-barwidth, len(names) - 1 + barwidth],
+                [-w / 2, len(names) - 1 + w / 2],
                 [0.01, 0.01],
                 label="Gamma threshold",
-                color="black",
+                color="grey",
                 linestyle="dashed",
             )
         ax.set_ylabel(measure)

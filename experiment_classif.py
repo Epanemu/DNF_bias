@@ -16,7 +16,7 @@ from scenarios.folktables_scenarios import load_classif_scenario
 from spsf_mio import SPSF
 from utils import eval_fpsf, eval_spsf
 
-githash = ""
+gitcommit = ""
 
 
 @hydra.main(version_base="1.3", config_path="conf", config_name="config")
@@ -36,6 +36,9 @@ def run_experiment(cfg: DictConfig):
     dfX_prot = pd.DataFrame(X_prot)
     dfy = pd.Series(y)
 
+    d = X_enc.shape[1]
+    d_prot = X_prot.shape[1]
+
     if cfg.model == "DNF":
         mio_setup = DNFFairClassifier(gamma=0.01)
         dnf_model = mio_setup.find_dnf(
@@ -49,26 +52,44 @@ def run_experiment(cfg: DictConfig):
                 y_term &= X[:, conj]
             y_hat_train |= y_term
         y_hat_train_prob = y_hat_train.astype(int)
+        d = X.shape[1]
     elif cfg.model == "Linear":
         mio_setup = LinearFairClassifier(gamma=0.01)
         coefs, threshold = mio_setup.find_classifier(
-            X_enc, X_prot, y, time_limit=cfg.time_limit, epsilon=1e-4, verbose=True
+            X_enc, X_prot, y, time_limit=cfg.time_limit, epsilon=1e-3, verbose=True
         )
         y_hat_train = X_enc @ coefs.reshape((-1, 1)) >= threshold
         y_hat_train = y_hat_train.flatten()
         y_hat_train_prob = y_hat_train.astype(int)
     elif cfg.model == "NN":
         # alpha = 1/gamma
-        NN = NNFairClassifier(X_enc.shape[1], [500, 200, 50, 10], gamma=0.01, alpha=100)
+        NN = NNFairClassifier(
+            X_enc.shape[1],
+            # TODO make it smaller?
+            [500, 200, 50, 10],
+            gamma=0.01,
+            alpha=1000,
+            dropout=True,
+            learning_rate=0.001,
+            # weight_decay=2e-4,
+            weight_decay=0,
+        )
         np.random.seed(cfg.seed)
         eval_idx = np.random.choice(n_samples, n_samples // 10, replace=False)
         eval_mask = np.zeros_like(y, dtype=bool)
         eval_mask[eval_idx] = True
         train = SimpleDataset(X_enc[~eval_mask], X_prot[~eval_mask], y[~eval_mask])
         eval = SimpleDataset(X_enc[eval_mask], X_prot[eval_mask], y[eval_mask])
-        NN.train(train, eval, batch_size=2000, fpsf_size=20000, epochs=10)
-        y_hat_train_prob = NN.predict_proba(X_enc)
+        NN.train(
+            train, eval, batch_size=2000, fpsf_size=20000, epochs=20
+        )  # Base version
+        y_hat_train_prob = NN.predict_proba(X_enc[~eval_mask])
         y_hat_train = y_hat_train_prob >= 0.5
+        y = y[~eval_mask]
+        X_prot = X_prot[~eval_mask]
+        dfX_prot = pd.DataFrame(X_prot)
+        dfy = pd.Series(y)
+        n_samples = X_prot.shape[0]
     elif cfg.model == "GerryFair":
         gerryfair_model = Model(printflag=True, gamma=0.01, fairness_def="FP")
         n_iters = cfg.time_limit // 5
@@ -174,7 +195,7 @@ def run_experiment(cfg: DictConfig):
     with open(os.path.join(run_dir, "output.txt"), "w") as out_file:
         print(f"Config:\n {cfg}", file=sys.stderr)
         out_file.write(f"Config:\n {cfg}\n")
-        out_file.write(f"\nGit hash: {githash}\n\n")
+        out_file.write(f"\nGit hash: {gitcommit}\n\n")
         out_file.write("RESULT\n")
         if cfg.model == "DNF":
             out_file.write(f"DNF: {dnf_model} \n")
@@ -205,8 +226,9 @@ def run_experiment(cfg: DictConfig):
         out_file.write(f"Gerry oracle b1 intercept: {oracle.b1.intercept_} \n")
         out_file.write(f"Gerry SPSF: {eval_spsf(y_hat_train, gerrygroup_train)} \n")
         out_file.write(f"Gerry FPSF: {eval_fpsf(y, y_hat_train, gerrygroup_train)} \n")
-        out_file.write(f"Protected dimension: {X_prot.shape[1]} \n")
-        out_file.write(f"Full dimension: {X.shape[1]} \n")
+        out_file.write(f"True number of training samples: {n_samples} \n")
+        out_file.write(f"Protected dimension: {d_prot} \n")
+        out_file.write(f"Full dimension: {d} \n")
 
     print(f"Result saved to {os.path.join(run_dir, 'output.txt')}")
     if cfg.model == "GerryFair":
@@ -223,9 +245,11 @@ if __name__ == "__main__":
     )
     if result.stdout.strip() == "":
         res = subprocess.run(
-            ["git", "rev-parse", "HEAD"], capture_output=True, text=True
+            ["git", "rev-list", "--format=%B", "-n", "1", "HEAD"],
+            capture_output=True,
+            text=True,
         )
-        githash = res.stdout.strip()
+        gitcommit = res.stdout.strip()
         run_experiment()
     else:
         raise Exception("Git status is not clean. Commit changes first.")

@@ -130,7 +130,7 @@ class SPSF:
         if verbose:
             print("OBJECTIVE:", int_model.o.value)
 
-        return [i for i in int_model.feat_i if int_model.use_feat[i].value != 0]
+        return [i for i in int_model.feat_i if int_model.use_feat[i].value >= 1e-4]
 
     # TODO move this wrapper to utils?
     def find_subgroup(
