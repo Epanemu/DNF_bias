@@ -7,14 +7,14 @@ This repository contains code for detecting intersectional bias using the **Maxi
 ## Installation
 
 **Install Dependencies**:
-    ```bash
+    ```
     pip install -r requirements.txt
     ```
 
    - **Python 3.9+** recommended.
    - **Gurobi**: If using the MIO-based OneRule approach, ensure Gurobi is installed & licensed or switch to a different solver in the code.
    - **Optional**: For MDSS or additional fairness metrics:
-   
+
     pip install aif360
 
 ---
@@ -49,19 +49,19 @@ This repository contains code for detecting intersectional bias using the **Maxi
 Below are common examples using Hydra-style overrides:
 
 1. **OneRule MSD** on ACSIncome (California):
-   ```bash
+   ```
    python experiment_enumerative.py -m
    ```
    Use config *conf/enumerative.yaml*.
 
 2. **Sample Complexity** experiments:
-   ```bash
+   ```
    python experiment_sample_complexity.py -m
    ```
    Use config *conf/distances.yaml*.
 
 3. **Compare Distances** (W1, W2, TV, MMD):
-   ```bash
+   ```
    python experiment_distances.py -m
    ```
    Use config *conf/distances.yaml*.
@@ -75,12 +75,12 @@ Results are typically saved to `./multirun/`.
 After running experiments, you can produce plots:
 
 1. **Enumeration Comparison**  
-   ```bash
+   ```
     python .\plot-maker\plot_exploration.py
     ```
 
 2. **Paper Figures**  
-   ```bash
+   ```
     python .\plot-maker\plots_for_paper.py base
     ```
    And instead of 'base' you can also choose 'relative' or 'RSE' for different y-axis interpretations
