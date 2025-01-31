@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 class OneRule:
     """Implementation of a MIO formulation for finding an optimal conjunction with lowest 0-1 error.
-    The formulation is inspired by 1Rule method from http://proceedings.mlr.press/v28/malioutov13.pdf
     """
 
     def __init__(self) -> None:

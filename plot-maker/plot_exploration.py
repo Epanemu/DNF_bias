@@ -43,10 +43,10 @@ methods = [
 ]
 
 base_dir_prefix = (
-    "batch_from_cluster/experiment_enumerative"  # from cluster, final (hopefully)
+    "batch_precomputed/experiment_enumerative"
 )
 
-base_onerule = "batch_from_cluster/experiment_sample_complexity"
+base_onerule = "batch_precomputed/experiment_sample_complexity"
 
 method_colors = {
     "OneRule": "red",
@@ -228,7 +228,7 @@ fig.legend(
 
 # plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.tight_layout(rect=[0, 0.1, 1, 1])
-output_path = "multirun_images/" + str(date.today()) + "_enumeration.pdf"
+output_path = "enumeration.pdf"
 plt.savefig(output_path)
 
 plt.show()

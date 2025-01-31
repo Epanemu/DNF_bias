@@ -21,25 +21,25 @@ This repository contains code for detecting intersectional bias using the **Maxi
 
 ## Repository Structure
 
-- **experiment_enumerative.py**  
+- **experiment_enumerative.py**
   - Runs the enumerative or direct approach comparing MSD against other distances.
 
-- **experiment_sample_complexity.py**  
+- **experiment_sample_complexity.py**
   - Varies sample sizes to show how quickly each distance converges.
 
-- **experiment_distances.py**  
+- **experiment_distances.py**
   - Compares multiple distributional distances (W1, W2, TV, MMD, etc.).
 
-- **scenarios/folktables_scenarios.py**  
+- **scenarios/folktables_scenarios.py**
   - Loads and preprocesses Folktables-based datasets (US Census ACS).
 
-- **plot-maker/**  
+- **plot-maker/**
   - Contains scripts (plot_exploration.py, plots_for_paper.py) for generating figures.
 
-- **methods.py, one_rule.py, utils.py**  
+- **methods.py, one_rule.py, utils.py**
   - Core logic for the MIO-based OneRule (single-term) solver, plus helper functions for distances, evaluation, etc.
 
-- **conf/**  
+- **conf/**
   - Hydra configuration files, specifying scenarios, seeds, model parameters.
 
 ---
@@ -66,7 +66,7 @@ Below are common examples using Hydra-style overrides:
    ```
    Use config *conf/distances.yaml*.
 
-Results are typically saved to `./multirun/`.
+Results are typically saved to `./multirun/`. To utilize the structure as the precomputed results, add `+dir_structure=cluster_batch` as a command line argument, and the results will be saved in `./batch_out/` folder.
 
 ---
 
@@ -74,24 +74,24 @@ Results are typically saved to `./multirun/`.
 
 After running experiments, you can produce plots:
 
-1. **Enumeration Comparison**  
+1. **Enumeration Comparison**
    ```
-    python .\plot-maker\plot_exploration.py
+    python ./plot-maker/plot_exploration.py
     ```
 
-2. **Paper Figures**  
+2. **Paper Figures**
    ```
-    python .\plot-maker\plots_for_paper.py base
+    python ./plot-maker/plots_for_paper.py base
     ```
    And instead of 'base' you can also choose 'relative' or 'RSE' for different y-axis interpretations
 
-Results are typically saved to `./multirun_images/`.
+Results are will be saved to the working folder (`./`).
 
 ---
 
 ## Notes
 
-- Plots are being generated from data in folder `batch_from_cluster`. If you would like to plot your own experiments, move it to the folder, and rename them.
+- Plots are being generated from data in folder `batch_precomputed`. If you would like to plot your own experiments, move it to the folder, and rename them, or change the plotting scripts.
 - The code expects certain columns in Folktables data; see `PROTECTED_ATTRS` in `scenarios/folktables_scenarios.py`.
 - BRCG and Ripper require AIX360. There is manually installed AIX360 with modified versions of the algorithms. MDSS or other advanced fairness methods can require AIF360.
 - Hydra automatically creates separate output folders for each run, storing logs and an `output.txt` with the distance results.
