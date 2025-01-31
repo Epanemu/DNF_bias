@@ -91,6 +91,7 @@ Results are typically saved to `./multirun_images/`.
 
 ## Notes
 
+- Plots are being generated from data in folder `batch_from_cluster`. If you would like to plot your own experiments, move it to the folder, and rename them.
 - The code expects certain columns in Folktables data; see `PROTECTED_ATTRS` in `scenarios/folktables_scenarios.py`.
 - BRCG and Ripper require AIX360. There is manualy intalled AIX360 with modified versions of the algorithms. MDSS or other advanced fairness methods can require AIF360.
 - Hydra automatically creates separate output folders for each run, storing logs and an `output.txt` with the distance results.
