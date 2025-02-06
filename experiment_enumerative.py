@@ -250,7 +250,7 @@ if __name__ == "__main__":
     result = subprocess.run(
         ["git", "status", "--porcelain"], capture_output=True, text=True
     )
-    if True or result.stdout.strip() == "":
+    if result.stdout.strip() == "":
         res = subprocess.run(
             ["git", "rev-list", "--format=%B", "-n", "1", "HEAD"],
             capture_output=True,
