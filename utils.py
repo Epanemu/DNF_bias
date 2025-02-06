@@ -174,15 +174,17 @@ def TV_binarized(X0: np.ndarray[int], X1: np.ndarray[int]) -> float:
 
 
 def wasserstein_distance(
-    X0: np.ndarray[float], X1: np.ndarray[float], Wtype: str
+    X0: np.ndarray[float], X1: np.ndarray[float], Wtype: str, true_dimension: int
 ) -> float:
-    (n0, d), n1 = X0.shape, X1.shape[0]
+    n0, n1 = X0.shape[0], X1.shape[0]
     X0, counts0 = np.unique(X0, return_counts=True, axis=0)
     X1, counts1 = np.unique(X1, return_counts=True, axis=0)
     if Wtype == "W1":
-        dist_matrix = ot.dist(X0, X1, p=2, metric="euclidean") / np.sqrt(2 * d)
+        dist_matrix = ot.dist(X0, X1, p=2, metric="euclidean") / np.sqrt(
+            2 * true_dimension
+        )
     else:
-        dist_matrix = ot.dist(X0, X1, p=2, metric="sqeuclidean") / (2 * d)
+        dist_matrix = ot.dist(X0, X1, p=2, metric="sqeuclidean") / (2 * true_dimension)
     print(np.max(dist_matrix))
     dist = ot.emd2(counts0 / n0, counts1 / n1, dist_matrix, numItermax=1e6)
     if Wtype == "W2":

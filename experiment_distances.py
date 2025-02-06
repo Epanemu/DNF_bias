@@ -102,7 +102,9 @@ def run_experiment(cfg: DictConfig):
         d = X_prot.shape[1]
         X0 = X_prot[~y].astype(float)
         X1 = X_prot[y].astype(float)
-        dist = wasserstein_distance(X0, X1, Wtype=cfg.model)
+        dist = wasserstein_distance(
+            X0, X1, Wtype=cfg.model, true_dimension=X_prot_orig.shape[1]
+        )
     elif cfg.model == "TV":
         d = X_prot.shape[1]
         X0 = X_prot[~y].astype(float)

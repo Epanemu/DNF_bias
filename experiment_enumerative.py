@@ -159,7 +159,9 @@ def run_experiment(cfg: DictConfig):
         if X0_sub.shape[0] == 0 or X1_sub.shape[0] == 0:
             continue
         if cfg.model in ["W1", "W2"]:
-            dist = wasserstein_distance(X0_sub, X1_sub, Wtype=cfg.model)
+            dist = wasserstein_distance(
+                X0_sub, X1_sub, Wtype=cfg.model, true_dimension=X_prot_orig.shape[1]
+            )
         elif cfg.model == "TV":
             dist = TV_binarized(X0_sub, X1_sub)
         elif cfg.model == "MMD":
