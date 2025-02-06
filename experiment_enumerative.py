@@ -18,13 +18,15 @@ logger = logging.getLogger(__name__)
 
 n_options = 0
 n_checked = 0
+n_skipped = 0
 
 
 def recurse_generate(data, n_min, size, i, lengths, order, offset, pos, neg):
     if sum((data[:, pos] == 1).all(axis=1) & (data[:, neg] == 0).all(axis=1)) < n_min:
-        global n_checked
+        global n_checked, n_skipped
         val = recurse(size, i, [lengths[v] for v in order])
         n_checked += val
+        n_skipped += val
         return
     if size == 0:
         yield (pos, neg)
@@ -153,10 +155,10 @@ def run_experiment(cfg: DictConfig):
         X0cat = X_categ[~y].astype(float)
         X1cat = X_categ[y].astype(float)
 
-    global n_options
-    global n_checked
+    global n_options, n_checked, n_skipped
     n_options = 0
     n_checked = 0
+    n_skipped = 0
 
     subgroups = subg_generator(X_prot, cfg.n_min, binarizer_protected)
 
@@ -235,6 +237,7 @@ def run_experiment(cfg: DictConfig):
         out_file.write(f"Max subgroup: ({' AND '.join(sorted(map(str, term)))}) \n")
         out_file.write(f"Total options: {n_options} \n")
         out_file.write(f"Checked options: {n_checked} \n")
+        out_file.write(f"Of that skipped options: {n_skipped} \n")
         out_file.write(f"Time spent: {t_tot} \n")
         out_file.write(f"True number of training samples: {n_samples} \n")
         out_file.write(f"Protected dimension: {d_prot} \n")
