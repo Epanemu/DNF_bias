@@ -129,6 +129,17 @@ def run_experiment(cfg: DictConfig):
     X_prot = binarizer_protected.encode(
         X_prot_orig[train_mask], include_negations=False, include_binary_negations=False
     )
+    X_categ = np.empty_like(X_prot_orig[train_mask], dtype=int)
+    offset = 0
+    for i, f in enumerate(binarizer_protected.get_bin_encodings()):
+        j = len(f)
+        if j == 1:
+            # binary
+            X_categ[:, i] = X_prot[:, offset]
+        else:
+            # categorized
+            X_categ[:, i] = np.argmax(X_prot[:, offset : offset + j], axis=1)
+        offset += j
     y = binarizer.encode_y(y_orig[train_mask])
     # X_enc = dhandler.encode(X_orig[train_mask])
 
@@ -138,6 +149,9 @@ def run_experiment(cfg: DictConfig):
     d = X_prot.shape[1]
     X0 = X_prot[~y].astype(float)
     X1 = X_prot[y].astype(float)
+    if cfg.model == "MMD":
+        X0cat = X_categ[~y].astype(float)
+        X1cat = X_categ[y].astype(float)
 
     global n_options
     global n_checked
@@ -165,6 +179,8 @@ def run_experiment(cfg: DictConfig):
         elif cfg.model == "TV":
             dist = TV_binarized(X0_sub, X1_sub)
         elif cfg.model == "MMD":
+            X0_sub = X0cat[mask0]
+            X1_sub = X1cat[mask1]
             dist = MMD(X0_sub, X1_sub)
         elif cfg.model == "MSD":
             mask = X_prot[:, sg_pos].all(axis=1) & (~X_prot[:, sg_neg]).all(axis=1)

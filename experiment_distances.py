@@ -54,6 +54,18 @@ def run_experiment(cfg: DictConfig):
     X_prot_ripper_eval = binarizer_protected.encode(
         X_prot_orig[train_mask], include_negations=True
     )
+    X_categ = np.empty_like(X_prot_orig[train_mask], dtype=int)
+    offset = 0
+    for i, f in enumerate(binarizer_protected.get_bin_encodings()):
+        j = len(f)
+        if j == 1:
+            # binary
+            X_categ[:, i] = X_prot[:, offset]
+        else:
+            # categorized
+            X_categ[:, i] = np.argmax(X_prot[:, offset : offset + j], axis=1)
+        offset += j
+
     y = binarizer.encode_y(y_orig[train_mask])
     # X_enc = dhandler.encode(X_orig[train_mask])
 
@@ -111,9 +123,9 @@ def run_experiment(cfg: DictConfig):
         X1 = X_prot[y].astype(float)
         dist = TV_binarized(X0, X1)
     elif cfg.model == "MMD":
-        d = X_prot.shape[1]
-        X0 = X_prot[~y].astype(float)
-        X1 = X_prot[y].astype(float)
+        d = X_categ.shape[1]
+        X0 = X_categ[~y].astype(float)
+        X1 = X_categ[y].astype(float)
         dist = MMD(X0, X1)
     else:
         raise ValueError(f"Unknown fair classifier {cfg.model}")
