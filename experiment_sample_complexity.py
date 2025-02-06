@@ -87,7 +87,10 @@ def run_experiment(cfg: DictConfig):
         t_start = time.time()
 
         opt = True
-        if cfg.model == "OneRule":
+        if cfg.model in ["OneRule", "OneRuleBalanceData"]:
+            if cfg.model == "OneRuleBalanceData":
+                y, X_prot_full = balance_datasets(y, [y, X_prot_full], seed=cfg.seed)
+                true_n, d = X_prot_full.shape
             onerule = OneRule()
             conj, opt = onerule.find_rule(
                 X_prot_full,
