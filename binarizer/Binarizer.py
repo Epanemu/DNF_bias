@@ -239,7 +239,7 @@ class Binarizer:
         )
 
     def get_bin_encodings(
-        self, include_negations=False, include_binary_negations=False
+        self, include_negations=False, include_binary_negations=False, return_flat=True
     ):
         if include_negations:
             feats = self.__binarized_features + self.__binarized_negations
@@ -249,6 +249,8 @@ class Binarizer:
                 for binarization in self.__binarized_negations:
                     if isinstance(binarization[0].feature, Binary):
                         feats.append(binarization)
+        if not return_flat:
+            return feats
         flat = []
         for binariaztions in feats:
             for bin in binariaztions:

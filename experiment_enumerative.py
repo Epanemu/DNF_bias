@@ -131,7 +131,7 @@ def run_experiment(cfg: DictConfig):
     )
     X_categ = np.empty_like(X_prot_orig[train_mask], dtype=int)
     offset = 0
-    for i, f in enumerate(binarizer_protected.get_bin_encodings()):
+    for i, f in enumerate(binarizer_protected.get_bin_encodings(return_flat=False)):
         j = len(f)
         if j == 1:
             # binary
@@ -177,8 +177,8 @@ def run_experiment(cfg: DictConfig):
         col_mask = []
         cat_col_mask = []
         i = 0  # index of currently sought fixed value
-        for f in binarizer_protected.get_bin_encodings():
-            if fixed_idxs[i] > offset + len(f):
+        for f in binarizer_protected.get_bin_encodings(return_flat=False):
+            if i >= len(fixed_idxs) or fixed_idxs[i] > offset + len(f):
                 col_mask += [1] * len(f)
                 cat_col_mask.append(1)
             else:

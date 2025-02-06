@@ -56,7 +56,7 @@ def run_experiment(cfg: DictConfig):
     )
     X_categ = np.empty_like(X_prot_orig[train_mask], dtype=int)
     offset = 0
-    for i, f in enumerate(binarizer_protected.get_bin_encodings()):
+    for i, f in enumerate(binarizer_protected.get_bin_encodings(return_flat=False)):
         j = len(f)
         if j == 1:
             # binary
