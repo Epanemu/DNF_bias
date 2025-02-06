@@ -217,6 +217,10 @@ def run_experiment(cfg: DictConfig):
             break
     t_tot = time.time() - t_start
 
+    bin_feats = binarizer.get_bin_encodings(include_binary_negations=False)
+    term = [bin_feats[r] for r in max_sg[0]]
+    term += [bin_feats[r].negate_self() for r in max_sg[1]]
+
     # Get the current working directory, which Hydra sets for each run
     run_dir = hydra.core.hydra_config.HydraConfig.get().runtime.output_dir
 
@@ -228,7 +232,7 @@ def run_experiment(cfg: DictConfig):
         out_file.write("RESULT\n")
         out_file.write(f"Max distance: {max_dist} \n")
         out_file.write(f"Max MSD: {max_MSD} \n")
-        out_file.write(f"Max group: {max_sg} \n")
+        out_file.write(f"Max subgroup: ({' AND '.join(sorted(map(str, term)))}) \n")
         out_file.write(f"Total options: {n_options} \n")
         out_file.write(f"Checked options: {n_checked} \n")
         out_file.write(f"Time spent: {t_tot} \n")

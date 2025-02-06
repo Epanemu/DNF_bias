@@ -88,7 +88,7 @@ def run_experiment(cfg: DictConfig):
         opt = True
         if cfg.model == "OneRule":
             onerule = OneRule()
-            term, opt = onerule.find_rule(
+            conj, opt = onerule.find_rule(
                 X_prot_full,
                 y,
                 verbose=True,
@@ -97,10 +97,12 @@ def run_experiment(cfg: DictConfig):
                 return_opt_flag=True,
             )
             y_hat = np.ones_like(y, dtype=bool)
-            for conj in term:
-                y_hat &= X_prot_full[:, conj]
+            for c in conj:
+                y_hat &= X_prot_full[:, c]
             dist = our_metric(y, y_hat)
             d = X_prot_full.shape[1]
+            bin_feats = binarizer.get_bin_encodings(include_binary_negations=True)
+            term = [bin_feats[r] for r in conj]
         elif cfg.model == "Ripper":
             y, X_prot, X_prot_ripper_eval = balance_datasets(
                 y, [y, X_prot, X_prot_ripper_eval], seed=cfg.seed
@@ -114,6 +116,7 @@ def run_experiment(cfg: DictConfig):
             _, dnf = test_RIPPER(X_prot, ~y, X_prot, binarizer_protected)
             y_hat_true2 = eval_terms(dnf, binarizer_protected, X_prot_ripper_eval)[0]
             dist = max(dist, our_metric(y, y_hat_true2))
+            term = dnf[0]
         elif cfg.model == "BRCG":
             y, X_prot_full = balance_datasets(y, [y, X_prot_full], seed=cfg.seed)
             true_n, d = X_prot_full.shape
@@ -129,6 +132,7 @@ def run_experiment(cfg: DictConfig):
                 dnf, binarizer_protected, X_prot_full, binary_negs_only=True
             )[0]
             dist = max(dist, our_metric(y, y_hat2))
+            term = dnf[0]
         elif cfg.model in ["W1", "W2"]:
             d = X_prot.shape[1]
             X0 = X_prot[~y].astype(float)
@@ -168,6 +172,10 @@ def run_experiment(cfg: DictConfig):
         out_file.write(f"Config:\n {cfg}\n")
         out_file.write(f"\nGit hash: {gitcommit}\n\n")
         out_file.write("RESULT\n")
+        if cfg.model in ["OneRule", "Ripper", "BRCG"]:
+            out_file.write(
+                f"Subgroup found: ({' AND '.join(sorted(map(str, term)))}) \n"
+            )
         out_file.write(f"Distances reported: {distances} \n")
         out_file.write(f"Times spent: {times} \n")
         out_file.write(f"Optimal/Valid flags: {opts} \n")
