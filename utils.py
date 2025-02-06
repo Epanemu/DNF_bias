@@ -185,7 +185,7 @@ def wasserstein_distance(
         )
     else:
         dist_matrix = ot.dist(X0, X1, p=2, metric="sqeuclidean") / (2 * true_dimension)
-    print(np.max(dist_matrix))
+    # print(np.max(dist_matrix))
     dist = ot.emd2(counts0 / n0, counts1 / n1, dist_matrix, numItermax=1e6)
     if Wtype == "W2":
         dist = np.sqrt(dist)
