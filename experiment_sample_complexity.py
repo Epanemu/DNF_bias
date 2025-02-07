@@ -105,7 +105,9 @@ def run_experiment(cfg: DictConfig):
                 y_hat &= X_prot_full[:, c]
             dist = our_metric(y, y_hat)
             d = X_prot_full.shape[1]
-            bin_feats = binarizer.get_bin_encodings(include_binary_negations=True)
+            bin_feats = binarizer_protected.get_bin_encodings(
+                include_binary_negations=True
+            )
             terms.append([bin_feats[r] for r in conj])
         elif cfg.model == "Ripper":
             y, X_prot, X_prot_ripper_eval = balance_datasets(
@@ -176,7 +178,7 @@ def run_experiment(cfg: DictConfig):
         out_file.write(f"Config:\n {cfg}\n")
         out_file.write(f"\nGit hash: {gitcommit}\n\n")
         out_file.write("RESULT\n")
-        if cfg.model in ["OneRule", "Ripper", "BRCG"]:
+        if cfg.model in ["OneRule", "Ripper", "BRCG", "OneRuleBalanceData"]:
             out_file.write(
                 f"Subgroups found: [{' | '.join([' AND '.join(sorted(map(str, term))) for term in terms])}] \n"
             )
