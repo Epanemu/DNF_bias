@@ -219,7 +219,7 @@ def run_experiment(cfg: DictConfig):
             break
     t_tot = time.time() - t_start
 
-    bin_feats = binarizer.get_bin_encodings(include_binary_negations=False)
+    bin_feats = binarizer_protected.get_bin_encodings(include_binary_negations=False)
     term = [bin_feats[r] for r in max_sg[0]]
     term += [bin_feats[r].negate_self() for r in max_sg[1]]
 
