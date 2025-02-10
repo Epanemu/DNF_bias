@@ -168,46 +168,48 @@ def run_experiment(cfg: DictConfig):
     for sg_pos, sg_neg in subgroups:
         n_checked += 1
         logger.info(f"{sg_pos}, {sg_neg}")
-        mask0 = (X0[:, sg_pos] == 1).all(axis=1) & (X0[:, sg_neg] == 0).all(axis=1)
-        mask1 = (X1[:, sg_pos] == 1).all(axis=1) & (X1[:, sg_neg] == 0).all(axis=1)
-        X0_sub = X0[mask0]
-        X1_sub = X1[mask1]
-        if X0_sub.shape[0] == 0 or X1_sub.shape[0] == 0:
-            continue
-        # remove the fixed columns
-        fixed_idxs = sorted(sg_pos + sg_neg)
-        col_mask = []
-        cat_col_mask = []
-        i = 0  # index of currently sought fixed value
-        for f in binarizer_protected.get_bin_encodings(return_flat=False):
-            if i >= len(fixed_idxs) or fixed_idxs[i] > offset + len(f):
-                col_mask += [1] * len(f)
-                cat_col_mask.append(1)
-            else:
-                col_mask += [0] * len(f)
-                cat_col_mask.append(0)
-                i += 1
-        col_mask = np.array(col_mask, dtype=bool)
-        if np.all(~col_mask):
-            continue
-        X0_sub = X0_sub[:, col_mask]
-        X1_sub = X1_sub[:, col_mask]
-
-        if cfg.model in ["W1", "W2"]:
-            dist = wasserstein_distance(
-                X0_sub, X1_sub, Wtype=cfg.model, true_dimension=X_prot_orig.shape[1]
-            )
-        elif cfg.model == "TV":
-            dist = TV_binarized(X0_sub, X1_sub)
-        elif cfg.model == "MMD":
-            X0_sub = X0cat[mask0][:, cat_col_mask]  # keeps the shape correctly
-            X1_sub = X1cat[mask1][:, cat_col_mask]  # keeps the shape correctly
-            dist = MMD(X0_sub, X1_sub)
-        elif cfg.model == "MSD":
+        if cfg.model == "MSD":
             mask = X_prot[:, sg_pos].all(axis=1) & (~X_prot[:, sg_neg]).all(axis=1)
             dist = our_metric(y, mask)
         else:
-            raise ValueError(f"Not implemented for {cfg.model}")
+            mask0 = (X0[:, sg_pos] == 1).all(axis=1) & (X0[:, sg_neg] == 0).all(axis=1)
+            mask1 = (X1[:, sg_pos] == 1).all(axis=1) & (X1[:, sg_neg] == 0).all(axis=1)
+            X0_sub = X0[mask0]
+            X1_sub = X1[mask1]
+            if X0_sub.shape[0] == 0 or X1_sub.shape[0] == 0:
+                continue
+            # remove the fixed columns
+            fixed_idxs = sorted(sg_pos + sg_neg)
+            col_mask = []
+            cat_col_mask = []
+            i = 0  # index of currently sought fixed value
+            for f in binarizer_protected.get_bin_encodings(return_flat=False):
+                if i >= len(fixed_idxs) or fixed_idxs[i] > offset + len(f):
+                    col_mask += [1] * len(f)
+                    cat_col_mask.append(1)
+                else:
+                    col_mask += [0] * len(f)
+                    cat_col_mask.append(0)
+                    i += 1
+            col_mask = np.array(col_mask, dtype=bool)
+            if np.all(~col_mask):
+                continue
+            X0_sub = X0_sub[:, col_mask]
+            X1_sub = X1_sub[:, col_mask]
+
+            if cfg.model in ["W1", "W2"]:
+                dist = wasserstein_distance(
+                    X0_sub, X1_sub, Wtype=cfg.model, true_dimension=X_prot_orig.shape[1]
+                )
+            elif cfg.model == "TV":
+                dist = TV_binarized(X0_sub, X1_sub)
+            elif cfg.model == "MMD":
+                X0_sub = X0cat[mask0][:, cat_col_mask]  # keeps the shape correctly
+                X1_sub = X1cat[mask1][:, cat_col_mask]  # keeps the shape correctly
+                dist = MMD(X0_sub, X1_sub)
+            else:
+                raise ValueError(f"Not implemented for {cfg.model}")
+
         if dist > max_dist:
             max_dist = dist
             mask = (X_prot[:, sg_pos] == 1).all(axis=1) & (X_prot[:, sg_neg] == 0).all(
