@@ -79,14 +79,14 @@ method_markers = {
     "MSD": "D",
 }
 method_names = {
-    "OneRule": "MSD$_\\mathrm{{diff}}$ (proposed)",
+    "OneRule": "MSD (ours)",
     # "BRCG": "MSD (via BRCG)",
     # "Ripper": "MSD (via Ripper)",
-    "W1": "Wasserstein-1",
-    "W2": "Wasserstein-2",
-    "TV": "TV",
-    "MMD": "MMD",
-    "MSD": "MSD$_\\mathrm{{diff}}$ by enumeration",
+    "W1": "MSDD$_{{\\mathrm{{W}}_1}}$ (naive)",
+    "W2": "MSDD$_{{\\mathrm{{W}}_2}}$ (naive)",
+    "TV": "MSDD$_\\mathrm{{TV}}$ (naive)",
+    "MMD": "MSDD$_\\mathrm{{MMD}}$ (naive)",
+    "MSD": "MSD (naive)",
 }
 
 
@@ -228,7 +228,7 @@ fig.legend(
 
 # plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.tight_layout(rect=[0, 0.1, 1, 1])
-output_path = "multirun_images/" + str(date.today()) + "_enumeration.pdf"
+output_path = "multirun_images/" + str(date.today()) + "_enumeration_MSD.pdf"
 plt.savefig(output_path)
 
 plt.show()

@@ -34,6 +34,7 @@ scenario_titles = {
 
 methods = [
     "OneRule",
+    # "OneRuleBalanceData",
     "BRCG",
     "Ripper",
     "W1",
@@ -47,6 +48,7 @@ base_dir_prefix = (
 )
 
 method_colors = {
+    "OneRuleBalanceData": "red",
     "OneRule": "red",
     "BRCG": "orange",
     "Ripper": "magenta",
@@ -56,6 +58,7 @@ method_colors = {
     "MMD": "brown",
 }
 method_lines = {
+    "OneRuleBalanceData": "--",
     "OneRule": "--",
     "BRCG": "--",
     "Ripper": "--",
@@ -65,9 +68,10 @@ method_lines = {
     "MMD": "-",
 }
 method_names = {
-    "OneRule": "MSD$_\\mathrm{{diff}}$ (ours)",
-    "BRCG": "MSD$_\\mathrm{{diff}}$ (via BRCG)",
-    "Ripper": "MSD$_\\mathrm{{diff}}$ (via Ripper)",
+    "OneRuleBalanceData": "MSD (ours)",
+    "OneRule": "MSD (ours)",
+    "BRCG": "MSD (via BRCG)",
+    "Ripper": "MSD (via Ripper)",
     "W1": "Wasserstein-1",
     "W2": "Wasserstein-2",
     "TV": "Total Variation",
@@ -248,7 +252,7 @@ fig.legend(
 # plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.tight_layout(rect=[0, 0.05, 1, 1])
 output_path = (
-    "multirun_images/" + str(date.today()) + f"final_complexity_{sys.argv[1]}.pdf"
+    "multirun_images/" + str(date.today()) + f"final_complexity_{sys.argv[1]}_MSD.pdf"
 )
 plt.savefig(output_path)
 
