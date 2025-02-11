@@ -24,9 +24,6 @@ This repository contains code for detecting intersectional bias using the **Maxi
 - **experiment_sample_complexity.py**
   - Varies sample sizes to show how quickly each distance converges.
 
-- **experiment_distances.py**
-  - Compares multiple distributional distances (W1, W2, TV, MMD, etc.).
-
 - **scenarios/folktables_scenarios.py**
   - Loads and preprocesses Folktables-based datasets (US Census ACS).
 
