@@ -32,7 +32,6 @@ class NNFairClassifier(torch.nn.Module):
     Implementation of a Neural Network classifier, trained with extra fairness loss
     """
 
-    # TODO paramterize MSE and bigupdates...
     def __init__(
         self,
         input_dim: int,
@@ -43,6 +42,8 @@ class NNFairClassifier(torch.nn.Module):
         learning_rate: float = 0.001,
         weight_decay: float = 0,
         verbose: bool = False,
+        mse_loss: bool = False,
+        include_class_loss: bool = True,
     ) -> None:
         super().__init__()
         self._alpha = alpha
@@ -62,10 +63,13 @@ class NNFairClassifier(torch.nn.Module):
         layers.append(nn.Sigmoid())
 
         self._model = nn.Sequential(*layers)
-        # self._sigmoid = nn.Sigmoid()
-        self._sigmoid = nn.Identity()
-        # self._bce_loss = nn.BCEWithLogitsLoss()
-        self._bce_loss = nn.MSELoss()
+        self._sigmoid = nn.Sigmoid()
+        self._bce_loss = nn.BCEWithLogitsLoss()
+        if mse_loss:
+            self._sigmoid = nn.Identity()
+            self._bce_loss = nn.MSELoss()
+        self._include_class_loss = include_class_loss
+
         self._optimizer = torch.optim.Adam(
             self._model.parameters(), lr=learning_rate, weight_decay=weight_decay
         )
@@ -124,7 +128,8 @@ class NNFairClassifier(torch.nn.Module):
                 class_loss = self._bce_loss(pred, y)
                 cum_class_loss += class_loss.item()
                 loss = 0
-                loss += class_loss
+                if self._include_class_loss:
+                    loss += class_loss
 
                 n_corr += (
                     ((self._sigmoid(pred) >= 0.5) == y).type(torch.float).sum().item()

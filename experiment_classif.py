@@ -68,11 +68,14 @@ def run_experiment(cfg: DictConfig):
             # TODO make it smaller?
             [500, 200, 50, 10],
             gamma=0.01,
-            alpha=1000,
+            # alpha=1000,
+            alpha=1,
             dropout=True,
             learning_rate=0.001,
             # weight_decay=2e-4,
             weight_decay=0,
+            mse_loss=False,
+            include_class_loss=False,
         )
         np.random.seed(cfg.seed)
         eval_idx = np.random.choice(n_samples, n_samples // 10, replace=False)
@@ -102,21 +105,22 @@ def run_experiment(cfg: DictConfig):
         # y_hat_train variable must be set, a numpy array with bool values representing classifications - True for 1
         # y_hat_train_prob variable must be set as well, containing the probability of a positive classification (if model does not give probability, make it same as y_hat_train, but with ints)
 
-        from sklearn.model_selection import train_test_split
         import torch
         import torch.nn as nn
+        from sklearn.model_selection import train_test_split
+
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         X_train, X_test, A_train, A_test, y_train, y_test = train_test_split(
             X_enc, X_prot, y, test_size=0.2, random_state=cfg.seed
         )
-        
-
-        from fams.engine.fair_training import train as fams_train
-        from fams.layers.stochastic_models import get_model
-        from fams.engine.fair_training import inference as fams_inference
 
         from types import SimpleNamespace
+
+        from fams.engine.fair_training import inference as fams_inference
+        from fams.engine.fair_training import train as fams_train
+        from fams.layers.stochastic_models import get_model
+
         fams_cfg = SimpleNamespace()
 
         fams_cfg.method = "ours"
@@ -142,7 +146,7 @@ def run_experiment(cfg: DictConfig):
         fams_cfg.wandb_username = "UNKNOWN"
         fams_cfg.exp_name = "test"
         fams_cfg.train_inf_step = 2
-        
+
         fams_cfg.N_subtask = len(np.unique(A_train))
         fams_cfg.input_shape = X_train.shape[1]
         fams_cfg.output_dim = 1
