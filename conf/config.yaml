@@ -2,8 +2,29 @@
 seed: 4
 model: NN
 time_limit: 300
-# hydra:
-#   sweeper:
-#     params:
+epochs: 300
+mse_loss: False
+gamma: 0.01
+alpha: 1
+dropout: False
+learning_rate: False
+weight_decay: 0
+include_class_loss: True
+batch_size: 2000
+fpsf_eval_samples: 50000
+
+hydra:
+  sweeper:
+    params:
+      gamma: 0.01, 0.001
+      alpha: 100, 1000, 10000
+      dropout: True, False
+      learning_rate: 0.001, 0.01
+      weight_decay: 0, 0.0002
+      # mse_loss: True, False
+      include_class_loss: True, False
+      batch_size: 2000, 10000, 20000
+      seed: 0, 1, 2
+      # fpsf_eval_samples: 20000, 50000
 #       seed: 0, 1, 2, 3, 4
 # model: Linear, NN, FAMS, DNF, GerryFair

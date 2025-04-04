@@ -60,14 +60,15 @@ class NNFairClassifier(torch.nn.Module):
             prev = h
         # Assume binary classification
         layers.append(nn.Linear(prev, 1))
-        layers.append(nn.Sigmoid())
 
-        self._model = nn.Sequential(*layers)
         self._sigmoid = nn.Sigmoid()
         self._bce_loss = nn.BCEWithLogitsLoss()
         if mse_loss:
+            layers.append(nn.Sigmoid())
             self._sigmoid = nn.Identity()
             self._bce_loss = nn.MSELoss()
+
+        self._model = nn.Sequential(*layers)
         self._include_class_loss = include_class_loss
 
         self._optimizer = torch.optim.Adam(
@@ -130,6 +131,11 @@ class NNFairClassifier(torch.nn.Module):
                 loss = 0
                 if self._include_class_loss:
                     loss += class_loss
+                elif len(self._subgroups) == 0:
+                    # non-zero gradient until a subgroup is identified
+                    loss += class_loss
+                else:
+                    loss += class_loss * 0
 
                 n_corr += (
                     ((self._sigmoid(pred) >= 0.5) == y).type(torch.float).sum().item()
@@ -144,9 +150,9 @@ class NNFairClassifier(torch.nn.Module):
                 fpsf_y.append(y)
                 if len(fpsf_X) * batch_size >= fpsf_size:
                     Xin = torch.concat(fpsf_X)
-                    if Xin.shape[0] > 2000:
+                    if Xin.shape[0] > 5000:
                         np.random.seed(epoch_i * batch_i + batch_i)
-                        eval_idx = np.random.choice(Xin.shape[0], 2000, replace=False)
+                        eval_idx = np.random.choice(Xin.shape[0], 5000, replace=False)
                     else:
                         eval_idx = np.arange(Xin.shape[0])
                     with torch.no_grad():

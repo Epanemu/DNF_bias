@@ -63,19 +63,18 @@ def run_experiment(cfg: DictConfig):
         y_hat_train_prob = y_hat_train.astype(int)
     elif cfg.model == "NN":
         # alpha = 1/gamma
+        print(cfg)
         NN = NNFairClassifier(
             X_enc.shape[1],
             # TODO make it smaller?
             [500, 200, 50, 10],
-            gamma=0.01,
-            # alpha=1000,
-            alpha=1,
-            dropout=True,
-            learning_rate=0.001,
-            # weight_decay=2e-4,
-            weight_decay=0,
-            mse_loss=False,
-            include_class_loss=False,
+            gamma=cfg.gamma,
+            alpha=cfg.alpha,
+            dropout=cfg.dropout,
+            learning_rate=cfg.learning_rate,
+            weight_decay=cfg.weight_decay,
+            mse_loss=cfg.mse_loss,
+            include_class_loss=cfg.include_class_loss,
         )
         np.random.seed(cfg.seed)
         eval_idx = np.random.choice(n_samples, n_samples // 10, replace=False)
@@ -84,7 +83,11 @@ def run_experiment(cfg: DictConfig):
         train = SimpleDataset(X_enc[~eval_mask], X_prot[~eval_mask], y[~eval_mask])
         eval = SimpleDataset(X_enc[eval_mask], X_prot[eval_mask], y[eval_mask])
         NN.train(
-            train, eval, batch_size=2000, fpsf_size=20000, epochs=20
+            train,
+            eval,
+            batch_size=cfg.batch_size,
+            fpsf_size=cfg.fpsf_eval_samples,
+            epochs=cfg.epochs,
         )  # Base version
         y_hat_train_prob = NN.predict_proba(X_enc[~eval_mask])
         y_hat_train = y_hat_train_prob >= 0.5
@@ -254,6 +257,7 @@ if __name__ == "__main__":
             text=True,
         )
         gitcommit = res.stdout.strip()
+        # if True:
         run_experiment()
     else:
         raise Exception("Git status is not clean. Commit changes first.")
